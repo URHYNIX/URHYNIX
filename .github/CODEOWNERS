@@ -1,0 +1,47 @@
+# URHYNIX CODEOWNERS
+# 폴더별 owner — PR 열릴 때 GitHub이 자동으로 owner를 reviewer로 지정함.
+# 팀원 GitHub handle은 placeholder. 알게 되면 @TEAM_XXX 를 실제 핸들로 치환하세요.
+#
+# 알려진 핸들:
+#   @kimjuyoung1127 = 김주영 (주인님, Unity DT + 통합 QA)
+# placeholder (실제 핸들로 치환 필요):
+#   @TEAM_ROS    = 임현찬   (ROS 메인 + Unity-ROS 브릿지)
+#   @TEAM_VISION = 김선일   (Vision + DB)
+#   @TEAM_DEMO   = 박태진   (HW + Demo)
+
+# ─── 글로벌 fallback ───
+*                                          @kimjuyoung1127
+
+# ─── Unity (메인 owner: 김주영) ───
+/unity-src/                                @kimjuyoung1127
+/unity-src/Assets/Scripts/Network/         @kimjuyoung1127 @TEAM_ROS
+/unity-src/Assets/Scripts/UI/Detection/    @kimjuyoung1127 @TEAM_VISION
+
+# ─── ROS 워크스페이스 ───
+/ros-ws/                                   @TEAM_ROS
+/ros-ws/src/urhynix_bringup/               @TEAM_ROS
+/ros-ws/src/urhynix_unity_bridge/          @TEAM_ROS @kimjuyoung1127
+/ros-ws/src/urhynix_obstacle_detect/       @TEAM_VISION
+/ros-ws/src/urhynix_logger/                @TEAM_VISION
+
+# ─── Vision / DB / Backend ───
+/vision/                                   @TEAM_VISION
+/backend/                                  @TEAM_VISION
+/backend/db/                               @TEAM_VISION @kimjuyoung1127
+
+# ─── Demo / HW / Evidence ───
+/demo/                                     @TEAM_DEMO
+/docs/evidence/                            @TEAM_DEMO
+/docs/assets/                              @TEAM_DEMO @kimjuyoung1127
+
+# ─── 공용 문서/설정 (수정 시 전원 알림) ───
+/docs/ref/                                 @kimjuyoung1127 @TEAM_ROS @TEAM_VISION @TEAM_DEMO
+/docs/ref/CONTRACT.md                      @kimjuyoung1127 @TEAM_ROS @TEAM_VISION
+/docs/status/                              @kimjuyoung1127
+/HARNESS-MANIFEST.yaml                     @kimjuyoung1127
+/.github/                                  @kimjuyoung1127
+/.claude/                                  @kimjuyoung1127
+/AGENTS.md                                 @kimjuyoung1127
+/CLAUDE.md                                 @kimjuyoung1127
+/README.md                                 @kimjuyoung1127
+/.gitignore                                @kimjuyoung1127
