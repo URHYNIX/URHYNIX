@@ -73,8 +73,9 @@ owner: 코워크 (Claude Code 별도 인스턴스가 이 문서를 참조해 스
 - [ ] cron 표현식 `0 22 * * 1-5` 등록 (또는 `schedule` 스킬 사용)
 - [ ] `CronCreate` 시 `prompt`에 이 파일 경로 전달: `/Users/family/jason/URHYNIX/.claude/automations/daily-recap.md`
 - [ ] 채널 ID `C0B5Q43A27R` 권한 (Bot이 채널에 초대되어 있는지)
-- [ ] 첫 회차 수동 실행으로 출력 검증 후 자동화 활성화
+- [ ] **⚠️ 필수 — 첫 회차는 반드시 dry-run**: cron 등록 직후 `RemoteTrigger`로 즉시 1회 실행 → 출력을 슬랙 대신 `docs/daily/{TODAY}-recap-preview.md`에 저장 → 주인님이 직접 보고 OK 하면 cron 활성화. 검증 없이 자동 발송 절대 금지.
 - [ ] 등록 결과를 `docs/status/PROJECT-STATUS.md`의 **Automations** 섹션에 기록
+- [ ] 첫 회차 결과 링크를 주인님(슬랙 DM 또는 콘솔)에게 보여주고 승인 대기
 
 ## 관련 파일
 
