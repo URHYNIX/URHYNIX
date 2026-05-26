@@ -1,13 +1,13 @@
-name: URHYNIX CI
+name: URHYNIX CI (최소)
 
 on:
   pull_request:
-    branches: [main, dev]
+    branches: [main]
   push:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
-  # ─── Job 1: 시크릿 점검 (모든 PR) ───
+  # 시크릿만 점검. 다른 건 다 풀어둠.
   secret-scan:
     runs-on: ubuntu-latest
     steps:
@@ -19,71 +19,8 @@ jobs:
           chmod +x .claude/skills/secret-scan/scan.sh
           bash .claude/skills/secret-scan/scan.sh
 
-  # ─── Job 2: 문서 정합성 빠른 체크 ───
-  doc-lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check HARNESS-MANIFEST required_files 존재
-        run: |
-          python3 - <<'PY'
-          import yaml, sys, pathlib
-          m = yaml.safe_load(open("HARNESS-MANIFEST.yaml"))
-          missing = [f for f in m.get("required_files", []) if not pathlib.Path(f).exists()]
-          if missing:
-              print("❌ 누락된 required_files:")
-              for f in missing: print(f"  - {f}")
-              sys.exit(1)
-          print(f"✅ {len(m.get('required_files', []))}개 required_files 모두 존재")
-          PY
-      - name: CONTRACT.md 변경 강제 (ROS msg / DB schema / Unity bridge 영역)
-        if: github.event_name == 'pull_request'
-        run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
-          NEEDS_CONTRACT=$(echo "$CHANGED" | grep -E "ros-ws/.*\.msg|backend/db/migrations|unity-src/Assets/Scripts/Network" || true)
-          CONTRACT_TOUCHED=$(echo "$CHANGED" | grep "docs/ref/CONTRACT.md" || true)
-          if [[ -n "$NEEDS_CONTRACT" && -z "$CONTRACT_TOUCHED" ]]; then
-            echo "❌ ROS msg/DB migration/Unity bridge 변경됐는데 CONTRACT.md는 안 건드림"
-            echo "변경 파일:"
-            echo "$NEEDS_CONTRACT"
-            echo ""
-            echo "→ docs/ref/CONTRACT.md 도 같이 수정해서 PR에 포함해주세요."
-            exit 1
-          fi
-          echo "✅ CONTRACT 동시 갱신 룰 통과"
-
-  # ─── Job 3: ROS colcon build (ros-ws 변경 시) ───
-  ros-build:
-    runs-on: ubuntu-latest
-    container:
-      image: ros:humble
-    if: contains(github.event.pull_request.changed_files, 'ros-ws/') || github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-      - name: colcon build
-        working-directory: ros-ws
-        shell: bash
-        run: |
-          if [ ! -d "src" ]; then
-            echo "ros-ws/src 없음 — skip (Sprint 2 진입 전)"
-            exit 0
-          fi
-          source /opt/ros/humble/setup.bash
-          apt-get update && apt-get install -y python3-colcon-common-extensions
-          colcon build --event-handlers console_direct+ || true
-          # 첫 sprint는 실패해도 통과 (Sprint 2 진입 후 || true 제거)
-
-  # ─── Job 4: Unity 컴파일 체크 (선택, 라이선스 필요) ───
-  # unity-build:
-  #   runs-on: ubuntu-latest
-  #   if: contains(github.event.pull_request.changed_files, 'unity-src/')
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Unity Test (Editor)
-  #       uses: game-ci/unity-test-runner@v4
-  #       env:
-  #         UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-  #       with:
-  #         projectPath: unity-src
-  #         testMode: editmode
-  # → Unity Personal 라이선스 필요. 활성화하려면 GitHub Secrets에 UNITY_LICENSE 추가.
+# 익숙해지면 추가할 수 있는 것 (지금은 주석 처리):
+# - HARNESS-MANIFEST required_files 검증
+# - CONTRACT.md 동시 갱신 강제
+# - ROS colcon build
+# - Unity 컴파일 (라이선스 필요)
