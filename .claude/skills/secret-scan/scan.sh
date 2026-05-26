@@ -14,21 +14,21 @@ PATTERNS='(xox[baprs]-[0-9a-zA-Z-]{10,}|sk-[a-zA-Z0-9]{20,}|AIza[0-9A-Za-z_-]{35
 EXCLUDE='\.env\.example|node_modules|\.lock$|unity-src/Library|unity-src/Temp|docs/_archived-fr5|\.claude/skills/secret-scan/'
 
 TODAY="$(date +%F)"
+SCANNED=$(git ls-files | wc -l | tr -d ' ')
+
 HITS=$(git ls-files 2>/dev/null \
   | xargs grep -nE "$PATTERNS" 2>/dev/null \
-  | grep -vE "$EXCLUDE" \
-  || true)
-
-COUNT=$(printf '%s' "$HITS" | grep -c . 2>/dev/null || echo 0)
-SCANNED=$(git ls-files | wc -l | tr -d ' ')
+  | grep -vE "$EXCLUDE" || true)
 
 echo "🔍 secret-scan 결과 ($TODAY)"
 echo "스캔: $SCANNED files"
 
-if [[ "$COUNT" -eq 0 ]]; then
+if [[ -z "$HITS" ]]; then
   echo "발견: 0건 ✅"
   exit 0
 fi
+
+COUNT=$(printf '%s\n' "$HITS" | wc -l | tr -d ' ')
 
 echo "발견: $COUNT건 ⚠️"
 echo ""
