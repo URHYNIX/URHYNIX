@@ -1,0 +1,159 @@
+# Stack Profiles
+
+새 프로젝트는 아래 starter profile 중 가장 가까운 것을 골라 `PROJECT-PLAN.md`, `ARCHITECTURE.md`, `PROJECT-STATUS.md`, 필요 시 `PRD.md`를 채운다.
+
+## Next.js + FastAPI + Supabase
+
+- Use when:
+  - 웹 UI, Python 백엔드, auth/database 속도가 동시에 필요할 때
+- Suggested boundaries:
+  - `apps/web`
+  - `backend/app`
+  - `src/shared`
+- Naming contract starters:
+  - route: `GET /api/v1/records`
+  - table/schema: `health_records`
+  - env: `NEXT_PUBLIC_SUPABASE_URL`
+  - env: `SUPABASE_SERVICE_ROLE_KEY`
+- Suggested skills:
+  - `project-planning`
+  - `socratic-review`
+  - `big-task`
+  - `api-contract-guard`
+  - `doc-sync`
+- Suggested verify:
+  - `bash scripts/check-project.sh`
+  - `pnpm typecheck`
+  - `pnpm build`
+  - `pytest`
+- Suggested file map starters:
+  - `candidate:apps/web/app/dashboard/page.tsx`
+  - `candidate:backend/app/api/records.py`
+  - `docs/ref/PRD.md`
+  - `docs/status/PROJECT-STATUS.md`
+- Suggested architecture notes:
+  - `apps/web`는 route, page, UI surface를 담당한다
+  - `backend/app`은 API contract와 workflow orchestration을 담당한다
+  - `src/shared`는 공용 types와 helper를 담당한다
+  - external systems는 auth, database, storage를 명시한다
+- Suggested next actions:
+  - `ARCHITECTURE.md`에 web/api/shared boundary를 적는다
+  - `PROJECT-PLAN.md`에 first route와 first API 후보를 적는다
+  - `PROJECT-STATUS.md`에 `pnpm typecheck`, `pnpm build`, `pytest`를 추가한다
+
+## Next.js + Supabase
+
+- Use when:
+  - 빠른 MVP
+  - BaaS 중심
+  - 별도 백엔드가 아직 불필요할 때
+- Suggested boundaries:
+  - `apps/web`
+  - `src/features`
+- Naming contract starters:
+  - route: `app/dashboard/page.tsx`
+  - table/schema: `user_profiles`
+  - env: `NEXT_PUBLIC_SUPABASE_URL`
+  - env: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Suggested skills:
+  - `project-planning`
+  - `design-to-code`
+  - `api-contract-guard`
+  - `doc-sync`
+- Suggested verify:
+  - `bash scripts/check-project.sh`
+  - `pnpm typecheck`
+  - `pnpm build`
+- Suggested file map starters:
+  - `candidate:apps/web/app/dashboard/page.tsx`
+  - `candidate:src/features/onboarding/index.ts`
+  - `docs/ref/PRD.md`
+  - `docs/status/PROJECT-STATUS.md`
+- Suggested architecture notes:
+  - `apps/web`는 app route와 page surface를 담당한다
+  - `src/features`는 feature module 경계다
+  - external systems는 auth, database, storage를 명시한다
+  - 별도 backend를 쓰지 않으면 그 사실을 boundaries에 적는다
+- Suggested next actions:
+  - `PROJECT-PLAN.md`에 route starter와 feature boundary를 적는다
+  - `ARCHITECTURE.md`에 backend 미사용 여부를 적는다
+  - `PROJECT-STATUS.md`에 `pnpm typecheck`, `pnpm build`를 추가한다
+
+## Python API + Worker
+
+- Use when:
+  - ingestion
+  - automation
+  - batch
+  - workflow 중심 프로젝트일 때
+- Suggested boundaries:
+  - `src/`
+  - `backend/`
+  - `workers/`
+- Naming contract starters:
+  - route: `POST /internal/jobs/sync`
+  - table/schema: `job_runs`
+  - env: `SERVICE_BASE_URL`
+  - env: `QUEUE_NAME`
+- Suggested skills:
+  - `project-planning`
+  - `big-task`
+  - `migration-manifest`
+  - `doc-sync`
+- Suggested verify:
+  - `bash scripts/check-project.sh`
+  - `ruff check .`
+  - `pytest`
+- Suggested file map starters:
+  - `candidate:backend/app/api/jobs.py`
+  - `candidate:workers/sync_runner.py`
+  - `docs/ref/PRD.md`
+  - `docs/status/PROJECT-STATUS.md`
+- Suggested architecture notes:
+  - `backend/`는 API surface와 admin/internal contract를 담당한다
+  - `workers/`는 long-running workflow와 batch boundary를 담당한다
+  - `src/`는 shared domain과 helper를 담당한다
+  - external systems는 queue, db, upstream API를 명시한다
+- Suggested next actions:
+  - `PROJECT-PLAN.md`에 first worker와 API path를 적는다
+  - `ARCHITECTURE.md`에 queue/db/upstream boundary를 적는다
+  - `PROJECT-STATUS.md`에 `ruff check .`, `pytest`를 추가한다
+
+## Unity / Robot / C#
+
+- Use when:
+  - runtime state
+  - scene/prefab
+  - 하드웨어/IPC 계약이 중요한 프로젝트일 때
+- Suggested boundaries:
+  - `Assets/Scripts`
+  - `Assets/Scenes`
+  - `docs/status`
+- Naming contract starters:
+  - route: `robot.control.movej`
+  - table/schema: `latest_state_snapshot`
+  - env: `ROBOT_ENDPOINT`
+  - env: `UNITY_ENV`
+- Suggested skills:
+  - `project-planning`
+  - `socratic-review`
+  - `big-task`
+  - `doc-sync`
+- Suggested verify:
+  - `bash scripts/check-project.sh`
+  - `play mode smoke`
+  - `ipc preflight`
+  - `readback verification`
+- Suggested file map starters:
+  - `candidate:Assets/Scripts/Runtime/RobotControl.cs`
+  - `candidate:Assets/Scenes/Main.unity`
+  - `docs/ref/PRD.md`
+  - `docs/status/PROJECT-STATUS.md`
+- Suggested architecture notes:
+  - runtime truth source를 먼저 명시한다
+  - scene, prefab, runtime controller 경계를 분리한다
+  - external systems는 robot, ipc, calibration config를 명시한다
+- Suggested next actions:
+  - `PROJECT-PLAN.md`에 first runtime component와 event 이름을 적는다
+  - `ARCHITECTURE.md`에 truth source와 scene/runtime boundary를 적는다
+  - `PROJECT-STATUS.md`에 play mode/ipc/readback 검증을 추가한다

@@ -1,0 +1,62 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Node / Python / Cache
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+build/
+tmp/
+coverage/
+htmlcov/
+
+# Obsidian local workspace
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Unity (unity-src/ 추가 시 활성)
+unity-src/Library/
+unity-src/Temp/
+unity-src/Obj/
+unity-src/Build/
+unity-src/Builds/
+unity-src/Logs/
+unity-src/UserSettings/
+unity-src/MemoryCaptures/
+unity-src/*.csproj
+unity-src/*.sln
+unity-src/*.unityproj
+unity-src/*.suo
+unity-src/*.user
+
+# ROS / Python builds
+__pycache__/
+*.py[cod]
+ros-ws/build/
+ros-ws/install/
+ros-ws/log/
+
+# Secrets / Env
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+auth.json
+
+# Evidence / Assets (대용량은 LFS 또는 별도 저장)
+docs/evidence/**/*.mp4
+docs/evidence/**/*.mov
+docs/evidence/**/*.zip
+docs/assets/**/*.psd
+docs/assets/**/*.ai
+
+# Playwright / Test artifacts
+.playwright-mcp/
+qa-screenshots/
+test-results/
+playwright-report/
