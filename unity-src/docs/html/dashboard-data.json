@@ -1,0 +1,1309 @@
+{
+  "generated_at": "2026-05-19T18:55:04+09:00",
+  "generated_timezone": "Asia/Seoul",
+  "source_docs": [
+    {
+      "path": "docs/status/ACTIVE-WORK-INDEX.md",
+      "title": "Active Work Index",
+      "status": "done",
+      "last_updated": "2026-05-19",
+      "doc_type": "status-index",
+      "domain": "status",
+      "canonical": true
+    },
+    {
+      "path": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "title": "FR5 Live Integration Roadmap",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "title": "Pendant V3 Progress Checklist",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/pendant-v3/v3-componentization-priority-plan.md",
+      "title": "Pendant V3 Componentization Priority Plan",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/status/AUTOMATION-HEALTH.md",
+      "title": "자동화 건강 상태",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/status/NIGHTLY-RUN-LOG.md",
+      "title": "야간 실행 로그",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "title": "FR5 Connect Sync Debug Success Pattern",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "title": "FR5 Gripper Live Success Pattern",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "title": "FR5 Teaching Point Live Success Pattern",
+      "status": "unknown",
+      "last_updated": null
+    },
+    {
+      "path": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "title": "FR5 Tiny Joint Live Success Pattern",
+      "status": "done",
+      "last_updated": "2026-04-29",
+      "doc_type": "reference",
+      "domain": "fr5-live"
+    }
+  ],
+  "active_tracks": [
+    {
+      "name": "FR5 실기 연동",
+      "status": "open",
+      "summary": "readback-only baseline 확보",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 29
+    },
+    {
+      "name": "Pendant V3 운영 노출",
+      "status": "open",
+      "summary": "실기 readback과 연결됨, 운영자용 노출은 일부 후속",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 71
+    }
+  ],
+  "open_items": [
+    {
+      "status": "open",
+      "label": "official SDK audit P0를 완결: status/readback gap inventory, gripper completion-readback rule, IO app-contract gap 고정",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 83,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "official SDK audit P1: current J5/J6 both directions + same-day repeatability를 multi-cycle repeatability와 next-joint expansion 기준으로 넓히기",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 84,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-tiny-joint-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "official SDK audit P2: tiny joint green을 바탕으로 joint/TCP operator/debug flow와 auto-mode dependency를 축약",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 85,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-auto-manual-mode-transition-plan.md",
+          "href": "../ref/product/roadmap/fr5-auto-manual-mode-transition-plan.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "gripper live path 후속 정리: DAHUAN + auto mode 조건에서 0/100 discrete write와 Easy Motion apply는 green. 다음은 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 86,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-gripper-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-gripper-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "V3 큰 파일의 다음 구조 정리를 책임 혼합도 기준으로 진행한다. 현재 첫 순서는 PointMoveController.Functions -> ViewState -> PointActions -> LiveApproval이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 87,
+      "links": [
+        {
+          "label": "v3-componentization-priority-plan.md",
+          "href": "../ref/product/pendant-v3/v3-componentization-priority-plan.md"
+        },
+        {
+          "label": "progress-checklist.md",
+          "href": "../ref/product/pendant-v3/progress-checklist.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "공통 Live QA runner로 joint/TCP/gripper/point field evidence를 같은 형식으로 축적",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 88,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "robotcontrol-next-session-handoff.md",
+          "href": "../ref/product/ux/robotcontrol-next-session-handoff.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "Easy Motion 슬라이더 조작이 실기 gripper를 실시간으로 따라오게 만들기",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 89,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-live-field-checklist.md",
+          "href": "../ref/product/roadmap/fr5-live-field-checklist.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "tiny joint direct-input 성공패턴의 5deg acceptance를 다른 일부 축으로 넓힌다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 90,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-tiny-joint-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "헤더 다음 행동 + Safety/Diagnostics taxonomy가 tiny range exceeded 같은 blocked state에서도 generic readback-only 문구로 되돌아가지 않게 보강한다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 91,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "teaching point live는 single point / two-point once / Home-based custom one-shot까지 green이다. 다음은 broad named sequence generalization과 live loop 범위를 어디까지 열지 결정하는 일이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 92,
+      "links": [
+        {
+          "label": "fr5-teaching-point-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "상단 헤더 자동 / 수동 버튼은 normal-case green으로 본다. 다음은 failure/recovery wording과 drag/servo exceptional case를 정리",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 93,
+      "links": [
+        {
+          "label": "fr5-auto-manual-mode-transition-plan.md",
+          "href": "../ref/product/roadmap/fr5-auto-manual-mode-transition-plan.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "tiny MoveJ 승인 게이트를 tool/user/coordSystem + evidence freshness + drift + operator confirm 기준으로 묶기",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 94,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "MacBook Unity Editor 비-4K 해상도 V3 레이아웃 안정화",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 95,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "robotcontrol-next-session-handoff.md",
+          "href": "../ref/product/ux/robotcontrol-next-session-handoff.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "PlayMode/bootstrap 공통 실패 정리",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 96,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "이미 끝난 큰 보드는 archive로 보내고, 남은 일만 따로 모아 본다.",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 8,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "2026-05-19 fresh 재검증에서는 192.168.57.2:8080과 V3 connect/sync가 green으로 회복됐다. 이후 operator가 실제 teach pendant에서 수동 -> 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 SDK profile company=2; device=4; soft=0; index=1, activationMask=1로 읽혔고, explicit gripper-only write와 Easy Motion apply path 모두 0% -> position=0, 100% -> position=100으로 수렴했다. 남은 gripper 이슈는 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 40,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "다만 blocked 직후 헤더/진단 surface는 아직 generic readback-only 문구로 되돌아가서 copy-layer 후속이 남아 있다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 48,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "arm track의 현재 open item은 더 이상 \"tiny MoveJ가 아예 안 된다\"가 아니라 true 3deg helper, multi-cycle repeatability, TCP, manual recovery wording 확장이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 61,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "상태: 실기 readback과 연결됨, 운영자용 노출은 일부 후속",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 73,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "ResetErrors()는 0/OK였지만 후속 sync에서도 fault=1/1이 유지됐다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 109,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "따라서 현재 tiny MoveJ는 gate 설계 pending이 아니라 controller fault clear pending 상태다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 110,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "적용 now routes through product live approval instead of direct blocked write",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 134,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "before the hardware-side change, 100% open reached SDK position=96, but 0% close repeatedly returned to position=96",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 155,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "remaining follow-up is UI polish, not basic hardware operation: command-immediate pending wording, Easy Motion stale pending/lastApply, and a fresh popup-confirm path without reused debug approval",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 160,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "header now exposes a one-line 다음 행동 summary and Safety/Diagnostics shows operator-facing failure taxonomy",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 218,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "final live re-smoke after the patch is still pending",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 221,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "IO: official APIs exist, but current app contract/live path is effectively Stubbed/Blocked",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 244,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "this is now normal-case green; recovery wording and exceptional-case operator UX are still pending",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 256,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "다음 현장 세션 우선순위는 layout polish보다 hardware readback evidence 축적",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 260,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "arm track: current J1~J6 effective tiny path is green and J6 true +3deg direct-input path is green, but 5deg direct-input closure, multi-cycle repeatability, TCP, and operator-only auto-mode transition are still pending",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 272,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "gripper: historical 70/100/50 command path and 0% contact baseline were field-green on 2026-04-29. 2026-05-19 retest showed the hardware-side setting matters: before auto mode + DAHUAN, 0% close stayed at SDK position=96; after auto mode + DAHUAN, explicit gripper-only and Easy Motion apply both reached 0% -> position=0 and 100% -> position=100. Next work is pending UX, stale Easy Motion state cleanup, and fresh popup-confirm verification before slider follow",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 273,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "teaching repeatability track: Home 기준 2-point / multi-axis sequence는 sync-confirm 절차와 same-session live re-smoke까지 닫혔다. 다음 범위는 broad named sequence generalization과 live loop unlock 판단이다",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 275,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "header 다음 행동과 Safety/Diagnostics taxonomy가 tiny range exceeded, mode mismatch, activation not ready 같은 real failure state에서 충분한지 확인",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 281,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "첫 motion 검증은 후속 phase에서 \"작은 범위 MoveJ 1회\"만 따로 승인",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 356,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "다음 남은 일은 두 갈래다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 380,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "그 다음 트랙이 pendant-free auto/manual transition 구현과 non-4K layout 정리다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 383,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "현재 다음 개발 우선순위는 motion enable이 아니라 tool/user/coordSystem + motion gate 운영 노출 정리다",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 531,
+      "links": []
+    },
+    {
+      "status": "open",
+      "label": "2B-4 포인트 이동: MoveL/MoveJ preview/apply, save/recall/list/delete/rename/export/cleanup 연결 완료. Saved MoveJ single-point live apply, PendantV3Points two-point once, QA0430_HOME_2PT_T6, QA0430_HOME_MULTIAXIS_T5_T6 one-shot repeatability는 green. point save/apply/run 앞에는 Sync + RefreshLiveEvidence gate를 강제하고, manual pose 변경 시 synced Home 저장 후 repeatability를 시작한다. loop/broad named live는 아직 잠금",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 26,
+      "links": [],
+      "raw_status": "2b-4 포인트 이동"
+    },
+    {
+      "status": "open",
+      "label": "2C-2 뷰포트 보조 UI: toolbar/frame/path/ghost/bound/coll/cam actual click matrix 통과. 실데이터 boundary/collision은 후속",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 28,
+      "links": [],
+      "raw_status": "2c-2 뷰포트 보조 ui"
+    },
+    {
+      "status": "open",
+      "label": "3B 로컬 서비스: Product live confirm token 완료, manual readback 6/6 PASS, sequence runtime/run-step/order-overwrite/detail/duplicate/timing/confirm/edit-lock/loop/run-from-selected/function-v1-polish 33/33 PASS, shared live QA runner scaffold 추가, verified controller mode path + header 자동/수동 버튼 노출, teaching point live single point / two-point once green",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 34,
+      "links": [],
+      "raw_status": "3b 로컬 서비스"
+    }
+  ],
+  "locked_scope": [
+    {
+      "status": "locked",
+      "label": "current branch에서 broad arm motion green으로 일반화하지 않음. tiny MoveJ success는 현재 J5/J6 narrow path로만 본다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 97,
+      "links": [
+        {
+          "label": "fr5-tiny-joint-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "locked"
+    },
+    {
+      "status": "locked",
+      "label": "상태: readback-only baseline 확보",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 31,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "Unity gripper live write는 2026-04-29 gripper-only 기준으로 실제 readback 변화까지 확인된 이력이 있다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 39,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "2026-05-19 fresh 재검증에서는 192.168.57.2:8080과 V3 connect/sync가 green으로 회복됐다. 이후 operator가 실제 teach pendant에서 수동 -> 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 SDK profile company=2; device=4; soft=0; index=1, activationMask=1로 읽혔고, explicit gripper-only write와 Easy Motion apply path 모두 0% -> position=0, 100% -> position=100으로 수렴했다. 남은 gripper 이슈는 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 40,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "다만 blocked 직후 헤더/진단 surface는 아직 generic readback-only 문구로 되돌아가서 copy-layer 후속이 남아 있다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 48,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "teaching point live 범위는 현재 single point / two-point once / Home-based custom one-shot / loop locked로 잠겨 있다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 53,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "Readback-only live monitor 추가",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 46,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "구현 커밋: d8c0726 Add FR5 readback-only live monitor",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 53,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "V3 readback-only live UX 정렬 완료",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 61,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "readback-only live에서는 primary action이 서보 켜기가 아니라 현재 위치 읽기를 우선 안내",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 62,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "readback-only motion gate summary 정합성 복구 완료",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 84,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "V3 tiny MoveJ gate debug summary가 더 이상 실기 readback-only 세션을 dry-run simulation으로 오인하지 않는다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 85,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "current live baseline에서는 status=ReadbackOnly, ready=False, tool=1, user=1을 포함한 readback summary가 노출된다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 86,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "같은 세션에서 tiny MoveJ gate는 계속 status=ReadbackOnly, ready=False로 잠겨 있었고, latest-state.json / latest-drift.json freshness는 유지됐다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 101,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "2026-04-28 session 20260428-084436에서 tiny target J6 +0.5deg @ 5%를 다시 시도했지만, live blocker는 controller fault main=1 / sub=1이었다.",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 108,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "this historical signal should now be treated as branch/time-specific evidence, not as the current discrete V3 gripper blocker without latest-branch reconfirmation",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 117,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "Unity-side live gripper write was revalidated in gripper-only mode",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 129,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "적용 now routes through product live approval instead of direct blocked write",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 134,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "same-day calibration update also locked current branch closedRawPercent=0, and operator confirmed real gripper contact/close at 0%",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 137,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "2026-05-14 gripper current blocker reconfirmed",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 142,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "after IPC/tiny MoveJ stabilization, gripper was re-tested in a separate gripper-only session",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 143,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "explicit gripper-only writes reached 0% -> SDK position=0 done=1 and 100% -> SDK position=100 done=1",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 158,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "mock/readback-only should no longer be interpreted as successful live movement by the same button label",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 164,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "2026-05-01 verification on current branch is mock-only compile/behavior check, not fresh field smoke",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 165,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "current narrow green scope is locked as:",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 174,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "5deg is not yet locked green:",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 219,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "a tiny range tolerance patch was added to avoid floating-point 5.000xdeg false blocks",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 220,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "saved MoveJ points only",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 230,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "this is not broad named-sequence/program-runtime green",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 236,
+      "links": []
+    },
+    {
+      "status": "locked",
+      "label": "current summary is locked as:",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "line": 239,
+      "links": []
+    }
+  ],
+  "latest_verified_evidence": [
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "controller disabled/manual readback stall",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 29,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "Artifacts/live/fr5/latest-state.json",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 39,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "current session Artifacts/live/fr5/sessions/*-events.ndjson",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 40,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "session events가 readback updated를 계속 찍는다.",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 48,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "LiveFairinoClient는 sdk version을 매 readback마다 다시 읽지 않는다.",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 72,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "mode=1이 곧 crash 원인은 아니다. 먼저 live readback이 계속 갱신되는지 본다.",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 78,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "connect + sync baseline",
+      "label": "이 baseline이 green이면 그다음에만 gripper, joint, point/sequence live test로 넘어간다.",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "line": 83,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "다음 세션에서 같은 성공 패턴을 다시 밟게 한다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 11,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "current truth source는 FR5 controller readback이다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 20,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "2026-05-14 재검증 기준, 이전 70 -> 100 green 패턴을 그대로 current green으로 일반화하지 않는다. 첫 세션은 gripper readback motionFault=-2 / activationFault=-2 / positionFault=-2와 RobotEnable(1) code=-2로 write 전 중단했고, Unity 재시작 후 재시도는 70% command sent / readback unconfirmed 뒤 100% 복귀가 gripper 동작 오류로 실패했다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 23,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "2026-05-15 current branch 기준, 연결 + 위치 읽기가 실제로 성공한 세션에서는 UI/runtime gripper readback이 실기 닫힘 상태 0%를 다시 따라온다. 다만 같은 날 후속 재테스트에서는 ping 192.168.57.2는 성공했지만 nc -vz 192.168.57.2 8080이 timeout이라 fresh live connect가 실패했고, 그 상태의 V3는 다시 requested=100; actual=100; raw=100; readback=False 기본값에 머문다. 따라서 현재 문제는 sync 후 0을 절대 못 읽음이 아니라 fresh 8080 연결이 불안정하면 UI가 default 100/readback false에 남음이다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 24,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "2026-05-19 fresh field 기준, 네트워크와 V3 connect/sync는 회복됐다: Mac en5=192.168.57.10/24, ping 192.168.57.2 0% loss, nc 192.168.57.2 8080 success, session 20260519-091601, connected=true, enabled=true, mode=1, toolId=1, userId=1, coordSystem=Base, drift ok. 다만 restart_v3_live_loop.sh 계열 gate는 current clientMode=direct-motion을 direct|bridge로만 검사하면 false fail을 낼 수 있다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 25,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "2026-05-19 후속 현장 조치 기준, operator가 실제 teach pendant에서 수동 -> 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 gripper path가 회복됐다. SDK profile은 company=2; device=4; soft=0; bus=0; index=1, activationMask=1, activationFault=0, positionFault=0으로 읽혔다. 이 조건에서는 explicit gripper-only write와 Easy Motion apply path 모두 0% -> SDK position=0 / 100% -> SDK position=100까지 수렴했다.",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 26,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "default session: readback-only",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 45,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "gripper-only live control",
+      "label": "gripper readback이 살아 있으면 runtime/easy-motion summary가 Actual 0% 또는 현재 실기 값으로 따라와야 한다",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "line": 94,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "current verified two-point sequence is LIVE_P1 -> LIVE_P2",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 29,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "point/sequence live는 이제 save / apply / run 앞마다 Sync + RefreshLiveEvidence를 강제하는 operator gate를 탄다",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 30,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "RefreshLiveEvidenceForDebug()",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 86,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "post-run truth is judged from refreshed Artifacts/live/fr5/latest-state.json",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 119,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "base/home 복귀, offset point 저장, point apply, sequence run once는 모두 각각 post-sync evidence를 남긴다.",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 145,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "QA0430_HOME_2PT_T6는 same-session 2회 연속 live 1회 실행 후 post-sync 기준으로 repeatability를 확인했다.",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 146,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "QA0430_HOME_MULTIAXIS_T5_T6는 same-session 2회 연속 live 1회 실행 후, 최종 sleep + post-sync 기준으로 Home 복귀를 확인했다.",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 147,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "teaching point one-shot live path",
+      "label": "current branch에서 broad named sequence green을 일반화하지 않는다. repeatability 확장은 Home 기준 saved MoveJ path를 좁게 늘리는 식으로만 본다.",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "line": 148,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "verified joints: J1 through J6",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 13,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "verified delta: +1deg, -1deg",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 14,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "TCP jog, MoveL, large-range joint move가 green이라고 보지 않는다.",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 21,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "immediate QA artifact afterMovement만으로 real joint delta를 확정하지 않는다.",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 22,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "ping 192.168.57.2 success",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 29,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "nc -vz 192.168.57.2 8080 success",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 30,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "live evidence freshness is available",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 33,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "tiny joint MoveJ narrow path",
+      "label": "after execute, runtime relocks back to readback-safe mode",
+      "source": "docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md",
+      "line": 44,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "Pendant V3 progress",
+      "label": "현재 완료/진행중/미착수 범위를 빠르게 확인한다.",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 5,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "Pendant V3 progress",
+      "label": "검증: dotnet build green, Unity compile check pass",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 46,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "Pendant V3 progress",
+      "label": "검증: dotnet build green",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 51,
+      "links": []
+    },
+    {
+      "status": "done",
+      "scope": "Pendant V3 progress",
+      "label": "ConnectionHomeController, StageRuntime, ReadbackAsync, PointMoveController.Bootstrap, PointMoveController.Sequence는 현재 기준으로는 상대적으로 cohesive한 파일로 유지한다.",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "line": 88,
+      "links": []
+    }
+  ],
+  "automation_health": {
+    "status": "stale",
+    "source": "docs/status/AUTOMATION-HEALTH.md",
+    "latest_run": "2026-03-27",
+    "today": "2026-05-19",
+    "automations": [
+      {
+        "name": "code-doc-align: COMPLETED (2026-03-27 13:08 KST)",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 13
+      },
+      {
+        "name": "docs-nightly-organizer: COMPLETED (2026-03-27 13:08 KST)",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 14
+      },
+      {
+        "name": "math-module-add: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 23
+      },
+      {
+        "name": "dh-algorithm-add: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 24
+      },
+      {
+        "name": "robot-template-add: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 25
+      },
+      {
+        "name": "tutor-step-add: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 26
+      },
+      {
+        "name": "editmode-test-add: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 27
+      },
+      {
+        "name": "pre-commit-validate: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 28
+      },
+      {
+        "name": "asmdef-setup: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 29
+      },
+      {
+        "name": "scene-scaffold: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 30
+      },
+      {
+        "name": "unity-official-docs: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 31
+      },
+      {
+        "name": "sprint-docs-sync: ✓",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 32
+      },
+      {
+        "name": "31",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 47
+      },
+      {
+        "name": "1",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 49
+      },
+      {
+        "name": "1",
+        "status": "stale",
+        "source": "docs/status/AUTOMATION-HEALTH.md",
+        "line": 51
+      }
+    ],
+    "warning": "AUTOMATION-HEALTH.md is older than today's KST date; HEALTHY text is treated as stale."
+  },
+  "stale_docs": [
+    {
+      "status": "stale",
+      "label": "AUTOMATION-HEALTH.md is older than today's KST date; HEALTHY text is treated as stale.",
+      "source": "docs/status/AUTOMATION-HEALTH.md",
+      "latest_run": "2026-03-27"
+    },
+    {
+      "status": "unknown",
+      "label": "FR5 Live Integration Roadmap has no normalized frontmatter status",
+      "source": "docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "Pendant V3 Progress Checklist has no normalized frontmatter status",
+      "source": "docs/ref/product/pendant-v3/progress-checklist.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "Pendant V3 Componentization Priority Plan has no normalized frontmatter status",
+      "source": "docs/ref/product/pendant-v3/v3-componentization-priority-plan.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "자동화 건강 상태 has no normalized frontmatter status",
+      "source": "docs/status/AUTOMATION-HEALTH.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "야간 실행 로그 has no normalized frontmatter status",
+      "source": "docs/status/NIGHTLY-RUN-LOG.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "FR5 Connect Sync Debug Success Pattern has no normalized frontmatter status",
+      "source": "docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "FR5 Gripper Live Success Pattern has no normalized frontmatter status",
+      "source": "docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md",
+      "last_updated": null
+    },
+    {
+      "status": "unknown",
+      "label": "FR5 Teaching Point Live Success Pattern has no normalized frontmatter status",
+      "source": "docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md",
+      "last_updated": null
+    }
+  ],
+  "next_actions": [
+    {
+      "status": "open",
+      "label": "official SDK audit P0를 완결: status/readback gap inventory, gripper completion-readback rule, IO app-contract gap 고정",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 83,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "official SDK audit P1: current J5/J6 both directions + same-day repeatability를 multi-cycle repeatability와 next-joint expansion 기준으로 넓히기",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 84,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-tiny-joint-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "official SDK audit P2: tiny joint green을 바탕으로 joint/TCP operator/debug flow와 auto-mode dependency를 축약",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 85,
+      "links": [
+        {
+          "label": "fr5-live-official-sdk-audit.md",
+          "href": "../ref/product/roadmap/fr5-live-official-sdk-audit.md"
+        },
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-auto-manual-mode-transition-plan.md",
+          "href": "../ref/product/roadmap/fr5-auto-manual-mode-transition-plan.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "gripper live path 후속 정리: DAHUAN + auto mode 조건에서 0/100 discrete write와 Easy Motion apply는 green. 다음은 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 86,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-gripper-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-gripper-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "V3 큰 파일의 다음 구조 정리를 책임 혼합도 기준으로 진행한다. 현재 첫 순서는 PointMoveController.Functions -> ViewState -> PointActions -> LiveApproval이다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 87,
+      "links": [
+        {
+          "label": "v3-componentization-priority-plan.md",
+          "href": "../ref/product/pendant-v3/v3-componentization-priority-plan.md"
+        },
+        {
+          "label": "progress-checklist.md",
+          "href": "../ref/product/pendant-v3/progress-checklist.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "공통 Live QA runner로 joint/TCP/gripper/point field evidence를 같은 형식으로 축적",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 88,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "robotcontrol-next-session-handoff.md",
+          "href": "../ref/product/ux/robotcontrol-next-session-handoff.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "Easy Motion 슬라이더 조작이 실기 gripper를 실시간으로 따라오게 만들기",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 89,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-live-field-checklist.md",
+          "href": "../ref/product/roadmap/fr5-live-field-checklist.md"
+        }
+      ],
+      "raw_status": "open"
+    },
+    {
+      "status": "open",
+      "label": "tiny joint direct-input 성공패턴의 5deg acceptance를 다른 일부 축으로 넓힌다",
+      "source": "docs/status/ACTIVE-WORK-INDEX.md",
+      "line": 90,
+      "links": [
+        {
+          "label": "FR5-LIVE-INTEGRATION-ROADMAP.md",
+          "href": "./FR5-LIVE-INTEGRATION-ROADMAP.md"
+        },
+        {
+          "label": "fr5-tiny-joint-live-success-pattern.md",
+          "href": "../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md"
+        }
+      ],
+      "raw_status": "open"
+    }
+  ]
+}

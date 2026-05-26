@@ -1,0 +1,100 @@
+/* Pendant V3 - Cartesian Arrows Overlay: Phase 2B-3 first slice */
+.rc-cartesian-root {
+    padding: 7px;
+    border-radius: var(--rc-radius-xl);
+    background-color: var(--rc-stage-overlay-panel);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-cartesian-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 0;
+}
+
+.rc-cartesian-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.rc-cartesian-badge {
+    padding: 2px 8px;
+    border-radius: var(--rc-radius);
+    color: var(--rc-axis-z);
+    background-color: var(--rc-button-bg-hover);
+    font-size: 11px;
+}
+
+.rc-cartesian-grid {
+    margin-top: 8px;
+}
+
+.rc-cartesian-axis {
+    margin-top: 6px;
+    padding: 7px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-stage-axis-panel);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-cartesian-axis--active {
+    background-color: var(--rc-button-bg-active);
+}
+
+.rc-cartesian-axis--x {
+    border-left-width: 3px;
+    border-left-color: var(--rc-axis-x);
+}
+
+.rc-cartesian-axis--y {
+    border-left-width: 3px;
+    border-left-color: var(--rc-axis-y);
+}
+
+.rc-cartesian-axis--z {
+    border-left-width: 3px;
+    border-left-color: var(--rc-axis-z);
+}
+
+.rc-cartesian-axis--r {
+    border-left-width: 3px;
+    border-left-color: var(--rc-axis-r);
+}
+
+.rc-cartesian-axis-value {
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.rc-cartesian-axis-meta {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-cartesian-button-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-cartesian-button {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 28px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    font-size: 11px;
+}
+
+.rc-cartesian-summary {
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--rc-muted-text);
+}

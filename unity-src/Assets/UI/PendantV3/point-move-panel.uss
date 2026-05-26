@@ -1,0 +1,432 @@
+.rc-point-root {
+    flex-grow: 1;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-point-header {
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    min-width: 0;
+}
+
+.rc-point-motion-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+    margin-top: 6px;
+}
+
+.rc-point-motion-button {
+    flex-grow: 1;
+    min-width: 56px;
+    min-height: 30px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.rc-point-motion-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-subview-tabs {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    margin-top: 10px;
+    min-width: 0;
+}
+
+.rc-point-subview-tab {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 30px;
+    margin-right: 2px;
+    font-size: 11px;
+}
+
+.rc-point-subview-tab--active {
+    background-color: var(--rc-button-bg-pressed);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-subview {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-name-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 10px;
+    min-width: 0;
+}
+
+.rc-point-name-label {
+    min-width: 72px;
+    font-size: 14px;
+    color: var(--rc-muted-text);
+}
+
+.rc-point-name-input {
+    flex-grow: 1;
+    min-width: 120px;
+    min-height: 32px;
+}
+
+.rc-point-primary-save {
+    min-height: 38px;
+    margin-top: 8px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    background-color: var(--rc-button-bg-primary);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-name-input--danger {
+    background-color: var(--rc-button-bg-danger-soft);
+}
+
+.rc-point-coord-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    min-width: 0;
+}
+
+.rc-point-coord-button {
+    min-width: 56px;
+    min-height: 30px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.rc-point-coord-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.rc-point-cell {
+    flex-grow: 1;
+    width: 46%;
+    min-width: 92px;
+    min-height: 44px;
+    flex-direction: row;
+    align-items: center;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    padding: 6px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-surface-faint);
+}
+
+.rc-point-cell-label {
+    min-width: 24px;
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.rc-point-cell-input {
+    flex-grow: 1;
+    min-width: 42px;
+    min-height: 28px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.rc-point-cell-input--danger {
+    background-color: var(--rc-button-bg-danger-soft);
+}
+
+.rc-point-cell-unit {
+    min-width: 22px;
+    font-size: 10px;
+    color: var(--rc-muted-text);
+}
+
+.rc-point-footer-card {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-surface-faint);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-execution-card {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-surface-faint);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-list {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    margin-top: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-inventory-summary {
+    margin-top: 8px;
+    padding: 6px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-button-bg);
+    font-size: 10px;
+    white-space: normal;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-bulk-actions {
+    margin-top: 6px;
+}
+
+.rc-point-feedback-line {
+    min-height: 0;
+    white-space: normal;
+}
+
+.rc-point-list-button {
+    flex-grow: 0;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 28px;
+    margin-right: 0;
+    margin-bottom: 4px;
+    font-size: 10px;
+    overflow: hidden;
+}
+
+.rc-point-list-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-row {
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 4px;
+    padding: 5px;
+    border-radius: var(--rc-radius);
+    border-width: 1px;
+    border-color: transparent;
+    background-color: var(--rc-surface-subtle);
+}
+
+.rc-point-row--active {
+    background-color: var(--rc-button-bg-hover);
+}
+
+.rc-point-row--selected {
+    border-width: 1px;
+    border-color: var(--rc-selection-border);
+    background-color: var(--rc-selection-bg);
+}
+
+.rc-point-row-summary {
+    font-size: 10px;
+    white-space: nowrap;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.rc-point-row-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+    min-width: 0;
+}
+
+.rc-point-row-button {
+    flex-grow: 1;
+    width: 30%;
+    min-width: 0;
+    height: 22px;
+    min-height: 22px;
+    max-height: 22px;
+    margin-right: 2px;
+    margin-bottom: 3px;
+    font-size: 9px;
+    padding-left: 2px;
+    padding-right: 2px;
+    overflow: hidden;
+}
+
+.rc-point-loop-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-loop-button {
+    min-width: 72px;
+    min-height: 28px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+
+.rc-point-loop-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-loop-status {
+    flex-grow: 1;
+    min-width: 96px;
+}
+
+.rc-point-detail-card {
+    margin-top: 4px;
+    padding: 5px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-surface-subtle);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-function-card {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-surface-faint);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-modal {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+    background-color: var(--rc-modal-scrim);
+    justify-content: center;
+    align-items: stretch;
+}
+
+.rc-point-modal-card {
+    padding: 10px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-modal-card-bg);
+    border-width: 1px;
+    border-color: var(--rc-modal-card-border);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-modal-readonly {
+    opacity: 0.58;
+}
+
+.rc-point-function-actions {
+    margin-top: 6px;
+}
+
+.rc-point-detail-title {
+    font-size: 11px;
+    -unity-font-style: bold;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+}
+
+.rc-point-detail-line {
+    font-size: 9px;
+    white-space: normal;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-timing-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-point-timing-button {
+    flex-grow: 1;
+    min-width: 46px;
+    min-height: 28px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    font-size: 10px;
+}
+
+.rc-point-timing-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-timing-button--primary {
+    background-color: var(--rc-button-bg-hover);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-dwell-input {
+    flex-grow: 1;
+    min-width: 56px;
+    min-height: 28px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+}
+
+.rc-point-dwell-input--danger {
+    background-color: var(--rc-button-bg-danger-soft);
+}
+
+.rc-point-action-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.rc-point-action-row--left {
+    justify-content: flex-start;
+    margin-top: 6px;
+}
+
+.rc-point-action-button {
+    flex-grow: 1;
+    min-width: 58px;
+    max-width: 100%;
+    min-height: 34px;
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: 6px;
+    font-size: 11px;
+}
+
+.rc-point-action-button--primary {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-point-action-button--danger {
+    background-color: var(--rc-button-bg-danger);
+    color: var(--rc-button-text-strong);
+}

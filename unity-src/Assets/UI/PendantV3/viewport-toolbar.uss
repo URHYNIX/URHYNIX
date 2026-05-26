@@ -1,0 +1,71 @@
+/* Pendant V3 - Viewport Toolbar: Phase 2C-2 workspace/collision helper scaffold */
+.rc-hidden {
+    display: none;
+}
+
+.rc-viewport-toolbar-root {
+    border-radius: var(--rc-radius-lg);
+    padding: 6px;
+    background-color: var(--rc-toolbar-bg);
+    border-width: 1px;
+    border-color: var(--rc-button-bg-hover);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-viewport-toolbar-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+    min-width: 0;
+}
+
+.rc-viewport-toolbar-button {
+    min-height: 24px;
+    min-width: 40px;
+    margin-right: 4px;
+    margin-bottom: 3px;
+    font-size: 10px;
+    padding-left: 4px;
+    padding-right: 4px;
+    flex-shrink: 1;
+    white-space: normal;
+}
+
+.rc-viewport-toolbar-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-viewport-toolbar-status {
+    margin-top: 2px;
+    padding-top: 4px;
+    border-top-width: 1px;
+    border-top-color: var(--rc-button-border-subtle);
+}
+
+.rc-viewport-toolbar-status-line {
+    font-size: 10px;
+    color: var(--rc-title-text);
+    margin-bottom: 1px;
+}
+
+.rc-viewport-toolbar-status-line--muted {
+    color: var(--rc-muted-text);
+}
+
+.rc-viewport-toolbar-status-line--warning {
+    color: var(--rc-warning);
+}
+
+.rc-viewport-toolbar-status-line--danger {
+    color: var(--rc-danger);
+}
+
+.rc-viewport-toolbar-hint {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--rc-muted-text);
+    white-space: normal;
+}

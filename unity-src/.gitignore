@@ -1,0 +1,51 @@
+# Python
+.venv/
+
+# Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.unitypackage
+Assets/HQP Studios/
+Assets/_Heathen Engineering/
+Assets/Glowing Rifts/
+Assets/HQP Studios.meta
+Assets/_Heathen Engineering.meta
+Assets/Glowing Rifts.meta
+
+# IDE
+.vs/
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docs automation locks
+docs/.docs-nightly.lock
+docs/status/.code-doc-align.lock
+
+# Generated validation artifacts
+Artifacts/

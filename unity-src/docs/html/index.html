@@ -1,0 +1,1296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Robotapp Docs Dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f2;
+      --panel: #ffffff;
+      --ink: #17211d;
+      --muted: #63706a;
+      --line: #d8ded6;
+      --open: #b24d1f;
+      --done: #236e4a;
+      --locked: #504f60;
+      --stale: #9a6a08;
+      --unknown: #697179;
+      --accent: #0f6d7a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    header {
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #eef3ee;
+    }
+    h1 { margin: 0 0 8px; font-size: 28px; letter-spacing: 0; }
+    header p { margin: 0; color: var(--muted); max-width: 900px; line-height: 1.5; }
+    main { padding: 24px 32px 40px; max-width: 1280px; margin: 0 auto; }
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+    .tab-button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .tab-button[aria-selected="true"] {
+      border-color: var(--accent);
+      color: #fff;
+      background: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .summary-grid, .item-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin: 14px 0 24px;
+    }
+    .track, .item, .warning {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      min-height: 112px;
+    }
+    h2 { margin: 24px 0 10px; font-size: 18px; letter-spacing: 0; }
+    h3 { margin: 10px 0 8px; font-size: 17px; letter-spacing: 0; }
+    p { line-height: 1.48; }
+    .item p { margin: 10px 0 12px; }
+    a { color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+    a:hover { text-decoration: underline; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      height: 22px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+    .badge-open { background: var(--open); }
+    .badge-done { background: var(--done); }
+    .badge-locked { background: var(--locked); }
+    .badge-stale { background: var(--stale); }
+    .badge-unknown { background: var(--unknown); }
+    .item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .scope { color: var(--muted); font-size: 13px; }
+    .warning { border-color: #d5b464; background: #fff8df; }
+    .empty { color: var(--muted); }
+    footer { color: var(--muted); margin-top: 28px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Robotapp Docs Dashboard</h1>
+    <p>Generated artifact from canonical markdown. Source of truth remains in <code>docs/status</code> and <code>docs/ref</code>. Generated at 2026-05-19T18:55:04+09:00.</p>
+  </header>
+  <main>
+    <nav class="tabs" aria-label="Dashboard tabs">
+      <button class="tab-button" aria-selected="true" data-tab="current">현재 작업</button>
+      <button class="tab-button" aria-selected="false" data-tab="fr5">FR5 Live</button>
+      <button class="tab-button" aria-selected="false" data-tab="pendant">Pendant V3</button>
+    </nav>
+
+    <section id="current" class="tab-panel active">
+      <h2>Active Tracks</h2>
+      <div class="summary-grid">
+            <article class="track">
+              <span class="badge badge-open">open</span>
+              <h3>FR5 실기 연동</h3>
+              <p>readback-only baseline 확보</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L29">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="track">
+              <span class="badge badge-open">open</span>
+              <h3>Pendant V3 운영 노출</h3>
+              <p>실기 readback과 연결됨, 운영자용 노출은 일부 후속</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L71">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            </div>
+      <h2>Next Actions</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P0를 완결: status/readback gap inventory, gripper completion-readback rule, IO app-contract gap 고정</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L83">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P1: current J5/J6 both directions + same-day repeatability를 multi-cycle repeatability와 next-joint expansion 기준으로 넓히기</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L84">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P2: tiny joint green을 바탕으로 joint/TCP operator/debug flow와 auto-mode dependency를 축약</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L85">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>gripper live path 후속 정리: DAHUAN + auto mode 조건에서 0/100 discrete write와 Easy Motion apply는 green. 다음은 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L86">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>V3 큰 파일의 다음 구조 정리를 책임 혼합도 기준으로 진행한다. 현재 첫 순서는 PointMoveController.Functions -&gt; ViewState -&gt; PointActions -&gt; LiveApproval이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L87">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>공통 Live QA runner로 joint/TCP/gripper/point field evidence를 같은 형식으로 축적</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L88">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>Easy Motion 슬라이더 조작이 실기 gripper를 실시간으로 따라오게 만들기</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L89">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>tiny joint direct-input 성공패턴의 5deg acceptance를 다른 일부 축으로 넓힌다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L90">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            </div>
+      <h2>Automation Warning</h2>
+      <article class="warning">
+        <span class="badge badge-stale">stale</span>
+        <p>AUTOMATION-HEALTH.md is older than today&#x27;s KST date; HEALTHY text is treated as stale.</p>
+      </article>
+    </section>
+
+    <section id="fr5" class="tab-panel">
+      <h2>Open Items</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P0를 완결: status/readback gap inventory, gripper completion-readback rule, IO app-contract gap 고정</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L83">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P1: current J5/J6 both directions + same-day repeatability를 multi-cycle repeatability와 next-joint expansion 기준으로 넓히기</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L84">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>official SDK audit P2: tiny joint green을 바탕으로 joint/TCP operator/debug flow와 auto-mode dependency를 축약</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L85">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>gripper live path 후속 정리: DAHUAN + auto mode 조건에서 0/100 discrete write와 Easy Motion apply는 green. 다음은 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L86">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>V3 큰 파일의 다음 구조 정리를 책임 혼합도 기준으로 진행한다. 현재 첫 순서는 PointMoveController.Functions -&gt; ViewState -&gt; PointActions -&gt; LiveApproval이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L87">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>공통 Live QA runner로 joint/TCP/gripper/point field evidence를 같은 형식으로 축적</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L88">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>Easy Motion 슬라이더 조작이 실기 gripper를 실시간으로 따라오게 만들기</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L89">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>tiny joint direct-input 성공패턴의 5deg acceptance를 다른 일부 축으로 넓힌다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L90">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>헤더 다음 행동 + Safety/Diagnostics taxonomy가 tiny range exceeded 같은 blocked state에서도 generic readback-only 문구로 되돌아가지 않게 보강한다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L91">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>teaching point live는 single point / two-point once / Home-based custom one-shot까지 green이다. 다음은 broad named sequence generalization과 live loop 범위를 어디까지 열지 결정하는 일이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L92">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>상단 헤더 자동 / 수동 버튼은 normal-case green으로 본다. 다음은 failure/recovery wording과 drag/servo exceptional case를 정리</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L93">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>tiny MoveJ 승인 게이트를 tool/user/coordSystem + evidence freshness + drift + operator confirm 기준으로 묶기</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L94">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>MacBook Unity Editor 비-4K 해상도 V3 레이아웃 안정화</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L95">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>PlayMode/bootstrap 공통 실패 정리</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L96">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>이미 끝난 큰 보드는 archive로 보내고, 남은 일만 따로 모아 본다.</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L8">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>2026-05-19 fresh 재검증에서는 192.168.57.2:8080과 V3 connect/sync가 green으로 회복됐다. 이후 operator가 실제 teach pendant에서 수동 -&gt; 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 SDK profile company=2; device=4; soft=0; index=1, activationMask=1로 읽혔고, explicit gripper-only write와 Easy Motion apply path 모두 0% -&gt; position=0, 100% -&gt; position=100으로 수렴했다. 남은 gripper 이슈는 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L40">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>다만 blocked 직후 헤더/진단 surface는 아직 generic readback-only 문구로 되돌아가서 copy-layer 후속이 남아 있다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L48">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>arm track의 현재 open item은 더 이상 &quot;tiny MoveJ가 아예 안 된다&quot;가 아니라 true 3deg helper, multi-cycle repeatability, TCP, manual recovery wording 확장이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L61">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>상태: 실기 readback과 연결됨, 운영자용 노출은 일부 후속</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L73">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>ResetErrors()는 0/OK였지만 후속 sync에서도 fault=1/1이 유지됐다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L109">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>따라서 현재 tiny MoveJ는 gate 설계 pending이 아니라 controller fault clear pending 상태다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L110">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>적용 now routes through product live approval instead of direct blocked write</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L134">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>before the hardware-side change, 100% open reached SDK position=96, but 0% close repeatedly returned to position=96</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L155">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>remaining follow-up is UI polish, not basic hardware operation: command-immediate pending wording, Easy Motion stale pending/lastApply, and a fresh popup-confirm path without reused debug approval</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L160">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>header now exposes a one-line 다음 행동 summary and Safety/Diagnostics shows operator-facing failure taxonomy</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L218">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>final live re-smoke after the patch is still pending</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L221">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>IO: official APIs exist, but current app contract/live path is effectively Stubbed/Blocked</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L244">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>this is now normal-case green; recovery wording and exceptional-case operator UX are still pending</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L256">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>다음 현장 세션 우선순위는 layout polish보다 hardware readback evidence 축적</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L260">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>arm track: current J1~J6 effective tiny path is green and J6 true +3deg direct-input path is green, but 5deg direct-input closure, multi-cycle repeatability, TCP, and operator-only auto-mode transition are still pending</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L272">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>gripper: historical 70/100/50 command path and 0% contact baseline were field-green on 2026-04-29. 2026-05-19 retest showed the hardware-side setting matters: before auto mode + DAHUAN, 0% close stayed at SDK position=96; after auto mode + DAHUAN, explicit gripper-only and Easy Motion apply both reached 0% -&gt; position=0 and 100% -&gt; position=100. Next work is pending UX, stale Easy Motion state cleanup, and fresh popup-confirm verification before slider follow</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L273">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>teaching repeatability track: Home 기준 2-point / multi-axis sequence는 sync-confirm 절차와 same-session live re-smoke까지 닫혔다. 다음 범위는 broad named sequence generalization과 live loop unlock 판단이다</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L275">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>header 다음 행동과 Safety/Diagnostics taxonomy가 tiny range exceeded, mode mismatch, activation not ready 같은 real failure state에서 충분한지 확인</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L281">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>첫 motion 검증은 후속 phase에서 &quot;작은 범위 MoveJ 1회&quot;만 따로 승인</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L356">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>다음 남은 일은 두 갈래다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L380">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>그 다음 트랙이 pendant-free auto/manual transition 구현과 non-4K layout 정리다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L383">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>현재 다음 개발 우선순위는 motion enable이 아니라 tool/user/coordSystem + motion gate 운영 노출 정리다</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L531">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            </div>
+      <h2>Locked Scope</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>current branch에서 broad arm motion green으로 일반화하지 않음. tiny MoveJ success는 현재 J5/J6 narrow path로만 본다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L97">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>상태: readback-only baseline 확보</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L31">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>Unity gripper live write는 2026-04-29 gripper-only 기준으로 실제 readback 변화까지 확인된 이력이 있다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L39">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>2026-05-19 fresh 재검증에서는 192.168.57.2:8080과 V3 connect/sync가 green으로 회복됐다. 이후 operator가 실제 teach pendant에서 수동 -&gt; 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 SDK profile company=2; device=4; soft=0; index=1, activationMask=1로 읽혔고, explicit gripper-only write와 Easy Motion apply path 모두 0% -&gt; position=0, 100% -&gt; position=100으로 수렴했다. 남은 gripper 이슈는 command 직후 pending UX, Easy Motion pending/lastApply cleanup, fresh popup-confirm path 재검증이다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L40">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>다만 blocked 직후 헤더/진단 surface는 아직 generic readback-only 문구로 되돌아가서 copy-layer 후속이 남아 있다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L48">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>teaching point live 범위는 현재 single point / two-point once / Home-based custom one-shot / loop locked로 잠겨 있다</p>
+              <a href="../status/ACTIVE-WORK-INDEX.md#L53">docs/status/ACTIVE-WORK-INDEX.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>Readback-only live monitor 추가</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L46">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>구현 커밋: d8c0726 Add FR5 readback-only live monitor</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L53">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>V3 readback-only live UX 정렬 완료</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L61">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>readback-only live에서는 primary action이 서보 켜기가 아니라 현재 위치 읽기를 우선 안내</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L62">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>readback-only motion gate summary 정합성 복구 완료</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L84">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>V3 tiny MoveJ gate debug summary가 더 이상 실기 readback-only 세션을 dry-run simulation으로 오인하지 않는다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L85">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>current live baseline에서는 status=ReadbackOnly, ready=False, tool=1, user=1을 포함한 readback summary가 노출된다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L86">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>같은 세션에서 tiny MoveJ gate는 계속 status=ReadbackOnly, ready=False로 잠겨 있었고, latest-state.json / latest-drift.json freshness는 유지됐다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L101">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>2026-04-28 session 20260428-084436에서 tiny target J6 +0.5deg @ 5%를 다시 시도했지만, live blocker는 controller fault main=1 / sub=1이었다.</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L108">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>this historical signal should now be treated as branch/time-specific evidence, not as the current discrete V3 gripper blocker without latest-branch reconfirmation</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L117">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>Unity-side live gripper write was revalidated in gripper-only mode</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L129">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>적용 now routes through product live approval instead of direct blocked write</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L134">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>same-day calibration update also locked current branch closedRawPercent=0, and operator confirmed real gripper contact/close at 0%</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L137">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>2026-05-14 gripper current blocker reconfirmed</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L142">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>after IPC/tiny MoveJ stabilization, gripper was re-tested in a separate gripper-only session</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L143">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>explicit gripper-only writes reached 0% -&gt; SDK position=0 done=1 and 100% -&gt; SDK position=100 done=1</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L158">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>mock/readback-only should no longer be interpreted as successful live movement by the same button label</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L164">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>2026-05-01 verification on current branch is mock-only compile/behavior check, not fresh field smoke</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L165">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>current narrow green scope is locked as:</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L174">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>5deg is not yet locked green:</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L219">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>a tiny range tolerance patch was added to avoid floating-point 5.000xdeg false blocks</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L220">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>saved MoveJ points only</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L230">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>this is not broad named-sequence/program-runtime green</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L236">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-locked">locked</span>
+                
+              </div>
+              <p>current summary is locked as:</p>
+              <a href="../status/FR5-LIVE-INTEGRATION-ROADMAP.md#L239">docs/status/FR5-LIVE-INTEGRATION-ROADMAP.md</a>
+            </article>
+            </div>
+      <h2>Latest Verified Evidence</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>controller disabled/manual readback stall</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L29">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>Artifacts/live/fr5/latest-state.json</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L39">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>current session Artifacts/live/fr5/sessions/*-events.ndjson</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L40">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>session events가 readback updated를 계속 찍는다.</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L48">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>LiveFairinoClient는 sdk version을 매 readback마다 다시 읽지 않는다.</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L72">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>mode=1이 곧 crash 원인은 아니다. 먼저 live readback이 계속 갱신되는지 본다.</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L78">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">connect + sync baseline</span>
+              </div>
+              <p>이 baseline이 green이면 그다음에만 gripper, joint, point/sequence live test로 넘어간다.</p>
+              <a href="../ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md#L83">docs/ref/product/roadmap/fr5-connect-sync-debug-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>다음 세션에서 같은 성공 패턴을 다시 밟게 한다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L11">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>current truth source는 FR5 controller readback이다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L20">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>2026-05-14 재검증 기준, 이전 70 -&gt; 100 green 패턴을 그대로 current green으로 일반화하지 않는다. 첫 세션은 gripper readback motionFault=-2 / activationFault=-2 / positionFault=-2와 RobotEnable(1) code=-2로 write 전 중단했고, Unity 재시작 후 재시도는 70% command sent / readback unconfirmed 뒤 100% 복귀가 gripper 동작 오류로 실패했다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L23">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>2026-05-15 current branch 기준, 연결 + 위치 읽기가 실제로 성공한 세션에서는 UI/runtime gripper readback이 실기 닫힘 상태 0%를 다시 따라온다. 다만 같은 날 후속 재테스트에서는 ping 192.168.57.2는 성공했지만 nc -vz 192.168.57.2 8080이 timeout이라 fresh live connect가 실패했고, 그 상태의 V3는 다시 requested=100; actual=100; raw=100; readback=False 기본값에 머문다. 따라서 현재 문제는 sync 후 0을 절대 못 읽음이 아니라 fresh 8080 연결이 불안정하면 UI가 default 100/readback false에 남음이다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L24">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>2026-05-19 fresh field 기준, 네트워크와 V3 connect/sync는 회복됐다: Mac en5=192.168.57.10/24, ping 192.168.57.2 0% loss, nc 192.168.57.2 8080 success, session 20260519-091601, connected=true, enabled=true, mode=1, toolId=1, userId=1, coordSystem=Base, drift ok. 다만 restart_v3_live_loop.sh 계열 gate는 current clientMode=direct-motion을 direct|bridge로만 검사하면 false fail을 낼 수 있다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L25">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>2026-05-19 후속 현장 조치 기준, operator가 실제 teach pendant에서 수동 -&gt; 자동으로 전환하고 gripper를 DAHUAN으로 바꾼 뒤 gripper path가 회복됐다. SDK profile은 company=2; device=4; soft=0; bus=0; index=1, activationMask=1, activationFault=0, positionFault=0으로 읽혔다. 이 조건에서는 explicit gripper-only write와 Easy Motion apply path 모두 0% -&gt; SDK position=0 / 100% -&gt; SDK position=100까지 수렴했다.</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L26">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>default session: readback-only</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L45">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">gripper-only live control</span>
+              </div>
+              <p>gripper readback이 살아 있으면 runtime/easy-motion summary가 Actual 0% 또는 현재 실기 값으로 따라와야 한다</p>
+              <a href="../ref/product/roadmap/fr5-gripper-live-success-pattern.md#L94">docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>current verified two-point sequence is LIVE_P1 -&gt; LIVE_P2</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L29">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>point/sequence live는 이제 save / apply / run 앞마다 Sync + RefreshLiveEvidence를 강제하는 operator gate를 탄다</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L30">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>RefreshLiveEvidenceForDebug()</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L86">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>post-run truth is judged from refreshed Artifacts/live/fr5/latest-state.json</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L119">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>base/home 복귀, offset point 저장, point apply, sequence run once는 모두 각각 post-sync evidence를 남긴다.</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L145">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>QA0430_HOME_2PT_T6는 same-session 2회 연속 live 1회 실행 후 post-sync 기준으로 repeatability를 확인했다.</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L146">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>QA0430_HOME_MULTIAXIS_T5_T6는 same-session 2회 연속 live 1회 실행 후, 최종 sleep + post-sync 기준으로 Home 복귀를 확인했다.</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L147">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">teaching point one-shot live path</span>
+              </div>
+              <p>current branch에서 broad named sequence green을 일반화하지 않는다. repeatability 확장은 Home 기준 saved MoveJ path를 좁게 늘리는 식으로만 본다.</p>
+              <a href="../ref/product/roadmap/fr5-teaching-point-live-success-pattern.md#L148">docs/ref/product/roadmap/fr5-teaching-point-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>verified joints: J1 through J6</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L13">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>verified delta: +1deg, -1deg</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L14">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>TCP jog, MoveL, large-range joint move가 green이라고 보지 않는다.</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L21">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>immediate QA artifact afterMovement만으로 real joint delta를 확정하지 않는다.</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L22">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>ping 192.168.57.2 success</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L29">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>nc -vz 192.168.57.2 8080 success</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L30">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>live evidence freshness is available</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L33">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">tiny joint MoveJ narrow path</span>
+              </div>
+              <p>after execute, runtime relocks back to readback-safe mode</p>
+              <a href="../ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md#L44">docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md</a>
+            </article>
+            </div>
+    </section>
+
+    <section id="pendant" class="tab-panel">
+      <h2>Open Items</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>2B-4 포인트 이동: MoveL/MoveJ preview/apply, save/recall/list/delete/rename/export/cleanup 연결 완료. Saved MoveJ single-point live apply, PendantV3Points two-point once, QA0430_HOME_2PT_T6, QA0430_HOME_MULTIAXIS_T5_T6 one-shot repeatability는 green. point save/apply/run 앞에는 Sync + RefreshLiveEvidence gate를 강제하고, manual pose 변경 시 synced Home 저장 후 repeatability를 시작한다. loop/broad named live는 아직 잠금</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L26">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>2C-2 뷰포트 보조 UI: toolbar/frame/path/ghost/bound/coll/cam actual click matrix 통과. 실데이터 boundary/collision은 후속</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L28">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-open">open</span>
+                
+              </div>
+              <p>3B 로컬 서비스: Product live confirm token 완료, manual readback 6/6 PASS, sequence runtime/run-step/order-overwrite/detail/duplicate/timing/confirm/edit-lock/loop/run-from-selected/function-v1-polish 33/33 PASS, shared live QA runner scaffold 추가, verified controller mode path + header 자동/수동 버튼 노출, teaching point live single point / two-point once green</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L34">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            </div>
+      <h2>Locked Scope</h2>
+      <div class="item-grid"><p class="empty">No Pendant V3 locked scope parsed.</p></div>
+      <h2>Latest Verified Evidence</h2>
+      <div class="item-grid">
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">Pendant V3 progress</span>
+              </div>
+              <p>현재 완료/진행중/미착수 범위를 빠르게 확인한다.</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L5">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">Pendant V3 progress</span>
+              </div>
+              <p>검증: dotnet build green, Unity compile check pass</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L46">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">Pendant V3 progress</span>
+              </div>
+              <p>검증: dotnet build green</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L51">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            
+
+            <article class="item">
+              <div class="item-top">
+                <span class="badge badge-done">done</span>
+                <span class="scope">Pendant V3 progress</span>
+              </div>
+              <p>ConnectionHomeController, StageRuntime, ReadbackAsync, PointMoveController.Bootstrap, PointMoveController.Sequence는 현재 기준으로는 상대적으로 cohesive한 파일로 유지한다.</p>
+              <a href="../ref/product/pendant-v3/progress-checklist.md#L88">docs/ref/product/pendant-v3/progress-checklist.md</a>
+            </article>
+            </div>
+    </section>
+
+    <footer>
+      Generated files: <code>dashboard-data.json</code>, <code>project-structure.json</code>, <code>index.html</code>.
+    </footer>
+  </main>
+  <script>
+    for (const button of document.querySelectorAll('.tab-button')) {
+      button.addEventListener('click', () => {
+        const tab = button.dataset.tab;
+        for (const other of document.querySelectorAll('.tab-button')) {
+          other.setAttribute('aria-selected', String(other === button));
+        }
+        for (const panel of document.querySelectorAll('.tab-panel')) {
+          panel.classList.toggle('active', panel.id === tab);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

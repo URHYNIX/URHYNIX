@@ -1,0 +1,9 @@
+{"timestamp":"2026-03-05T00:00:00+09:00","event":"init","drift":0,"auto_fix":0,"manual_required":0,"note":"문서 체계 초기화"}
+{"timestamp":"2026-03-11T18:10:00+09:00","event":"product-doc-process-transplant","drift":0,"auto_fix":0,"manual_required":0,"note":"canonical product docs 3종과 PRODUCT-DOC-BOARD를 추가하고 downstream sync 규칙을 연결"}
+{"timestamp":"2026-03-11T19:10:00+09:00","event":"product-doc-branching-plan","drift":0,"auto_fix":0,"manual_required":0,"note":"root canonical 문서를 summary 문서로 축소하고 docs/ref/product 아래 branching leaf 문서를 추가"}
+{"timestamp":"2026-03-11T13:08:14+09:00","event":"scheduled-daily-run","drift":0,"auto_fix":0,"manual_required":0,"note":"첫 자동 실행 — DRY_RUN=true, 변경사항 없음, module/product-doc 정합성 유지"}
+{"timestamp":"2026-03-12T00:00:00+09:00","event":"phase5g-docs-sync","drift":0,"auto_fix":0,"manual_required":0,"note":"Phase 5 complete (5A~5G Done), sprint-docs-sync 전체 문서 동기화, skill routing verification 98.2%"}
+{"timestamp":"2026-03-12T12:00:00+09:00","event":"scara-template-docs-100","drift":0,"auto_fix":2,"manual_required":0,"note":"TemplateSCARA_RV 추가, 누락 문서 2개 생성, skill routing 114/114 (100%)"}
+{"timestamp":"2026-03-12T13:09:20+09:00","event":"scheduled-daily-run","drift":1,"auto_fix":0,"manual_required":1,"note":"WIREFRAME 03-12 downstream drift — architecture-diagrams.md not synced"}
+{"timestamp":"2026-03-27T09:31:42+09:00","event":"scheduled-daily-run","drift":0,"auto_fix":0,"manual_required":0,"note":"전체 정합성 확인 완료 — architecture-diagrams.md drift 해소(03-14 업데이트), broken links 0, WIREFRAME downstream sync RESOLVED"}
+{"timestamp":"2026-03-27T13:08:03+09:00","event":"scheduled-daily-run","drift":0,"auto_fix":0,"manual_required":0,"note":"당일 2차 실행 — 전체 정합성 재확인. board 42행 (Done:31, InProgress:2, QA:1, Ready:7, Hold:1), 스킬 10/10 HEALTHY, broken links 0, product docs 동기화 유지"}

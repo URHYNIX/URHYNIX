@@ -1,0 +1,1058 @@
+/* Pendant V3 - Root Shell: Phase 0B minimum shell tokens and layout */
+:root {
+    --rc-backdrop: rgb(18, 18, 24);
+    --rc-left-rail: rgb(24, 24, 32);
+    --rc-card: rgb(30, 30, 40);
+    --rc-card-alt: rgb(36, 36, 48);
+    --rc-accent: rgb(80, 140, 255);
+    --rc-success: rgb(60, 200, 120);
+    --rc-warning: rgb(255, 180, 40);
+    --rc-danger: rgb(255, 70, 70);
+    --rc-title-text: rgb(240, 240, 245);
+    --rc-muted-text: rgb(140, 140, 160);
+    --rc-button-text: rgb(205, 216, 232);
+    --rc-button-text-strong: rgb(232, 238, 248);
+    --rc-button-text-on-accent: rgb(12, 18, 30);
+    --rc-button-bg: rgba(80, 140, 255, 0.10);
+    --rc-button-bg-hover: rgba(80, 140, 255, 0.16);
+    --rc-button-bg-active: rgba(80, 140, 255, 0.34);
+    --rc-button-bg-pressed: rgba(80, 140, 255, 0.46);
+    --rc-button-bg-primary: rgba(80, 140, 255, 0.42);
+    --rc-button-bg-success-soft: rgba(60, 200, 120, 0.16);
+    --rc-button-bg-success: rgba(60, 200, 120, 0.18);
+    --rc-button-bg-danger-soft: rgba(255, 70, 70, 0.16);
+    --rc-button-bg-danger: rgba(255, 70, 70, 0.18);
+    --rc-button-bg-danger-strong: rgba(255, 70, 70, 0.22);
+    --rc-button-bg-danger-pressed: rgba(255, 70, 70, 0.34);
+    --rc-button-bg-success-pressed: rgba(60, 200, 120, 0.34);
+    --rc-button-border: rgba(80, 140, 255, 0.18);
+    --rc-button-border-active: rgba(140, 185, 255, 0.78);
+    --rc-button-border-pressed: rgba(190, 215, 255, 0.95);
+    --rc-button-border-subtle: rgba(255, 255, 255, 0.08);
+    --rc-surface-faint: rgba(255, 255, 255, 0.03);
+    --rc-surface-soft: rgba(255, 255, 255, 0.04);
+    --rc-surface-subtle: rgba(255, 255, 255, 0.05);
+    --rc-surface-row: rgba(18, 18, 24, 0.38);
+    --rc-surface-row-strong: rgba(18, 18, 24, 0.55);
+    --rc-surface-card-overlay: rgba(30, 30, 40, 0.96);
+    --rc-surface-card-overlay-strong: rgba(30, 30, 40, 0.98);
+    --rc-overlay-clear: rgba(0, 0, 0, 0.0);
+    --rc-overlay-scrim: rgba(0, 0, 0, 0.6);
+    --rc-overlay-backdrop: rgba(0, 0, 0, 0.52);
+    --rc-axis-x: rgb(255, 104, 104);
+    --rc-axis-y: rgb(92, 215, 138);
+    --rc-axis-z: rgb(91, 155, 255);
+    --rc-axis-r: rgb(255, 196, 88);
+    --rc-axis-x-soft: rgba(255, 104, 104, 0.18);
+    --rc-axis-y-soft: rgba(92, 215, 138, 0.18);
+    --rc-axis-z-soft: rgba(91, 155, 255, 0.18);
+    --rc-axis-r-soft: rgba(255, 196, 88, 0.18);
+    --rc-stage-overlay-panel: rgba(18, 18, 24, 0.86);
+    --rc-stage-axis-panel: rgba(30, 30, 40, 0.82);
+    --rc-stage-render-placeholder: rgba(180, 30, 30, 0.24);
+    --rc-stage-diagnostic-bg: rgba(0, 0, 0, 0.58);
+    --rc-stage-diagnostic-text: rgb(255, 255, 255);
+    --rc-axis-widget-bg: rgba(10, 12, 18, 0.74);
+    --rc-axis-widget-border: rgba(255, 255, 255, 0.10);
+    --rc-axis-widget-center: rgba(255, 255, 255, 0.88);
+    --rc-axis-widget-label: rgb(245, 245, 245);
+    --rc-axis-widget-x: rgba(255, 76, 76, 0.88);
+    --rc-axis-widget-y: rgba(68, 210, 120, 0.88);
+    --rc-axis-widget-z: rgba(88, 148, 255, 0.88);
+    --rc-debug-highlight-fill: rgba(255, 180, 40, 0.04);
+    --rc-debug-badge-border: rgba(255, 180, 40, 0.52);
+    --rc-split-handle-bg: rgba(80, 140, 255, 0.12);
+    --rc-viewport-boundary-border: rgba(80, 140, 255, 0.36);
+    --rc-viewport-boundary-bg: rgba(80, 140, 255, 0.04);
+    --rc-viewport-collision-border: rgba(255, 70, 70, 0.42);
+    --rc-viewport-collision-bg: rgba(255, 70, 70, 0.05);
+    --rc-selection-border: rgba(80, 220, 180, 0.42);
+    --rc-selection-bg: rgba(80, 220, 180, 0.09);
+    --rc-modal-scrim: rgba(8, 12, 18, 0.72);
+    --rc-modal-card-bg: rgb(22, 27, 35);
+    --rc-modal-card-border: rgba(255, 255, 255, 0.12);
+    --rc-status-success-bg: rgba(60, 200, 120, 0.10);
+    --rc-status-warning-bg: rgba(255, 180, 40, 0.12);
+    --rc-safety-success-bg: rgba(60, 200, 120, 0.14);
+    --rc-safety-warning-bg: rgba(255, 180, 40, 0.14);
+    --rc-surface-emphasis: rgba(255, 255, 255, 0.06);
+    --rc-surface-raised-line: rgba(255, 255, 255, 0.08);
+    --rc-toolbar-bg: rgba(18, 20, 28, 0.86);
+    --rc-top-bar-height: 56px;
+    --rc-nav-rail-width: 72px;
+    --rc-context-panel-width: 320px;
+    --rc-bottom-bar-height: 48px;
+    --rc-work-tab-height: 40px;
+    --rc-gap: 4px;
+    --rc-card-padding: 12px;
+    --rc-radius-xs: 4px;
+    --rc-radius-sm: 5px;
+    --rc-radius: 6px;
+    --rc-radius-lg: 8px;
+    --rc-radius-xl: 10px;
+    --rc-radius-card: 12px;
+    --rc-radius-axis: 9px;
+    --rc-radius-pill: 999px;
+    --rc-button-radius: var(--rc-radius);
+    --rc-sheet-radius: 12px 12px 0 0;
+    --rc-stage-backdrop: rgb(12, 14, 20);
+    --rc-stage-border: rgba(80, 140, 255, 0.20);
+    --rc-stage-overlay: rgba(18, 18, 24, 0.78);
+    --rc-aux-surface: rgb(10, 10, 14);
+    --rc-aux-border: rgba(80, 140, 255, 0.12);
+    --rc-aux-muted-panel: var(--rc-surface-faint);
+    --rc-highlight-border: rgba(255, 180, 40, 0.82);
+    --rc-highlight-shadow: rgba(255, 180, 40, 0.22);
+    --rc-highlight-fill: rgba(255, 180, 40, 0.16);
+    --rc-highlight-text: rgb(255, 225, 150);
+    --rc-input-text: rgb(0, 0, 0);
+}
+
+.rc-root {
+    flex-grow: 1;
+    flex-direction: column;
+    background-color: var(--rc-backdrop);
+    color: var(--rc-title-text);
+}
+
+.rc-root .unity-base-text-field__input {
+    color: var(--rc-input-text);
+}
+
+.rc-root .unity-text-input {
+    color: var(--rc-input-text);
+}
+
+.rc-root .unity-button {
+    border-radius: var(--rc-button-radius);
+    background-color: var(--rc-button-bg);
+    color: var(--rc-button-text);
+    border-width: 1px;
+    border-color: var(--rc-button-border);
+}
+
+.rc-root .unity-button:hover {
+    background-color: var(--rc-button-bg-hover);
+    border-color: var(--rc-button-border-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-root .unity-button:active {
+    background-color: var(--rc-button-bg-pressed);
+    border-color: var(--rc-button-border-pressed);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-root .unity-button:focus {
+    border-color: var(--rc-button-border-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-nav-item--active,
+.rc-tab--active,
+.rc-context-tab--active,
+.rc-bottom-tab--active,
+.rc-home-state-button--active,
+.rc-coord-mode-button--active,
+.rc-joint-mode-button--active,
+.rc-tcp-coord-button--active,
+.rc-point-motion-button--active,
+.rc-point-subview-tab--active,
+.rc-point-coord-button--active,
+.rc-point-list-button--active,
+.rc-point-loop-button--active,
+.rc-point-timing-button--active,
+.rc-viewport-toolbar-button--active,
+.rc-workspace-toggle--active,
+.rc-collision-toggle--active {
+    border-width: 1px;
+    border-color: var(--rc-button-border-active);
+}
+
+.rc-root .unity-button.rc-home-button--primary:hover,
+.rc-root .unity-button.rc-popup-button--primary:hover,
+.rc-root .unity-button.rc-point-primary-save:hover {
+    background-color: var(--rc-button-bg-pressed);
+}
+
+.rc-root .unity-button.rc-easy-action-button--primary:hover {
+    background-color: var(--rc-button-bg-success-pressed);
+}
+
+.rc-root .unity-button.rc-top-button--danger:hover,
+.rc-root .unity-button.rc-popup-button--danger:hover,
+.rc-root .unity-button.rc-fault-overlay-button--danger:hover,
+.rc-root .unity-button.rc-easy-action-button--danger:hover,
+.rc-root .unity-button.rc-joint-action-button--danger:hover,
+.rc-root .unity-button.rc-tcp-action-button--danger:hover,
+.rc-root .unity-button.rc-point-action-button--danger:hover {
+    background-color: var(--rc-button-bg-danger-pressed);
+    border-color: var(--rc-danger);
+}
+
+.rc-top-status-bar {
+    height: var(--rc-top-bar-height);
+    min-height: var(--rc-top-bar-height);
+    max-height: var(--rc-top-bar-height);
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 12px;
+    padding-right: 12px;
+    background-color: var(--rc-card-alt);
+}
+
+.rc-top-info {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    min-width: 0;
+}
+
+.rc-top-controls {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    margin-left: 12px;
+}
+
+.rc-top-next-action {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--rc-muted-text);
+    unity-font-style: italic;
+    max-width: 720px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rc-probe-button {
+    min-height: 30px;
+    min-width: 110px;
+}
+
+.rc-top-button {
+    min-height: 32px;
+    min-width: 72px;
+    margin-left: 6px;
+}
+
+.rc-top-button--danger {
+    background-color: var(--rc-button-bg-danger);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-top-button--mode-auto {
+    background-color: var(--rc-button-bg-success-soft);
+}
+
+.rc-top-button--mode-manual {
+    background-color: var(--rc-button-bg);
+}
+
+.rc-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.rc-chip-row {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+}
+
+.rc-chip-row--primary {
+    flex-grow: 1;
+}
+
+.rc-chip-row--secondary {
+    display: none;
+}
+
+.rc-status-chip {
+    margin-right: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-radius: var(--rc-radius);
+    font-size: 12px;
+    background-color: var(--rc-card);
+    flex-shrink: 0;
+}
+
+.rc-status-chip--muted {
+    color: var(--rc-muted-text);
+}
+
+.rc-status-chip--success {
+    color: var(--rc-success);
+}
+
+.rc-status-chip--warning {
+    color: var(--rc-warning);
+}
+
+.rc-status-chip--danger {
+    color: var(--rc-danger);
+}
+
+.rc-meta {
+    font-size: 12px;
+    color: var(--rc-muted-text);
+}
+
+.rc-body-row {
+    flex-grow: 1;
+    flex-direction: row;
+    margin-top: var(--rc-gap);
+    margin-bottom: var(--rc-gap);
+}
+
+.rc-nav-rail {
+    width: var(--rc-nav-rail-width);
+    min-width: var(--rc-nav-rail-width);
+    max-width: var(--rc-nav-rail-width);
+    flex-direction: column;
+    background-color: var(--rc-left-rail);
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+
+.rc-nav-item {
+    min-height: 56px;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    border-radius: var(--rc-radius);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.rc-nav-item--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-main-content {
+    flex-grow: 1;
+    margin-left: var(--rc-gap);
+    margin-right: var(--rc-gap);
+    flex-direction: column;
+}
+
+.rc-work-tab-bar {
+    min-height: var(--rc-work-tab-height);
+    flex-direction: row;
+    background-color: var(--rc-card-alt);
+    padding-left: 8px;
+    padding-right: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+
+.rc-work-tab-bar--dock {
+    margin-bottom: 10px;
+    border-radius: var(--rc-radius-lg);
+    border-width: 1px;
+    border-color: var(--rc-button-border-subtle);
+}
+
+.rc-tab {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 30px;
+    margin-left: 2px;
+    margin-right: 2px;
+    white-space: normal;
+}
+
+.rc-tab--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-main-split {
+    flex-grow: 1;
+    flex-direction: row;
+    margin-top: var(--rc-gap);
+}
+
+.rc-work-panel {
+    flex-grow: 0.68;
+    flex-basis: 0;
+    background-color: var(--rc-card);
+    border-radius: var(--rc-radius);
+    padding: 6px;
+    min-width: 420px;
+}
+
+.rc-work-panel--debug-highlight {
+    border-width: 2px;
+    border-color: var(--rc-highlight-border);
+    background-color: var(--rc-debug-highlight-fill);
+}
+
+.rc-panel-header {
+    margin-bottom: 12px;
+}
+
+.rc-work-panel-header {
+    min-height: 22px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.rc-work-panel-title {
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.rc-work-panel-chip-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.rc-work-panel-chip {
+    margin-right: 4px;
+    padding-left: 5px;
+    padding-right: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border-radius: var(--rc-radius-sm);
+    font-size: 9px;
+    color: var(--rc-muted-text);
+    background-color: var(--rc-surface-subtle);
+}
+
+.rc-work-panel-chip--primary {
+    color: var(--rc-title-text);
+    background-color: var(--rc-button-bg-hover);
+}
+
+.rc-work-panel-debug-badge {
+    align-self: flex-start;
+    margin-top: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border-radius: var(--rc-radius-card);
+    border-width: 1px;
+    border-color: var(--rc-debug-badge-border);
+    background-color: var(--rc-highlight-fill);
+    color: var(--rc-highlight-text);
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.rc-work-panel-body {
+    flex-grow: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.rc-panel-host {
+    flex-grow: 1;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-robot-stage-host {
+    flex-grow: 1;
+    min-height: 600px;
+    border-radius: var(--rc-radius-lg);
+    border-width: 1px;
+    border-color: var(--rc-stage-border);
+    background-color: var(--rc-stage-backdrop);
+    position: relative;
+    overflow: hidden;
+}
+
+.rc-robot-stage-render-surface {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: var(--rc-stage-render-placeholder);
+}
+
+.rc-robot-stage-diagnostic {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    max-width: 420px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-radius: var(--rc-radius-xs);
+    background-color: var(--rc-stage-diagnostic-bg);
+    color: var(--rc-stage-diagnostic-text);
+    font-size: 11px;
+}
+
+.rc-robot-stage-orientation-host {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 88px;
+    height: 88px;
+    justify-content: center;
+    align-items: center;
+}
+
+.rc-robot-stage-orientation-widget {
+    width: 88px;
+    height: 88px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-axis-widget-bg);
+    border-width: 1px;
+    border-color: var(--rc-axis-widget-border);
+}
+
+.rc-robot-stage-orientation-center {
+    position: absolute;
+    left: 39px;
+    top: 39px;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--rc-radius-sm);
+    background-color: var(--rc-axis-widget-center);
+}
+
+.rc-robot-stage-orientation-axis {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--rc-radius-axis);
+    -unity-text-align: middle-center;
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: var(--rc-axis-widget-label);
+    cursor: pointer;
+}
+
+.rc-robot-stage-orientation-axis--x {
+    background-color: var(--rc-axis-widget-x);
+}
+
+.rc-robot-stage-orientation-axis--y {
+    background-color: var(--rc-axis-widget-y);
+}
+
+.rc-robot-stage-orientation-axis--z {
+    background-color: var(--rc-axis-widget-z);
+}
+
+.rc-robot-stage-overlay-host {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    padding: 10px;
+    border-radius: var(--rc-radius);
+    background-color: var(--rc-stage-overlay);
+}
+
+.rc-robot-stage-badge {
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: var(--rc-highlight-text);
+    -unity-font-style: bold;
+}
+
+.rc-control-dock-host {
+    flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-split-handle {
+    width: 8px;
+    min-width: 8px;
+    margin-left: var(--rc-gap);
+    margin-right: var(--rc-gap);
+    border-radius: var(--rc-radius-xs);
+    background-color: var(--rc-split-handle-bg);
+}
+
+.rc-split-handle--dragging {
+    background-color: var(--rc-button-bg-pressed);
+}
+
+.rc-viewport-host {
+    flex-grow: 0.32;
+    flex-basis: 0;
+    flex-direction: column;
+    background-color: var(--rc-aux-surface);
+    border-radius: var(--rc-radius);
+    padding: 8px;
+    border-width: 1px;
+    border-color: var(--rc-aux-border);
+    min-width: 360px;
+    max-width: 460px;
+    overflow: hidden;
+}
+
+.rc-viewport-host--boundary {
+    border-color: var(--rc-viewport-boundary-border);
+    background-color: var(--rc-viewport-boundary-bg);
+}
+
+.rc-viewport-host--collision {
+    border-color: var(--rc-viewport-collision-border);
+    background-color: var(--rc-viewport-collision-bg);
+}
+
+.rc-viewport-toolbar-host {
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    margin-bottom: 4px;
+}
+
+.rc-cartesian-overlay-host {
+    width: 100%;
+}
+
+.rc-viewport-overlay-host {
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    margin-bottom: 8px;
+}
+
+.rc-viewport-header {
+    min-height: 20px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.rc-viewport-title {
+    font-size: 13px;
+}
+
+.rc-shared-scroll {
+    flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
+    flex-shrink: 1;
+    background-color: transparent;
+    overflow: hidden;
+}
+
+.rc-shared-scroll .unity-scroll-view__content-container {
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    padding-bottom: 8px;
+}
+
+.rc-shared-scroll .unity-scroll-view__content-viewport {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.rc-shared-scroll .unity-scroller--horizontal {
+    display: none;
+}
+
+.rc-shared-scroll .unity-scroll-view__horizontal-scroller {
+    display: none;
+}
+
+.rc-shared-scroll .unity-scroll-view__horizontal-scroller-visibility {
+    display: none;
+}
+
+.rc-viewport-scroll {
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-aux-muted-panel);
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 6px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-overlay-title {
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.rc-overlay-copy {
+    font-size: 12px;
+    color: var(--rc-muted-text);
+}
+
+.rc-context-panel {
+    width: var(--rc-context-panel-width);
+    min-width: var(--rc-context-panel-width);
+    max-width: var(--rc-context-panel-width);
+    flex-direction: column;
+    min-height: 0;
+}
+
+.rc-context-tab-bar {
+    flex-direction: row;
+    margin-bottom: var(--rc-gap);
+    background-color: var(--rc-card-alt);
+    border-radius: var(--rc-radius);
+    padding: 4px;
+}
+
+.rc-context-tab {
+    flex-grow: 1;
+    min-height: 30px;
+    margin-right: 4px;
+}
+
+.rc-context-tab--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-context-host {
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-context-scroll {
+    margin-top: 0;
+}
+
+.rc-context-card {
+    background-color: var(--rc-card);
+    border-radius: var(--rc-radius);
+    padding: var(--rc-card-padding);
+    margin-bottom: var(--rc-gap);
+    flex-shrink: 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-context-flex {
+    flex-grow: 0;
+}
+
+.rc-panel-title {
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.rc-panel-copy {
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--rc-muted-text);
+    white-space: normal;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-bottom-bar {
+    height: var(--rc-bottom-bar-height);
+    min-height: var(--rc-bottom-bar-height);
+    max-height: var(--rc-bottom-bar-height);
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--rc-card-alt);
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.rc-bottom-sheet {
+    display: none;
+    min-height: 240px;
+    max-height: 240px;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    border-radius: var(--rc-sheet-radius);
+    background-color: var(--rc-surface-card-overlay);
+}
+
+.rc-bottom-sheet-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.rc-sheet-header-info {
+    flex-grow: 1;
+    min-width: 0;
+    margin-right: 12px;
+}
+
+.rc-sheet-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.rc-sheet-copy {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--rc-muted-text);
+    white-space: normal;
+}
+
+.rc-panel-copy--compact {
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.rc-accordion-card {
+    margin-bottom: 6px;
+    padding: 6px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-surface-soft);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-accordion-toggle {
+    min-height: 26px;
+    font-size: 11px;
+    -unity-text-align: middle-left;
+}
+
+.rc-accordion-body {
+    margin-top: 4px;
+}
+
+.rc-sheet-toggle {
+    min-height: 32px;
+    min-width: 96px;
+}
+
+.rc-bottom-tab-bar {
+    flex-direction: row;
+    min-height: 44px;
+    padding: 8px;
+    flex-wrap: wrap;
+    overflow: hidden;
+}
+
+.rc-bottom-tab {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 36px;
+    margin-left: 2px;
+    margin-right: 2px;
+    white-space: normal;
+}
+
+.rc-bottom-tab--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-bottom-sheet-content {
+    flex-grow: 1;
+    padding: 12px;
+}
+
+.rc-bottom-sheet-body {
+    flex-grow: 1;
+}
+
+.rc-bottom-button {
+    min-width: 72px;
+    min-height: 32px;
+    margin-right: 6px;
+}
+
+.rc-bottom-chip {
+    min-width: 84px;
+    min-height: 32px;
+    margin-right: 6px;
+}
+
+.rc-speed-slider {
+    flex-grow: 1;
+    margin-left: 12px;
+}
+
+.rc-speed-value {
+    min-width: 36px;
+    margin-left: 8px;
+    font-size: 14px;
+    color: var(--rc-muted-text);
+}
+
+.rc-popup-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--rc-overlay-clear);
+}
+
+.rc-popup-card {
+    min-width: 360px;
+    max-width: 420px;
+    padding: 16px;
+    border-radius: var(--rc-radius-card);
+    background-color: var(--rc-card-alt);
+}
+
+.rc-popup-template-host {
+    margin-top: 8px;
+}
+
+.rc-popup-template-body {
+    margin-top: 4px;
+    padding: 10px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-surface-soft);
+}
+
+.rc-popup-template-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.rc-popup-template-line {
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--rc-muted-text);
+    white-space: normal;
+}
+
+.rc-popup-action-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.rc-popup-button {
+    min-width: 88px;
+    min-height: 36px;
+    margin-left: 8px;
+}
+
+.rc-popup-button--primary {
+    background-color: var(--rc-accent);
+    color: var(--rc-button-text-on-accent);
+}
+
+.rc-popup-button--danger {
+    background-color: var(--rc-button-bg-danger-strong);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-hidden {
+    display: none;
+}
+
+.rc-popup-layer--active {
+    background-color: var(--rc-overlay-scrim);
+}
+
+.rc-popup-placeholder {
+    margin-right: 12px;
+    margin-bottom: 56px;
+    font-size: 12px;
+    color: var(--rc-muted-text);
+}
+
+.rc-overlay-layer-host {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.rc-root--tablet .rc-top-status-bar {
+    min-height: 48px;
+    max-height: 48px;
+    height: 48px;
+}
+
+.rc-root--tablet .rc-nav-rail {
+    display: none;
+}
+
+.rc-root--tablet .rc-context-panel {
+    display: none;
+}
+
+.rc-root--tablet .rc-work-tab-bar {
+    display: none;
+}
+
+.rc-root--tablet .rc-work-panel {
+    display: none;
+}
+
+.rc-root--tablet .rc-split-handle {
+    display: none;
+}
+
+.rc-root--tablet .rc-main-content {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.rc-root--tablet .rc-main-split {
+    margin-top: 0;
+}
+
+.rc-root--tablet .rc-viewport-host {
+    margin-left: 0;
+}
+
+.rc-root--tablet .rc-cartesian-overlay-host {
+    width: 100%;
+}
+
+.rc-root--tablet .rc-viewport-toolbar-host {
+    width: auto;
+    max-width: none;
+}
+
+.rc-root--tablet .rc-panel-header {
+    display: none;
+}
+
+.rc-root--tablet .rc-bottom-sheet {
+    display: flex;
+    flex-direction: column;
+}
+
+.rc-root--tablet .rc-bottom-sheet--collapsed {
+    min-height: 72px;
+    max-height: 72px;
+}

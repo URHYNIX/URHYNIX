@@ -1,0 +1,147 @@
+/* Pendant V3 - Joint Jog: Phase 2B-2 first slice */
+.rc-joint-root {
+    flex-grow: 1;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-joint-header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    min-width: 0;
+}
+
+.rc-joint-mode-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+}
+
+.rc-joint-mode-button {
+    min-height: 32px;
+    margin-left: 6px;
+    margin-bottom: 4px;
+}
+
+.rc-joint-mode-button--active {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-joint-list {
+    margin-top: 12px;
+}
+
+.rc-joint-row {
+    flex-direction: column;
+    margin-bottom: 8px;
+    padding: 7px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-surface-row);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-joint-row-meta {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-joint-axis-label {
+    min-width: 26px;
+    margin-right: 6px;
+    font-size: 13px;
+    -unity-font-style: bold;
+}
+
+.rc-joint-step-button {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 30px;
+    margin-right: 4px;
+    font-size: 11px;
+}
+
+.rc-joint-slider-group {
+    flex-grow: 1;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 6px;
+    margin-right: 0;
+}
+
+.rc-joint-button-row {
+    flex-direction: row;
+    min-width: 0;
+    max-width: 100%;
+    margin-top: 6px;
+}
+
+.rc-joint-slider {
+    flex-grow: 1;
+}
+
+.rc-joint-limit {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--rc-muted-text);
+}
+
+.rc-joint-input {
+    width: 54px;
+    min-width: 54px;
+    margin-right: 6px;
+}
+
+.rc-joint-value {
+    flex-grow: 1;
+    min-width: 42px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+}
+
+.rc-joint-value--warning {
+    color: var(--rc-warning);
+}
+
+.rc-joint-footer-card {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-surface-row-strong);
+    min-width: 0;
+    max-width: 100%;
+}
+
+.rc-joint-action-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.rc-joint-action-button {
+    flex-grow: 1;
+    min-width: 72px;
+    min-height: 34px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    font-size: 11px;
+}
+
+.rc-joint-action-button--primary {
+    background-color: var(--rc-button-bg-active);
+    color: var(--rc-button-text-strong);
+}
+
+.rc-joint-action-button--danger {
+    background-color: var(--rc-button-bg-danger);
+    color: var(--rc-button-text-strong);
+}

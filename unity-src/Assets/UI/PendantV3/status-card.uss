@@ -1,0 +1,105 @@
+/* Pendant V3 - Status Card: Phase 2A-2 right-side status summary */
+.rc-status-card-root {
+    margin-bottom: var(--rc-gap);
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.rc-status-summary-card {
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: var(--rc-radius-lg);
+    background-color: var(--rc-surface-soft);
+}
+
+.rc-status-summary-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: var(--rc-title-text);
+}
+
+.rc-status-summary-card--safe {
+    background-color: var(--rc-status-success-bg);
+}
+
+.rc-status-summary-card--warning {
+    background-color: var(--rc-status-warning-bg);
+}
+
+.rc-status-summary-card--danger {
+    background-color: var(--rc-button-bg-danger-soft);
+}
+
+.rc-status-card-section {
+    margin-top: 10px;
+}
+
+.rc-status-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 28px;
+    margin-bottom: 4px;
+    min-width: 0;
+}
+
+.rc-status-key {
+    font-size: 11px;
+    color: var(--rc-muted-text);
+    margin-right: 6px;
+}
+
+.rc-status-value {
+    flex-grow: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--rc-title-text);
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+}
+
+.rc-status-value--default {
+    color: var(--rc-title-text);
+}
+
+.rc-status-value--muted {
+    color: var(--rc-muted-text);
+}
+
+.rc-status-value--success {
+    color: var(--rc-success);
+}
+
+.rc-status-value--warning {
+    color: var(--rc-warning);
+}
+
+.rc-status-value--danger {
+    color: var(--rc-danger);
+}
+
+.rc-status-divider {
+    height: 1px;
+    margin-top: 8px;
+    margin-bottom: 2px;
+    background-color: var(--rc-surface-raised-line);
+}
+
+.rc-status-inline-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    min-width: 0;
+}
+
+.rc-status-inline-button {
+    min-height: 24px;
+    min-width: 64px;
+    margin-left: 4px;
+    margin-bottom: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 10px;
+}

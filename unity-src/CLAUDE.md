@@ -1,0 +1,184 @@
+# KineTutor3D Claude Index
+
+KineTutor3D에서 Claude 계열 에이전트가 가장 먼저 읽는 루트 허브 문서입니다.
+핵심 규칙은 짧게 유지하고, 실제 작업은 하위 `CLAUDE.md`와 정식 레퍼런스로 내려가도록 구성합니다.
+
+## 저장소 경계
+- Write Repo: `.` (저장소 루트)
+
+## 시작 순서
+1. `AGENTS.md` 또는 `CLAUDE.md`
+2. `harness/REGISTRY.md` (하네스 및 자동화 지침 확인)
+3. 새 요청이거나 범위가 흐리면 `.claude/commands/intake.md` 또는 `.claude/skills/meta/task-intake-router/SKILL.md`
+4. `docs/ref/architecture-mermaid.md`
+5. `docs/ref/project-flow-code-review.md`
+6. `docs/ref/csharp-master-harness.md` (C# 생성/수정 시 상위 운영 규칙 및 헤더 규격)
+7. `docs/ref/code-patterns.md` (구현 디테일과 패턴)
+8. `docs/status/PRODUCT-DOC-BOARD.md`
+9. `docs/ref/PRD.md`
+10. `docs/ref/WIREFRAME.md`
+11. `docs/ref/PRODUCT-ROADMAP.md`
+12. `docs/ref/phase5-implementation-plan.md` (Phase 5 구현/검수 시)
+
+## 현재 구조 요약
+- 현재 씬 흐름은 `Boot -> Onboarding -> RobotLibrary -> {MathReadiness, Sandbox, RobotControl}` 입니다.
+- `RobotLibrary`가 메인 진입점입니다.
+- `AppController`는 Guided Lesson/MathReadiness의 퍼블릭 앱 facade입니다.
+- `SandboxSceneCoordinator`는 Sandbox 전용 독립 코디네이터입니다.
+- `RobotControlSceneCoordinator`는 멀티로봇 RobotControl facade입니다.
+- `RobotRenderer`는 시각화 facade입니다.
+- `Home`과 `Main`은 현재 구조 기준으로는 역사적 이름입니다. 최신 판단에는 사용하지 않습니다.
+
+## 핵심 규칙
+1. 모든 `.cs` 파일 최상단에 `<ai_context>` 헤더를 유지/관리합니다. (csharp-master-harness 참조)
+2. 기존 코드, 타입, 유틸리티를 우선 재사용합니다.
+3. `Math`, `Kinematics`, `Types`는 pure C# `double` 기반으로 유지합니다.
+4. 작업 완료 전 `harness/code-health-audit.md`를 참고하여 품질 게이트를 통과하는지 확인합니다.
+5. C# 수정 전에는 `docs/ref/csharp-master-harness.md`와 `docs/ref/code-patterns.md`를 읽고 운영 규칙과 구현 패턴을 맞춥니다.
+6. Unity 작업의 기본 도구는 `unityctl`입니다. `unityctl`에 없는 작업만 MCP로 폴백합니다.
+7. 문서와 코드가 다르면 현재 코드와 테스트 결과를 우선합니다.
+8. 하위 폴더 규칙이 바뀌면 가장 가까운 `AGENTS.md` 또는 `CLAUDE.md`를 같이 갱신합니다.
+9. 외부 범용 하네스는 운영 원칙과 템플릿 참고원으로만 사용합니다. 이 저장소의 SSOT는 계속 로컬 `AGENTS.md`, `CLAUDE.md`, `docs/ref/csharp-master-harness.md`입니다.
+10. 새 요청 분류, 영향 범위 축소, 완료 전 근거 점검, 세션 handoff는 `.claude/commands/`와 `.claude/skills/meta/`의 얇은 운영 루프를 사용하되, FR5 live 판단은 항상 로컬 status/ref 문서로 다시 내립니다.
+
+## RobotControl 구현 규율
+1. `RobotControl`은 full rewrite가 아니라 `구조적 재조립`으로 진행합니다.
+2. 문서 기준선은 메인에 유지하고, 실제 구현은 기능 브랜치에서 진행합니다. 권장 브랜치 패턴은 `codex/robotcontrol-*` 입니다.
+3. 구현 순서는 `셸 -> 필수 패널 -> 3D 차별화 -> UX 보강 -> Tablet` 순서를 기본으로 합니다.
+4. 각 구현 Phase는 `구현 -> 자기리뷰 -> unityctl 검증 -> 커밋` 순서를 강제로 지킵니다.
+5. 문서 업데이트는 종료 조건이 아닙니다. 문서 기준선을 갱신했다면 같은 세션에서 바로 다음 구현/검증 단위로 이어갑니다.
+6. 문서 업데이트가 있는 턴에는 최소 `다음 실행 단위 1개`를 진행합니다.
+7. 자기리뷰 체크포인트:
+   - 역할 경계 유지 (`App`, `UI`, `Visualization` 혼합 금지)
+   - 디자인 토큰 우회 금지
+   - `RobotControlV2` 시각 변경은 `UIDesignTokens.RobotControlV2`를 SSOT로 사용할 것
+   - authored-first 유지
+   - `필수 / 선택 / 제외` 범위 누수 금지
+   - 패널 비대화 금지
+8. `unityctl` 검증 기본 루프:
+   - `check --type compile`
+   - 관련 `test --mode edit`
+   - 필요 시 `play start`, `console get-entries`, `scene snapshot`, `screenshot capture`
+9. 각 Phase 커밋은 해당 범위만 포함합니다. unrelated 변경을 같이 묶지 않습니다.
+
+## FR5 Live 문서 운영 규칙
+1. FR5 live 관련 현재 판단은 항상 `docs/status/ACTIVE-WORK-INDEX.md`에서 시작합니다.
+2. 다음 운영 세션용 요약은 `docs/ref/product/ux/robotcontrol-next-session-handoff.md`만 봅니다.
+3. 현재 세션 체크는 `docs/ref/product/roadmap/fr5-live-field-checklist.md`만 봅니다.
+4. gripper 상세 절차와 성공패턴은 `docs/ref/product/roadmap/fr5-gripper-live-success-pattern.md`를 SSOT로 봅니다.
+5. tiny joint 상세 절차와 narrow verified scope는 `docs/ref/product/roadmap/fr5-tiny-joint-live-success-pattern.md`를 SSOT로 봅니다.
+6. 과거 현장 서사와 시행착오는 `docs/ref/product/roadmap/fr5-live-field-history.md`에만 둡니다. current checklist/handoff에는 다시 섞지 않습니다.
+7. `V1`, `V2`는 active 운영 표면이 아닙니다. 문서에는 `개발 목적`과 `이력`만 남기고, 현재판 판단 근거로 사용하지 않습니다.
+
+## Meta 운영 루프
+1. 요청 분류가 필요하면 `/intake`
+2. cross-module 또는 live-risk 변경 전에는 `/impact-map`
+3. 완료 선언 전에는 `/evidence-review`
+4. 세션을 넘길 때는 `/handoff`
+5. 이 루프는 범용 운영선이고, 실제 truth는 계속 `ACTIVE-WORK-INDEX`, 관련 roadmap, success pattern SSOT에서 확인합니다.
+
+## Unityctl Quickstart
+- 고정 경로:
+  `C:\Users\ezen601\Desktop\Jason\unityctl\src\Unityctl.Cli\bin\Debug\net10.0\unityctl.exe`
+- 프로젝트 경로:
+  `C:\Users\ezen601\Desktop\Jason\robotapp2`
+
+추천 세션 변수:
+
+```powershell
+$unityctl = 'C:\Users\ezen601\Desktop\Jason\unityctl\src\Unityctl.Cli\bin\Debug\net10.0\unityctl.exe'
+$project = 'C:\Users\ezen601\Desktop\Jason\robotapp2'
+```
+
+추천 첫 루프:
+
+```powershell
+& $unityctl status --project $project --wait --json
+& $unityctl check --project $project --type compile --json
+& $unityctl console get-entries --project $project --limit 50 --json
+```
+
+에이전트용 빠른 검증 스크립트:
+
+```bash
+bash scripts/unityctl-agent-verify.sh
+bash scripts/unityctl-agent-verify.sh --test-filter KineTutor3D.Tests.EditMode.RobotControlV3HardcodingGuardTests
+bash scripts/validate.sh --fast
+bash scripts/validate.sh --strict
+```
+
+V3 debug shortcut:
+
+```bash
+bash scripts/unityctl-v3-debug.sh runtime-summary
+bash scripts/unityctl-v3-debug.sh panel-summary
+bash scripts/unityctl-v3-debug.sh connect-default
+bash scripts/unityctl-v3-debug.sh refresh-evidence
+```
+
+자주 쓰는 작업 루프:
+- 컴파일 확인: `check --type compile`
+- EditMode 테스트: `test --mode edit`
+- PlayMode 테스트: `test --mode play`
+- 씬/오브젝트 확인: `scene open`, `scene hierarchy`, `scene snapshot`
+- Play 검증: `play start`, `console get-entries`, `play stop`
+- 런타임 조사: `exec`
+- UGUI 조사/조작: `ui find`, `ui get`, `ui toggle`, `ui input`
+
+## 작업별 링크 허브
+
+### 앱 런타임 / 씬 흐름
+- 기본 규칙: `Assets/Scripts/App/AGENTS.md`
+- 로컬 요약: `Assets/Scripts/App/CLAUDE.md`
+- 현재 전체 플로우: `docs/ref/project-flow-code-review.md`
+
+### RobotControl / 멀티로봇 / 실기 연동
+- **V3 티칭패드 설계 (UI Toolkit)**: `docs/ref/product/pendant-v3/README.md`
+- 공용 RobotControl 런타임: `Assets/Scripts/App/Fairino/CLAUDE.md`
+- FR5 실기 참고: `docs/ref/product/robots/fairino-fr5-integration-reference.md`
+- UR5e: `Assets/Scripts/App/UniversalRobots/CLAUDE.md`
+- Doosan: `Assets/Scripts/App/Doosan/CLAUDE.md`
+- Meca500: `Assets/Scripts/App/Mecademic/CLAUDE.md`
+- Hand tracking: `Assets/Scripts/App/HandTracking/CLAUDE.md`
+
+### UI / HUD / 온보딩 / 튜터 흐름
+- 기본 규칙: `Assets/Scripts/UI/AGENTS.md`
+- 로컬 요약: `Assets/Scripts/UI/CLAUDE.md`
+- UI 데이터 타입: `Assets/Scripts/UI/Data/CLAUDE.md`
+- 가이드 레슨 UX: `docs/ref/product/ux/guided-lesson.md`
+- Sandbox UX: `docs/ref/product/ux/sandbox.md`
+
+### Visualization / donor / gizmo / trail
+- 기본 규칙: `Assets/Scripts/Visualization/AGENTS.md`
+- 로컬 요약: `Assets/Scripts/Visualization/CLAUDE.md`
+- 공용 시각화 컴포넌트: `Assets/Scripts/Visualization/Shared/CLAUDE.md`
+
+### Editor 도구 / QA / unityctl exec helper
+- 에디터 도구 요약: `Assets/Editor/KineTutor3D/CLAUDE.md`
+- CLI helper 요약: `Assets/Editor/KineTutor3D/CliTools/CLAUDE.md`
+- Claude command/hook 운영 자산: `.claude/commands/CLAUDE.md`, `harness/REGISTRY.md`
+
+### 테스트
+- 테스트 루트: `Assets/Tests/CLAUDE.md`
+- EditMode 규칙: `Assets/Tests/EditMode/CLAUDE.md`
+- PlayMode 규칙: `Assets/Tests/PlayMode/CLAUDE.md`
+- CliTools 테스트: `Assets/Tests/EditMode/CliTools/CLAUDE.md`
+
+### 제품 문서 / 계획 / 상태
+- 상태 보드: `docs/status/PRODUCT-DOC-BOARD.md`
+- PRD: `docs/ref/PRD.md`
+- Wireframe: `docs/ref/WIREFRAME.md`
+- Roadmap: `docs/ref/PRODUCT-ROADMAP.md`
+- 현재 구현 범위: `docs/ref/product/roadmap/current-feature-checklist.md`
+
+## 최신 기준으로 봐야 하는 문서
+- 시스템 전체 구조: `docs/ref/architecture-mermaid.md`
+- 코드 리뷰 기준 플로우: `docs/ref/project-flow-code-review.md`
+- C# 상위 운영 규칙: `docs/ref/csharp-master-harness.md`
+- 상세 다이어그램: `docs/ref/architecture-diagrams.md`
+- C# 패턴: `docs/ref/code-patterns.md`
+
+## 레거시/히스토리 주의
+- `Home`, `Main`, `HomeContinueHub`, `MainLearningTabs`가 보이는 설명은 대체로 히스토리성 기록입니다.
+- 현재 구조 판단은 반드시 `SceneCatalog`, `BootSceneRouter`, `RobotLibrary`, `SandboxSceneCoordinator`, `RobotControlSceneCoordinator` 기준으로 합니다.
+- 오래된 이름이 남은 문서를 발견하면 최신 구조 기준으로 갱신하거나, 최소한 historical note를 남깁니다.

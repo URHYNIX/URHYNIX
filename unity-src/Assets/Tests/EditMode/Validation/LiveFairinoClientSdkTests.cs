@@ -1,0 +1,102 @@
+﻿// Folder: Tests/EditMode - EditMode tests for runtime, math, and tooling behaviors.
+// LiveFairinoClientSdk 동작을 검증하는 EditMode 테스트입니다.
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using KineTutor3D.App.Fairino;
+using NUnit.Framework;
+
+namespace KineTutor3D.Tests.EditMode
+{
+    public class LiveFairinoClientSdkTests
+    {
+        private const string DllPath = "Assets/Plugins/Fairino/libfairino.dll";
+
+        [Test]
+        public void FairinoSdk_RobotTypeExists()
+        {
+            var assembly = LoadSdkAssembly();
+            var robotType = assembly.GetType("fairino.Robot");
+
+            Assert.That(robotType, Is.Not.Null, "fairino.Robot type should exist in libfairino.dll");
+        }
+
+        [Test]
+        public void FairinoSdk_CompatibilityProbeDetectsManagedAssembly()
+        {
+            var report = FairinoSdkCompatibilityProbe.Probe();
+
+            Assert.That(report.assemblyFound, Is.True, "probe should find libfairino assembly");
+            Assert.That(report.managedAssembly, Is.True, "repo libfairino.dll should be a managed .NET assembly");
+            Assert.That(report.robotTypeFound, Is.True, "probe should find fairino.Robot");
+            Assert.That(report.sdkRuntime, Is.Not.Empty);
+        }
+
+        [Test]
+        public void FairinoSdk_RequiredMethodsExist()
+        {
+            var assembly = LoadSdkAssembly();
+            var robotType = assembly.GetType("fairino.Robot");
+            Assert.That(robotType, Is.Not.Null);
+
+            var requiredMethods = new[]
+            {
+                "RPC",
+                "RobotEnable",
+                "MoveJ",
+                "MoveL",
+                "ServoJ",
+                "GetActualJointPosDegree",
+                "GetActualTCPPose",
+                "GetRobotRealTimeState",
+                "GetSDKVersion",
+                "GetSoftwareVersion",
+                "GetFirmwareVersion",
+                "GetSafetyCode",
+                "SetRobotRealtimeStateSamplePeriod",
+                "GetRobotRealtimeStateSamplePeriod",
+                "MotionQueueClear",
+                "StopMotion",
+                "DragTeachSwitch",
+                "IsInDragTeach",
+                "GetRobotErrorCode",
+                "ResetAllError",
+                "GetActualTCPNum",
+                "GetActualWObjNum"
+            };
+
+            var methodNames = robotType.GetMethods().Select(m => m.Name).ToHashSet();
+            foreach (var methodName in requiredMethods)
+            {
+                Assert.That(methodNames.Contains(methodName), Is.True, $"Method '{methodName}' should exist in fairino.Robot");
+            }
+
+            Assert.That(
+                methodNames.Contains("SetReConnectParam") || methodNames.Contains("SetReconnectParam") || methodNames.Contains("GetReconnectState"),
+                Is.True,
+                "Reconnect-related API should exist in fairino.Robot");
+        }
+
+        [Test]
+        public void FairinoSdk_GetGripperConfig_UsesDeviceIdCompanyDeviceSoftversionOrder()
+        {
+            var assembly = LoadSdkAssembly();
+            var robotType = assembly.GetType("fairino.Robot");
+            Assert.That(robotType, Is.Not.Null);
+
+            var method = robotType.GetMethods().SingleOrDefault(m => m.Name == "GetGripperConfig");
+            Assert.That(method, Is.Not.Null, "GetGripperConfig should exist in fairino.Robot");
+
+            var parameters = method.GetParameters();
+            Assert.That(parameters, Has.Length.EqualTo(4));
+            Assert.That(parameters.Select(p => p.Name).ToArray(), Is.EqualTo(new[] { "deviceID", "company", "device", "softvesion" }));
+            Assert.That(parameters.All(p => p.ParameterType.IsByRef), Is.True, "GetGripperConfig should use ref int parameters");
+        }
+
+        private static Assembly LoadSdkAssembly()
+        {
+            Assert.That(File.Exists(DllPath), Is.True, $"{DllPath} should exist");
+            return Assembly.LoadFrom(DllPath);
+        }
+    }
+}
