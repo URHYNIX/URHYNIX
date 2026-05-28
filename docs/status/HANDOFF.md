@@ -26,6 +26,7 @@
 | 2 | `kim@192.168.0.138`에서 **`/etc/urhynix.env`** 작성 (service_role 키 주입) | 박태진 | 1단계 후 |
 | 3 | **`tb3-go`** (Mac/Ubuntu) — bringup + ros_tcp + arduino_bridge + 검증까지 한 방 | 박태진 | 2단계 후 |
 | 4 | PIR 손 흔들기 → `sb-tail` 로 `events` row +1 확인 → **Day-1 완전 PASS** 🎉 | 다 같이 | 3단계 후 |
+| 5 | LDR 가리기 (어두움 만들기) → `sb-dark` 로 event_type='dark' row +1 확인 | 다 같이 | 4단계 후 (선택) |
 
 ### 2단계: `/etc/urhynix.env` 작성 절차
 

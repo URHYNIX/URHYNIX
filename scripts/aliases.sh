@@ -53,6 +53,15 @@ alias sb-events="sb-sql \"select id, ts, event_type, severity, x, y, raw_payload
 alias sb-count='sb-sql "select count(*) as events_count from public.events"'
 alias sb-tables="sb-sql \"select table_name from information_schema.tables where table_schema='public' order by table_name\""
 alias sb-session='sb-sql "select session_id, started_at, scenario, notes from public.session_meta"'
+sb-by-type() {
+  sb-sql "select event_type, count(*) as n from public.events group by event_type order by n desc"
+}
+sb-dark() {
+  sb-sql "select id, ts, severity, raw_payload->>'ldr' as ldr from public.events where event_type='dark' order by ts desc limit 5"
+}
+sb-pir() {
+  sb-sql "select id, ts, severity, raw_payload->>'label' as label from public.events where event_type='pir' order by ts desc limit 5"
+}
 
 sb-tail() {
   # events 한 화면: 총 수 + 최근 5건
@@ -95,6 +104,9 @@ Supabase Management API  (needs SUPABASE_ACCESS_TOKEN in ~/.tb3rc)
   sb-tables            list public tables
   sb-session           list session_meta rows
   sb-tail              ★ count + last 5 (한 화면 요약)
+  sb-by-type           이벤트 타입별 카운트 (pir/dark/...)
+  sb-dark              최근 dark(어두움) 이벤트 5건
+  sb-pir               최근 pir(인체감지) 이벤트 5건
 
 Robot (tb3.sh)
   tb3-help             robot helper menu (myip/ip/ssh/vnc/port/up/down/bridge/arduino/poweroff/unity)

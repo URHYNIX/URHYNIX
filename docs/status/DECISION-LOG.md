@@ -211,3 +211,25 @@
   - **publishable key** = 안전 공개 가능. 단 RLS ON 상태라 외부 anon 접근은 의미 없음 (정책 추가 시 효력).
   - **access token `sbp_…`** = 일회용 작업 토큰. 2026-05-28 작업 후 https://supabase.com/dashboard/account/tokens 에서 revoke 권장.
 - RLS 정책: 현재 4테이블 모두 RLS ON · 정책 0개. service_role만 R/W 가능. 추후 시연 dashboard용 SELECT policy는 별도 결정.
+
+### LDR(조도) 이벤트 트리거 규칙 — edge-trigger + 히스테리시스 (2026-05-28)
+
+- 결정: `arduino_bridge.py`가 LDR 시리얼 라인 (`[LDR] A0=<v>`)을 받을 때 **A0 < 200 으로 처음 진입**하는 순간 한 번만 `events` 테이블에 `event_type='dark', severity=1` 로 insert. **A0 >= 250 으로 복귀**하면 내부 state reset(insert 없음). 같은 어두움 상태 안에선 중복 insert 없음.
+- 근거:
+  - Arduino 스케치 임계값: `<200 dark / <600 dim / <900 bright / else very bright` (PIR+LDR 스케치).
+  - LDR은 2초 주기로 시리얼 발행 → 어두운 상태가 계속되면 매 2초마다 row 1건 → 시연 30분이면 ~900 row → DB가 dark로 가득 차고 신호 노이즈 비율 악화.
+  - edge-trigger(진입 1회만) + 히스테리시스(`enter=200`, `exit=250`)로 chatter 방지.
+  - severity: PIR(=3, 침입)보다 낮은 `1`로 잠금 (어두움 = 야간 모드 진입 신호 정도의 중요도).
+- 트리거 흐름:
+  ```
+  A0=190 (dark) → dark_state=False → insert event_type='dark' → dark_state=True
+  A0=180 (dark) → dark_state=True → insert 안 함 (중복 방지)
+  A0=260 (dim)  → A0>=250 + dark_state=True → state=False (insert 없음)
+  A0=190 (dark) → dark_state=False → insert event_type='dark' → dark_state=True
+  ```
+- 영향:
+  - `scripts/arduino_bridge.py`에 `LDR_DARK_ENTER=200`, `LDR_DARK_EXIT=250`, `self._dark_state` 추가.
+  - `scripts/aliases.sh`에 `sb-by-type` / `sb-dark` / `sb-pir` 신규 alias 3개. 시연 시 이벤트 타입별 통계 한 줄.
+  - `SCHEMA.md`의 `event_type` enum은 이미 `dark/pir/noise/fire`를 포함하므로 변경 없음.
+  - `raw_payload`에 `label="dark"`, `ldr=<A0 raw>`, `ts_unix`, `have_odom` 저장 → 후속 분석에서 어두운 정도(A0 값) 복원 가능.
+- 잔여: 시연 시 darkening 속도(LDR 직접 가림)에 따라 `LDR_DARK_ENTER=200`이 너무 민감하거나 둔할 수 있음 → 실측 후 임계값 미세조정. 임계값은 코드 상단 상수 두 줄만 변경.

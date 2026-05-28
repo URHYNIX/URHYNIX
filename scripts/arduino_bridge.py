@@ -55,6 +55,10 @@ RE_MOTION = re.compile(r"^\[MOTION\]")
 RE_CLEAR = re.compile(r"^\[CLEAR")
 RE_LDR = re.compile(r"^\[LDR\]\s+A0=(\d+)")
 
+# LDR edge-trigger thresholds (hysteresis to avoid chatter)
+LDR_DARK_ENTER = 200   # A0 < 200  → "어두움 진입" → events insert (event_type='dark')
+LDR_DARK_EXIT = 250    # A0 >= 250 → state reset (insert 없음, 다음 진입 대비)
+
 
 def _load_env_file(path="/etc/urhynix.env"):
     """dotenv-style loader. Lines: KEY=value. Comments with #. Quotes stripped."""
@@ -105,6 +109,9 @@ class ArduinoBridge(Node):
         self._last_yaw = 0.0
         self._have_odom = False
         self.create_subscription(Odometry, "/odom", self._on_odom, 10)
+
+        # LDR edge-trigger state
+        self._dark_state = False
 
         # serial
         try:
@@ -210,6 +217,28 @@ class ArduinoBridge(Node):
                     try:
                         v = int(m.group(1))
                         self.pub_ldr.publish(Int32(data=v))
+                        # edge-trigger 'dark' event (hysteresis)
+                        if not self._dark_state and v < LDR_DARK_ENTER:
+                            self._dark_state = True
+                            ok, info = self._insert_event(
+                                "dark",
+                                1,
+                                {
+                                    "source": "arduino_bridge",
+                                    "label": "dark",
+                                    "ldr": v,
+                                    "ts_unix": int(time.time()),
+                                    "have_odom": self._have_odom,
+                                },
+                            )
+                            self.get_logger().info(
+                                f"LDR dark enter (A0={v}) · DB insert: {info}"
+                            )
+                        elif self._dark_state and v >= LDR_DARK_EXIT:
+                            self._dark_state = False
+                            self.get_logger().info(
+                                f"LDR dark exit (A0={v}) — state reset"
+                            )
                     except ValueError:
                         pass
 
