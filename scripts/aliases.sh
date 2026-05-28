@@ -28,6 +28,19 @@ alias urhynix-pull='git -C "$TB3_REPO_ROOT" pull'
 alias urhynix-st='git -C "$TB3_REPO_ROOT" status'
 alias urhynix-log='git -C "$TB3_REPO_ROOT" log --oneline -20'
 
+# Shell reload (source ~/.zshrc + 한 줄 검증)
+reload() {
+  if [ -n "$ZSH_VERSION" ]; then
+    source ~/.zshrc 2>/dev/null
+  else
+    source ~/.bashrc 2>/dev/null
+  fi
+  printf "reloaded · PWD=%s · tb3-go=%s · sb-count=%s\n" \
+    "${TB3_PASSWORD:+set}" \
+    "$(type tb3-go 2>/dev/null | head -1 | awk '{print $4}')" \
+    "$(type sb-count 2>/dev/null | head -1 | awk '{print $NF}')"
+}
+
 # ─────────────────────────────────────────────────────────────
 # Supabase Management API helpers
 #   SUPABASE_ACCESS_TOKEN  required (put in ~/.tb3rc)
@@ -91,11 +104,12 @@ Documents
   urhynix-decisions    tail -200 DECISION-LOG.md
   urhynix-schema       less SCHEMA.md
 
-Board / Git
+Board / Git / Shell
   urhynix-board        rebuild docs/dev-plan-bundle.html
   urhynix-pull         git pull
   urhynix-st           git status
   urhynix-log          git log --oneline -20
+  reload               ★ source ~/.zshrc + 환경 한 줄 검증
 
 Supabase Management API  (needs SUPABASE_ACCESS_TOKEN in ~/.tb3rc)
   sb-sql "<SQL>"       run arbitrary SQL on $SUPABASE_PROJECT_REF
