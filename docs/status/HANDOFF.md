@@ -23,8 +23,9 @@
 |---|---|---|---|
 | 0 | ~~DB 선정 + 마이그레이션~~ | 김주영 | ✅ 완료 (Supabase `ueupkrxwybuuqxflstvg`, 4테이블 + seed) |
 | 1 | **로봇 메인 스위치 ON** (라즈베리파이 셧다운 상태) → 30초 부팅 대기 | 사람 (현장) | 🟥 대기 |
-| 2 | `kim@192.168.0.138`에서 **`/etc/urhynix.env`** 작성 (service_role 키 주입) | 박태진 | 1단계 후 |
-| 3 | **`tb3-go`** (Mac/Ubuntu) — bringup + ros_tcp + arduino_bridge + 검증까지 한 방 | 박태진 | 2단계 후 |
+| 2 | `kim@192.168.0.138`에서 **`/etc/urhynix.env`** 작성 (service_role 키 주입) — **2026-05-28 작성 완료** | 박태진 | ✅ done |
+| 2.5 | **`tb3-key-setup`** 한 번 (Mac/Ubuntu 머신마다 1회, 이후 비번 prompt 영구 사라짐) | 머신 주인 | 머신당 1회 |
+| 3 | **`tb3-go`** (Mac/Ubuntu) — bringup + ros_tcp + arduino_bridge + 검증까지 한 방 | 박태진 | 2.5단계 후 |
 | 4 | PIR 손 흔들기 → `sb-tail` 로 `events` row +1 확인 → **Day-1 완전 PASS** 🎉 | 다 같이 | 3단계 후 |
 | 5 | LDR 가리기 (어두움 만들기) → `sb-dark` 로 event_type='dark' row +1 확인 | 다 같이 | 4단계 후 (선택) |
 

@@ -21,13 +21,24 @@ git clone https://github.com/URHYNIX/URHYNIX.git ~/URHYNIX
 echo 'source ~/URHYNIX/scripts/tb3.sh' >> ~/.zshrc    # macOS
 # 또는
 echo 'source ~/URHYNIX/scripts/tb3.sh' >> ~/.bashrc   # Ubuntu
-source ~/.zshrc   # or ~/.bashrc
 
-# 3) Unity Hub 설치 + Editor 6000.0.64f1 설치
+# 3) 비밀번호/토큰 외부 분리
+cat > ~/.tb3rc <<'EOF'
+export TB3_PASSWORD='1234'
+export TB3_VNC_PASSWORD='123456'
+export SUPABASE_ACCESS_TOKEN='<your-token>'
+EOF
+chmod 600 ~/.tb3rc
+
+# 4) 새 셸 열고 SSH 공개키 등록 (★ 한 번만, 이후 비번 prompt 영구 사라짐)
+source ~/.zshrc   # or ~/.bashrc
+tb3-key-setup     # ssh-copy-id 한 방 + 검증
+
+# 5) Unity Hub 설치 + Editor 6000.0.64f1 설치
 #    https://unity.com/download
 #    Hub > Installs > 6000.0.64f1 (Universal Render Pipeline 템플릿 호환)
 
-# 4) Unity Hub > Open > URHYNIX/unity-smoke 폴더 선택
+# 6) Unity Hub > Open > URHYNIX/unity-smoke 폴더 선택
 #    첫 실행 시 Library/ 자동 재생성 (~5-10분)
 ```
 

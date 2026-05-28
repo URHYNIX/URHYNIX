@@ -198,6 +198,27 @@ tb3-unity() {
   echo "Unity launching → log: /tmp/unity-tb3-smoke.log"
 }
 
+tb3-key-setup() {
+  # 한 번만 실행: Mac/Linux ed25519 공개키를 로봇에 등록 → 이후 비번 prompt 사라짐
+  local ip; ip=$(tb3-ip) || return 1
+  if [ ! -f "$HOME/.ssh/id_ed25519.pub" ]; then
+    echo "→ generating new ed25519 key (no passphrase)"
+    ssh-keygen -t ed25519 -N '' -f "$HOME/.ssh/id_ed25519" || return $?
+  fi
+  echo "→ ssh-copy-id to $TB3_USER@$ip (will prompt for robot password once)"
+  expect <<EXP
+set timeout 30
+spawn ssh-copy-id -i $HOME/.ssh/id_ed25519.pub -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password -o PubkeyAuthentication=no $TB3_USER@$ip
+expect {
+  "password:" { send "$TB3_PASSWORD\r"; exp_continue }
+  timeout { exit 2 }
+  eof
+}
+EXP
+  echo "→ verify passwordless login"
+  ssh -o BatchMode=yes -o ConnectTimeout=6 "$TB3_USER@$ip" 'echo "OK from $(hostname)"' 2>&1 | head -3
+}
+
 tb3-go() {
   # 한 방 풀-기동: bringup + ros_tcp + arduino_bridge + 검증
   echo "▶ tb3-up (bringup + ros_tcp_endpoint)"
@@ -248,6 +269,7 @@ URHYNIX TurtleBot helpers ($(uname -s))
   tb3-go         ★ up + wait + bridge + verify (one-shot full boot)
   tb3-restart    ★ down + go (clean restart)
   tb3-logs       Tail bringup/ros_tcp/arduino_bridge logs + tmux ls
+  tb3-key-setup  ★ ssh-copy-id 한 번 (이후 비번 prompt 영구 사라짐)
 
   tb3-unity      Launch Unity Editor on $TB3_UNITY_PROJECT (auto-Play)
 

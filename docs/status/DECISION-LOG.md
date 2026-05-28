@@ -233,3 +233,23 @@
   - `SCHEMA.md`의 `event_type` enum은 이미 `dark/pir/noise/fire`를 포함하므로 변경 없음.
   - `raw_payload`에 `label="dark"`, `ldr=<A0 raw>`, `ts_unix`, `have_odom` 저장 → 후속 분석에서 어두운 정도(A0 값) 복원 가능.
 - 잔여: 시연 시 darkening 속도(LDR 직접 가림)에 따라 `LDR_DARK_ENTER=200`이 너무 민감하거나 둔할 수 있음 → 실측 후 임계값 미세조정. 임계값은 코드 상단 상수 두 줄만 변경.
+
+### SSH 공개키 인증 채택 — expect+비번 의존 영구 제거 (2026-05-28)
+
+- 결정: Mac/Linux 머신의 ed25519 공개키를 로봇 `kim@192.168.0.138`의 `~/.ssh/authorized_keys`에 등록한다. 이후 모든 SSH/SCP 호출이 비번 prompt 없이 즉시 통과하며, expect의 password 처리 의존을 거의 0으로 줄인다.
+- 근거:
+  - 2026-05-28 사용자 실측에서 `tb3-go` 흐름이 expect heredoc + send 자동 입력으로 처리되긴 했으나, 화면에 password prompt가 일부 노출되고 사용자가 무의식적으로 키 입력을 추가하면 zsh 명령 라인으로 흘러나가 `command not found: 1234` 같은 부작용 발생.
+  - 더 근본적으로 일부 셸 상태에서 `$TB3_PASSWORD`가 빈 값으로 expect에 expand되어 자동 입력 실패 → `Connection refused` 연쇄.
+  - 공개키 인증은 (a) 비번 prompt 자체가 발생하지 않음 (b) `BatchMode=yes`로 비대화형 호출 가능 (c) 키 분실 시 robot 쪽 authorized_keys만 정리하면 회수 가능.
+- 적용:
+  - Mac: `ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519` (이미 있으면 재사용) + `ssh-copy-id -i ~/.ssh/id_ed25519.pub kim@192.168.0.138`.
+  - 검증: `ssh -o BatchMode=yes kim@192.168.0.138 hostname` → `kim-desktop` 무대화형 응답.
+  - 헬퍼: `scripts/tb3.sh`에 `tb3-key-setup` 함수 신설 — 키 생성/검사 + ssh-copy-id + 검증을 한 줄로.
+- 영향:
+  - `tb3-go` / `tb3-restart` / `tb3-bridge` / `tb3-down` / `tb3-poweroff` / `tb3-arduino` / `tb3-logs` 모두 password 무관하게 동작.
+  - `~/.tb3rc`의 `TB3_PASSWORD`는 (a) 비상시 expect fallback (b) `tb3-key-setup` 첫 ssh-copy-id 호출 용도로만 의미.
+  - 협업자 (Ubuntu) 첫 setup 단계에 `tb3-key-setup` 한 줄 추가.
+  - `HANDOFF.md` Top 1을 (1) 메인 스위치 ON → (2) `tb3-go` → (3) `tb3-unity` → (4) PIR/LDR → `sb-tail` 검증 4단계로 단순화. SSH key 미등록 머신만 (0) `tb3-key-setup` 한 번 선행.
+- 보안:
+  - 키는 passphrase 없이 생성됨 — 개인 머신 전제. 공용 PC에선 passphrase 사용 권장 + `ssh-agent`에 일시 add.
+  - 키 회수: 로봇에서 `sed -i '/<MAC public key fingerprint>/d' ~/.ssh/authorized_keys`.
