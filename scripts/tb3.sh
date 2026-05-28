@@ -198,6 +198,37 @@ tb3-unity() {
   echo "Unity launching → log: /tmp/unity-tb3-smoke.log"
 }
 
+tb3-go() {
+  # 한 방 풀-기동: bringup + ros_tcp + arduino_bridge + 검증
+  echo "▶ tb3-up (bringup + ros_tcp_endpoint)"
+  tb3-up || return $?
+  echo "▶ wait 12s for ros_tcp listen..."
+  sleep 12
+  echo "▶ tb3-bridge (arduino → ROS2 + Supabase)"
+  tb3-bridge
+  echo "▶ verify TCP 10000"
+  tb3-port
+}
+
+tb3-restart() {
+  echo "▶ tb3-down"
+  tb3-down
+  tb3-go
+}
+
+tb3-logs() {
+  # 양쪽 tmux 로그 + 세션 한 화면
+  local ip; ip=$(tb3-ip) || return 1
+  expect <<EXP
+set timeout 15
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "echo --TMUX--; tmux ls 2>/dev/null || echo NO_TMUX; echo; echo --BRINGUP--; tail -15 /tmp/bringup.log 2>/dev/null; echo; echo --ROS_TCP--; tail -15 /tmp/ros_tcp_endpoint.log 2>/dev/null; echo; echo --BRIDGE--; tail -15 /tmp/arduino_bridge.log 2>/dev/null"}
+expect {
+  "password:" { send "$TB3_PASSWORD\r"; exp_continue }
+  eof
+}
+EXP
+}
+
 tb3-help() {
   cat <<EOF
 URHYNIX TurtleBot helpers ($(uname -s))
@@ -213,6 +244,10 @@ URHYNIX TurtleBot helpers ($(uname -s))
   tb3-bridge     Start Arduino → ROS2 bridge node on robot
   tb3-arduino    8-sec raw serial capture from /dev/tb3_arduino
   tb3-poweroff   sudo shutdown -h now (asks for confirmation)
+
+  tb3-go         ★ up + wait + bridge + verify (one-shot full boot)
+  tb3-restart    ★ down + go (clean restart)
+  tb3-logs       Tail bringup/ros_tcp/arduino_bridge logs + tmux ls
 
   tb3-unity      Launch Unity Editor on $TB3_UNITY_PROJECT (auto-Play)
 

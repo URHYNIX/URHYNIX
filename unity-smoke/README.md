@@ -34,11 +34,18 @@ source ~/.zshrc   # or ~/.bashrc
 ## 매 세션 실행
 
 ```bash
-tb3-myip          # 내 LAN IP 재확인 (DHCP)
-tb3-ip            # 로봇 IP 발견 (MAC 기반)
-tb3-up            # bringup + ros_tcp_endpoint tmux 재기동
-tb3-bridge        # 아두이노 → ROS2 토픽 브리지 시작
-tb3-unity         # Unity Editor 실행 (자동 Play 진입)
+tb3-go            # ★ up + wait + bridge + verify 한 줄
+tb3-unity         # Unity Editor 실행 (자동 Play)
+sb-tail           # events 총 수 + 최근 5건 (PIR 손 흔든 뒤 확인)
+```
+
+세부 명령 (필요 시):
+
+```bash
+tb3-myip          # 내 LAN IP (DHCP)
+tb3-ip            # 로봇 IP (MAC 기반)
+tb3-restart       # down + go (깨끗한 재기동)
+tb3-logs          # bringup / ros_tcp / arduino_bridge 로그 한 화면
 ```
 
 화면 가운데 패널에 **● 전체 LIVE** (녹) / **◐ 부분 LIVE** (노) / **○ 연결 대기** (주황) 표시.
