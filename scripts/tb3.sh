@@ -218,5 +218,10 @@ URHYNIX TurtleBot helpers ($(uname -s))
 
 Env overrides: TB3_USER, TB3_PASSWORD, TB3_ROBOT_IP_HINT, TB3_LAN_CIDR,
                TB3_UNITY_PROJECT, TB3_UNITY_BIN
+
+Additional URHYNIX aliases: run \`urhynix-help\`
 EOF
 }
+
+# ─────── auto-load URHYNIX aliases (urhynix-*, sb-*) ───────
+[ -f "$TB3_REPO_ROOT/scripts/aliases.sh" ] && . "$TB3_REPO_ROOT/scripts/aliases.sh"

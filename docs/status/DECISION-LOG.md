@@ -189,3 +189,25 @@
   - `SCHEMA.md` 상단·Open Questions에 "DB 미선정 (Day-1 차단)" 명시.
   - `arduino-flash` 스킬 마지막에 "RPi→DB 단계는 DB 선정 후 별 스킬" 노트 추가.
 - 잠금: 본 결정은 "DB 미선정"을 **명시적으로 잠그는 결정**. 다음 세션에서 옵션 1/2/3 중 하나로 전환되는 즉시 새 DECISION 항목으로 갱신.
+
+### DB 선정 완료 — 신규 Supabase `ueupkrxwybuuqxflstvg` (옵션 B + 트위스트) (2026-05-28)
+
+- 결정: URHYNIX `events`/`session_meta`/`dispatches`/`camera_captures` 4테이블은 **신규 Supabase 프로젝트 `ueupkrxwybuuqxflstvg`** (region ap-northeast-1 Tokyo, org `uisuqsaynxoedcsuikqc`)에 잠근다. 기존 시도(`oucgzkbqrzbwxxffmmqt` mungmungfit)는 **egress quota 초과**로 외부 REST가 HTTP 402로 차단되어 폐기.
+- 근거:
+  - 2026-05-28 외부 진단: `https://ueupkrxwybuuqxflstvg.supabase.co/rest/v1/` HTTP 401 `No API key found` = endpoint 살아있음 + quota 깨끗.
+  - Supabase access token `sbp_…` 으로 `supabase projects list` 통과 → org 권한 확인.
+  - Management API SQL endpoint `POST https://api.supabase.com/v1/projects/{ref}/database/query`로 마이그레이션 적용 성공 (HTTP 201, 4 테이블 + seed 1건 확인).
+- 외부 REST insert 통로:
+  - **publishable key** (`sb_publishable_bB5OpwyxD3-9o41kgcSY8g_tDgiCARM`) → RLS auto-on 상태에서 INSERT `HTTP 401 code 42501 RLS violation` (정상 보안).
+  - **service_role legacy JWT** → INSERT `HTTP 201` 정상 (RLS 우회). 새 row `c8c389b9-a5ee-4054-87fa-0203454a5d11` 확인.
+- 영향:
+  - `db/migrations/2026-05-27_init_security.sql` 헤더의 대상 ref를 신규 프로젝트로 갱신.
+  - `scripts/arduino_bridge.py` default `SUPABASE_URL`을 `https://ueupkrxwybuuqxflstvg.supabase.co`로 갱신. `SUPABASE_KEY`는 RPi `/etc/urhynix.env`에만 service_role 값으로 주입 (commit 금지).
+  - `SCHEMA.md` 상단 "저장소 미선정" 경고 해소.
+  - `PROJECT-STATUS.md` Evidence Status에 DB 선정 행 추가.
+  - `HANDOFF.md` Top 1을 (1) RPi env 작성 → (2) tb3-up → (3) tb3-bridge → (4) PIR row insert 검증 4단계로 재정렬.
+- 키 운영 룰 (2026-05-28 잠금):
+  - **service_role legacy JWT** = secret. RPi `/etc/urhynix.env`에만, 절대 repo·HTML 보드·Slack에 박지 않음.
+  - **publishable key** = 안전 공개 가능. 단 RLS ON 상태라 외부 anon 접근은 의미 없음 (정책 추가 시 효력).
+  - **access token `sbp_…`** = 일회용 작업 토큰. 2026-05-28 작업 후 https://supabase.com/dashboard/account/tokens 에서 revoke 권장.
+- RLS 정책: 현재 4테이블 모두 RLS ON · 정책 0개. service_role만 R/W 가능. 추후 시연 dashboard용 SELECT policy는 별도 결정.

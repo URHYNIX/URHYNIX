@@ -99,7 +99,9 @@ Last updated: 2026-05-28
 ### Blockers
 - **팀 Slack 채널 봇 권한 부족**: 채널 `C0B5Q43A27R`에 Claude 봇 멤버 초대 필요. 그때까지 결정 공지는 본인 DM으로만 발송 가능.
   - 안전한 다음 행동: 본인 DM으로 받은 메시지를 수동으로 팀 채널에 복붙해 공유.
-- **DB 미선정 — Day-1 박태진 잔여 작업 차단 (2026-05-28)**: `events` 테이블이 들어갈 Supabase 프로젝트/스키마 또는 로컬 Postgres가 미정. 다음 세션 첫 액션으로 격상. 옵션 3가지(신규 Supabase `urhynix` / `vibe` 스키마 추가 / RPi 로컬 Postgres)는 DECISION-LOG 2026-05-28 "DB 선정 보류"에 잠금.
+- ~~DB 미선정~~ → ✅ **해소 (2026-05-28)**: Supabase `ueupkrxwybuuqxflstvg` 잠금, 마이그레이션 적용 완료. DECISION-LOG "DB 선정 완료".
+- **로봇 전원 OFF (2026-05-28)** — 라즈베리파이 셧다운 + LiDAR 정지를 위해 메인 스위치 OFF 상태. end-to-end PIR→insert 테스트는 로봇 부팅 후 진행. 절차: 메인 스위치 ON → 30s 부팅 → `tb3-up && tb3-bridge` → PIR 손 흔들기 → `events` row +1 확인.
+- **RPi `/etc/urhynix.env` 미작성 (2026-05-28)** — 로봇 부팅 후 한 번만 작성 필요 (`SUPABASE_URL`, `SUPABASE_KEY=service_role JWT`). 자세한 내용: HANDOFF Top 1.
 - 그 외 미해결 결정: **none** (방향·하드웨어·역할·Day-1 분담·정합성은 모두 잠금)
 
 ### Unfinished decisions
@@ -150,5 +152,5 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | `arduino-flash` 스킬 등록 | ✅ | `.claude/skills/arduino-flash/SKILL.md` + README Embedded/Hardware 표 추가. 센서 4종 반복 플래시 표준화 |
 | LDR(조도) 센서 A0 정렬 검증 | ✅ | 2026-05-28 LDR + 10kΩ 분압회로를 SSOT 일치 핀(A0)으로 재배선·재플래시·재캡처. 시리얼 `[LDR] A0=29~214` 진동으로 빛 변화 추종 + PIR 모션 동시 동작 충돌 없음 확인. 잔여: PIR=D7→D2 정렬 |
 | RPi USB serial 식별 + 권한 영구화 | ✅ | 2026-05-28 `/dev/ttyACM0`=OpenCR · `/dev/ttyACM1`=Arduino UNO(vendor 2341) 분리 확인. `usermod -aG dialout kim` + `/etc/udev/rules.d/99-urhynix-arduino.rules` (MODE=0666, SYMLINK `tb3_arduino`) 적용. 8초 캡처에서 `[MOTION] detected -> LED ON`, `[LDR] A0=...` 정상 수신. |
-| DB 선정 (Supabase 프로젝트/스키마 또는 로컬 PG) | ❌ 차단 | 2026-05-28 Supabase MCP `list_projects`에서 URHYNIX 전용 없음(`vibe`만 ACTIVE, 무관). 박태진 Day-1 "PIR→insert" 사전 차단. DECISION-LOG "DB 선정 보류" 참조. |
+| DB 선정 + 마이그레이션 적용 | ✅ | 2026-05-28 신규 Supabase 프로젝트 `ueupkrxwybuuqxflstvg` (ap-northeast-1) 선정. Management API SQL endpoint로 `db/migrations/2026-05-27_init_security.sql` 적용 (4테이블 + seed). service_role JWT INSERT 정상(row `c8c389b9-...`). publishable key는 RLS 차단(정상 보안). 이전 mungmungfit 시도는 egress quota 초과로 폐기. |
 | TurtleBot ↔ Unity ROS-TCP 재기동 (`turtlebot` 프로젝트) | ✅ | 2026-05-28 새 Unity 프로젝트 `/Users/family/jason/turtlebot`에 ROS-TCP-Connector v0.7.0 + smoke 자산 설치. RegisterSubscriber 4/4(`/scan`·`/odom`·`/battery_state`·`/tf`) + ESTAB 2 세션 확인. Mac IP `192.168.0.67`(DHCP 변경), 로봇 IP `192.168.0.138` 유지. |

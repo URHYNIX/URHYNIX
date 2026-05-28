@@ -3,7 +3,7 @@
 > **다음 세션의 AI 에이전트가 첫 5분 안에 컨텍스트를 잡기 위한 1페이지.**
 > 이 파일만 읽으면 출발 가능. 자세한 건 아래 링크로 들어가면 됨.
 
-**Last updated**: 2026-05-28 (Day-1 후속 — Unity ROS-TCP 재기동 ✅ / RPi USB serial 영구 식별 ✅ / DB 선정 ❌ 차단) · **세션 종료자**: 김주영
+**Last updated**: 2026-05-28 (Day-1 후속 — Unity ROS-TCP 재기동 ✅ / RPi USB serial 영구 식별 ✅ / **DB 선정 완료 ✅** `ueupkrxwybuuqxflstvg` / 로봇 셧다운 상태) · **세션 종료자**: 김주영
 
 ---
 
@@ -17,15 +17,42 @@
 
 ---
 
-## 🚀 지금 즉시 해야 할 일 (Top 1) — **3단계로 확장됨 (2026-05-28)**
+## 🚀 지금 즉시 해야 할 일 (Top 1) — **DB 선정 + 마이그레이션 끝, 로봇 부팅만 남음 (2026-05-28)**
 
-**Day-1 한 줄 통과**가 DB 미선정으로 사전 차단되어 단계가 늘었습니다:
-
-| # | 단계 | 담당 | 차단? |
+| # | 단계 | 담당 | 상태 |
 |---|---|---|---|
-| 0 | **DB 선정** — 신규 Supabase `urhynix` / `vibe` 스키마 / RPi 로컬 Postgres 중 1개로 잠금 (DECISION-LOG 2026-05-28 "DB 선정 보류") | 김주영 (M1) | 🟥 다음 세션 첫 5분 |
-| 1 | `db/migrations/2026-05-27_init_security.sql` 작성 + 실행 → `session_meta`, `events` 최소 2개 테이블 + index | 김주영·임현찬 | 0단계 후 |
-| 2 | 라즈베리파이(`kim@192.168.0.138`)에서 **`/dev/tb3_arduino`** 읽어 `[MOTION]` 라인 감지 → `events` insert 파이썬 스크립트 | 박태진 | 1단계 후 |
+| 0 | ~~DB 선정 + 마이그레이션~~ | 김주영 | ✅ 완료 (Supabase `ueupkrxwybuuqxflstvg`, 4테이블 + seed) |
+| 1 | **로봇 메인 스위치 ON** (라즈베리파이 셧다운 상태) → 30초 부팅 대기 | 사람 (현장) | 🟥 대기 |
+| 2 | `kim@192.168.0.138`에서 **`/etc/urhynix.env`** 작성 (service_role 키 주입) | 박태진 | 1단계 후 |
+| 3 | `tb3-up && tb3-bridge` (Mac/Ubuntu) — bringup + ros_tcp_endpoint + arduino_bridge tmux 동시 기동 | 박태진 | 2단계 후 |
+| 4 | PIR 손 흔들기 → `events` row +1 → **Day-1 완전 PASS** 🎉 | 다 같이 | 3단계 후 |
+
+### 2단계: `/etc/urhynix.env` 작성 절차
+
+```bash
+tb3-ssh   # 또는: ssh kim@$(tb3-ip)
+sudo tee /etc/urhynix.env >/dev/null <<'EOF'
+SUPABASE_URL=https://ueupkrxwybuuqxflstvg.supabase.co
+SUPABASE_KEY=<paste service_role legacy JWT — DO NOT commit>
+URHYNIX_SESSION_ID=00000000-0000-0000-0000-000000000001
+URHYNIX_ROBOT_ID=tb3_1
+EOF
+sudo chmod 600 /etc/urhynix.env
+```
+
+→ service_role JWT는 작업자 본인의 Supabase 대시보드 또는 어제 발급된 access token으로 `supabase projects api-keys --project-ref ueupkrxwybuuqxflstvg`로 다시 받기. 절대 GitHub/Slack/HTML 보드에 박지 말 것.
+
+### 4단계: 검증 명령
+
+```bash
+# Supabase 대시보드에서:
+#   Table Editor → events → ts desc 정렬 → MOTION 새 row 확인
+# 또는 SQL editor에서:
+select id, ts, event_type, severity, x, y, theta, raw_payload->>'label' as label
+from public.events
+where session_id='00000000-0000-0000-0000-000000000001'
+order by ts desc limit 10;
+```
 
 ### 0단계 외 독립 진행 가능 (Day-1 잔여)
 
@@ -172,7 +199,9 @@ tb3-help
 
 ## 🚨 미해결 이슈
 
-- **DB 미선정 — Day-1 PIR→insert 사전 차단 (2026-05-28)** — Supabase에 URHYNIX 전용 프로젝트가 없음. 김주영이 다음 세션 첫 행동으로 신규 Supabase `urhynix` / 기존 `vibe` 스키마 추가 / RPi 로컬 Postgres 중 1개 결정. 자세한 옵션 비교: DECISION-LOG 2026-05-28 "DB 선정 보류".
+- ~~DB 미선정~~ → ✅ **해소 (2026-05-28)**: Supabase `ueupkrxwybuuqxflstvg` 잠금. DECISION-LOG "DB 선정 완료".
+- **로봇 셧다운 상태 (2026-05-28)** — `sudo shutdown -h now` 후 ping/SSH 모두 무응답. LiDAR도 메인 LiPo로 도는 걸 막기 위해 메인 슬라이드 스위치 OFF 권장. 다음 세션 첫 행동은 **사람이 메인 스위치 ON** → 30초 부팅 대기.
+- **`/etc/urhynix.env` 미작성** — 로봇 부팅 직후 한 번만 (service_role JWT 주입). 코드 commit 절대 금지.
 - **팀 Slack 채널 봇 권한 부족** — 채널 `C0B5Q43A27R`에 Claude 봇 초대 필요. 그때까지 결정 공지는 본인 DM으로만 가능.
 - **TurtleBot helper 설치 마무리 대기** — Mac helper는 `/Users/family/.zshrc`에 반영 완료. Robot helper installer는 `/tmp/install_tb3_helpers.py`까지 복사됐으나, teardown 이후 `192.168.0.138:22` SSH가 timeout되어 원격 실행은 미검증. 로봇 전원/네트워크가 돌아오면 위 `python3 /tmp/install_tb3_helpers.py` 실행으로 마무리. (2026-05-28 재접속 확인 — 다음 세션에서 즉시 실행 가능)
 - (그 외 미해결 결정 없음)

@@ -1,32 +1,52 @@
 #!/usr/bin/env python3
 """
-URHYNIX Arduino → ROS2 bridge
+URHYNIX Arduino → ROS2 + Supabase bridge
 
-Reads serial lines from /dev/tb3_arduino (Arduino UNO PIR + LDR sketch) and
-publishes:
-  - /sensors/pir   std_msgs/Bool   (motion detected: true on [MOTION], false on [CLEAR])
-  - /sensors/ldr   std_msgs/Int32  (raw A0 value 0..1023, sent every LDR reading)
+Subscribes to nothing on Arduino, reads raw serial lines from /dev/tb3_arduino
+(Arduino UNO PIR + LDR sketch) and:
 
-ROS_DOMAIN_ID and RMW settings must match the rest of the URHYNIX stack
-(see scripts/urhynix_robot_up.sh).
+  ROS2 publish:
+    - /sensors/pir   std_msgs/Bool   (true on [MOTION], false on [CLEAR])
+    - /sensors/ldr   std_msgs/Int32  (raw A0 value 0..1023)
 
-Run on the robot (manual):
+  ROS2 subscribe:
+    - /odom          nav_msgs/Odometry (caches last x, y, yaw for DB events)
+
+  Supabase insert (PIR 감지 시 events 한 줄):
+    POST {SUPABASE_URL}/rest/v1/events
+    body: { session_id, robot_id, event_type='pir', severity=3, x, y, theta, raw_payload }
+
+ENV (RPi side; loaded from /etc/urhynix.env if present, else os.environ):
+  SUPABASE_URL          (default: https://oucgzkbqrzbwxxffmmqt.supabase.co)
+  SUPABASE_KEY          (required; publishable or service_role)
+  URHYNIX_SESSION_ID    (default: seed session 00000000-...-0001)
+  URHYNIX_ROBOT_ID      (default: tb3_1)
+
+Run on the robot:
   source /opt/ros/jazzy/setup.bash
+  source ~/turtlebot3_ws/install/setup.bash
   python3 arduino_bridge.py
 
-Run via helper:
-  tb3-bridge        # from Mac/Ubuntu (uses tmux session arduino_bridge)
+Or via helper from Mac/Linux:
+  tb3-bridge
 """
+import json
+import math
+import os
 import re
 import sys
-import time
 import threading
+import time
+import urllib.request
+import urllib.error
 
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Bool, Int32
+from nav_msgs.msg import Odometry
 
 import serial
+
 
 SERIAL_DEVICE = "/dev/tb3_arduino"
 SERIAL_BAUD = 9600
@@ -36,28 +56,124 @@ RE_CLEAR = re.compile(r"^\[CLEAR")
 RE_LDR = re.compile(r"^\[LDR\]\s+A0=(\d+)")
 
 
+def _load_env_file(path="/etc/urhynix.env"):
+    """dotenv-style loader. Lines: KEY=value. Comments with #. Quotes stripped."""
+    if not os.path.exists(path):
+        return
+    try:
+        with open(path) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                v = v.strip().strip("'").strip('"')
+                os.environ.setdefault(k.strip(), v)
+    except OSError:
+        pass
+
+
+_load_env_file()
+
+SUPABASE_URL = os.environ.get(
+    "SUPABASE_URL", "https://ueupkrxwybuuqxflstvg.supabase.co"
+).rstrip("/")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+SESSION_ID = os.environ.get(
+    "URHYNIX_SESSION_ID", "00000000-0000-0000-0000-000000000001"
+)
+ROBOT_ID = os.environ.get("URHYNIX_ROBOT_ID", "tb3_1")
+
+
+def quaternion_to_yaw(q) -> float:
+    siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
+    cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+    return math.atan2(siny_cosp, cosy_cosp)
+
+
 class ArduinoBridge(Node):
     def __init__(self):
         super().__init__("arduino_bridge")
+
+        # publishers
         self.pub_pir = self.create_publisher(Bool, "/sensors/pir", 10)
         self.pub_ldr = self.create_publisher(Int32, "/sensors/ldr", 10)
 
+        # cached pose from /odom
+        self._last_x = 0.0
+        self._last_y = 0.0
+        self._last_yaw = 0.0
+        self._have_odom = False
+        self.create_subscription(Odometry, "/odom", self._on_odom, 10)
+
+        # serial
         try:
             self.ser = serial.Serial(SERIAL_DEVICE, SERIAL_BAUD, timeout=1)
         except serial.SerialException as e:
             self.get_logger().error(f"open serial failed: {e}")
             raise
+        time.sleep(2.0)  # Arduino DTR reset
 
-        # Arduino resets on DTR; give it a moment.
-        time.sleep(2.0)
         self.get_logger().info(
             f"bridging {SERIAL_DEVICE} @ {SERIAL_BAUD} → /sensors/pir, /sensors/ldr"
         )
+        if SUPABASE_KEY:
+            self.get_logger().info(
+                f"Supabase insert ENABLED → {SUPABASE_URL}/rest/v1/events  "
+                f"(session_id={SESSION_ID}, robot_id={ROBOT_ID})"
+            )
+        else:
+            self.get_logger().warn(
+                "SUPABASE_KEY not set — DB insert DISABLED "
+                "(set /etc/urhynix.env or env var to enable)"
+            )
 
         self._stop = threading.Event()
         self._t = threading.Thread(target=self._read_loop, daemon=True)
         self._t.start()
 
+    # -------- /odom --------
+    def _on_odom(self, msg: Odometry):
+        self._have_odom = True
+        self._last_x = msg.pose.pose.position.x
+        self._last_y = msg.pose.pose.position.y
+        self._last_yaw = quaternion_to_yaw(msg.pose.pose.orientation)
+
+    # -------- Supabase events insert --------
+    def _insert_event(self, event_type: str, severity: int, raw: dict) -> tuple[bool, str]:
+        if not SUPABASE_KEY:
+            return False, "SUPABASE_KEY-not-set"
+        url = f"{SUPABASE_URL}/rest/v1/events"
+        body = {
+            "session_id": SESSION_ID,
+            "robot_id": ROBOT_ID,
+            "event_type": event_type,
+            "severity": severity,
+            "x": float(self._last_x),
+            "y": float(self._last_y),
+            "theta": float(self._last_yaw),
+            "raw_payload": raw,
+        }
+        req = urllib.request.Request(
+            url,
+            method="POST",
+            data=json.dumps(body).encode("utf-8"),
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            },
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=4) as resp:
+                return resp.status in (200, 201, 204), f"http {resp.status}"
+        except urllib.error.HTTPError as e:
+            return False, f"http {e.code}: {e.read().decode('utf-8', errors='replace')[:160]}"
+        except Exception as e:
+            return False, f"{type(e).__name__}: {e}"
+
+    # -------- serial → ROS2 + DB --------
     def _read_loop(self):
         while not self._stop.is_set():
             try:
@@ -71,9 +187,21 @@ class ArduinoBridge(Node):
             line = raw.decode("utf-8", errors="replace").strip()
             if not line:
                 continue
+
             if RE_MOTION.match(line):
                 self.pub_pir.publish(Bool(data=True))
-                self.get_logger().info("PIR motion")
+                ok, info = self._insert_event(
+                    "pir",
+                    3,
+                    {
+                        "source": "arduino_bridge",
+                        "label": "MOTION",
+                        "ldr_hint": None,
+                        "ts_unix": int(time.time()),
+                        "have_odom": self._have_odom,
+                    },
+                )
+                self.get_logger().info(f"PIR motion · DB insert: {info}")
             elif RE_CLEAR.match(line):
                 self.pub_pir.publish(Bool(data=False))
             else:

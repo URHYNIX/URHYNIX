@@ -2,9 +2,10 @@
 
 > 디지털트윈경비로봇 — 이벤트/대응 로그 DB.
 > 정본: 본 문서. `CONTRACT.md §2` 는 요약본. 변경 시 둘을 동시에 갱신한다.
-> 저장소: Supabase (기본) 또는 로컬 Postgres 14+.
->
-> ⚠️ **저장소 미선정 (2026-05-28)** — Supabase에 URHYNIX 전용 프로젝트가 아직 없고 `db/migrations/2026-05-27_init_security.sql`도 미작성. Day-1 "PIR → `events` insert"는 DB 선정 결정(`DECISION-LOG.md` 2026-05-28 "DB 선정 보류") 후 진행한다.
+> 저장소: **Supabase 프로젝트 `ueupkrxwybuuqxflstvg`** (region ap-northeast-1 Tokyo, org `uisuqsaynxoedcsuikqc`).
+> 마이그레이션 적용 완료 (2026-05-28, Management API SQL endpoint 경유).
+> 자세한 결정 흐름: `DECISION-LOG.md` 2026-05-28 "DB 선정 완료 — 신규 Supabase `ueupkrxwybuuqxflstvg`".
+> 키 운영: service_role JWT는 RPi `/etc/urhynix.env`에만 (commit 금지), publishable은 공개 가능.
 
 ## Core Entities
 
@@ -119,7 +120,8 @@ GROUP BY s.scenario;
 
 ## Open Questions
 
-- **DB 선정 미정 (2026-05-28, Day-1 차단)** — 신규 Supabase 프로젝트 `urhynix` / 기존 `vibe`에 `urhynix` 스키마 추가 / 라즈베리파이 로컬 Postgres 14+ 중 1개로 결정 필요. 결정자: 김주영 (M1). 결정 즉시 `db/migrations/2026-05-27_init_security.sql` 작성 → 박태진 Day-1 잔여 액션 재개.
+- ~~DB 선정 미정 (2026-05-28, Day-1 차단)~~ → ✅ **해소 (2026-05-28)**: Supabase 프로젝트 `ueupkrxwybuuqxflstvg`로 잠금, 마이그레이션 적용·검증 완료. `DECISION-LOG.md` "DB 선정 완료" 참조.
+- **RLS 정책 미정 (2026-05-28)** — 4 테이블 모두 RLS ON · 정책 0개. service_role 외부 접근만 가능. Unity·시연 대시보드에서 read-only SELECT가 필요해지면 anon용 SELECT policy를 추가할지 결정.
 - AI 분류(`ai_label`)를 별도 `ai_labels` 테이블로 분리할지, `camera_captures` 인라인 컬럼으로 둘지 → S3 SCRUM-21 진행 시 결정.
 - Supabase Storage vs 로컬 파일 시스템 — Pi 저장소 한계 + 발표 영상 백업 정책 고려.
 - 실기 2대 운영 시 `dispatches.simulated=false` 조회를 추가 인덱스로 가속할지.
