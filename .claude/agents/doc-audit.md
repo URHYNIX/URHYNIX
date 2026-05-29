@@ -2,7 +2,7 @@
 name: doc-audit
 description: URHYNIX의 PRD/ARCHITECTURE/PROJECT-PLAN/PROJECT-STATUS/DECISION-LOG/JIRA-MAP 사이 정합성·드리프트를 크로스 검증하는 서브에이전트. 큰 결정이 바뀌거나 PR을 열기 전, 또는 주 1회 점검 시 호출.
 tools: Read, Grep, Bash
-model: opus
+model: haiku
 ---
 
 # doc-audit — 문서 정합성 점검 서브에이전트
