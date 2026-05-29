@@ -76,6 +76,8 @@
 - **LiDAR 멈춤** → 메인 스위치 OFF → 5초 → ON. 그래도 안 되면 USB 재연결
 - **Nav2 충돌** → `tb3-down`, 안전 위치로 수동 이동, `tb3-nav2` 재시작
 - **인터넷 끊김(LAN은 OK)** → 로컬 작업만 진행 (`tb3-*` 모두 LAN 기반이라 인터넷 불필요)
+- **경기장 Wi-Fi 대역이 다름** → `tb3-myip`가 192.168.0.x 안 잡힘. `vi ~/URHYNIX/scripts/tb3.sh`로 `TB3_LAN_CIDR='10.0.0'`(현장 대역) 같이 일시 수정. 또는 휴대폰 핫스팟 SSID/PW를 robot이 이전 연결한 Wi-Fi와 동일하게 설정 (가장 단순).
+- **Unity가 robot 토픽 못 받음 (5채널 LIVE 미점등)** → `RosSmokeDashboard.rosIP` Inspector 값이 `tb3-ip` 결과와 다름. Unity Editor → RosSmokeDashboard Inspector → `rosIP` 수동 변경 → Play 재시작.
 
 ## 🧳 회수 (경기장 떠나기 전)
 

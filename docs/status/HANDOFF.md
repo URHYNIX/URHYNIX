@@ -325,6 +325,9 @@ tb3-help
 - **`/etc/urhynix.env` 미작성** — 로봇 부팅 직후 한 번만 (service_role JWT 주입). 코드 commit 절대 금지.
 - **팀 Slack 채널 봇 권한 부족** — 채널 `C0B5Q43A27R`에 Claude 봇 초대 필요. 그때까지 결정 공지는 본인 DM으로만 가능.
 - **TurtleBot helper 설치 마무리 대기** — Mac helper는 `/Users/family/.zshrc`에 반영 완료. Robot helper installer는 `/tmp/install_tb3_helpers.py`까지 복사됐으나, teardown 이후 `192.168.0.138:22` SSH가 timeout되어 원격 실행은 미검증. 로봇 전원/네트워크가 돌아오면 위 `python3 /tmp/install_tb3_helpers.py` 실행으로 마무리. (2026-05-28 재접속 확인 — 다음 세션에서 즉시 실행 가능)
+- **경기장 Wi-Fi 대역 변경 가능성 (2026-05-29)** — robot DHCP IP가 192.168.0.x 아니면 `scripts/tb3.sh`의 `TB3_LAN_CIDR='192.168.0'` 수정 필요. 또는 휴대폰 핫스팟 SSID/PW를 robot이 이전에 연결했던 Wi-Fi와 동일하게 설정 (가장 단순). 자세히: `docs/ref/ARENA-DEPLOYMENT-CHECKLIST.md` §🚨.
+- **Unity rosIP 매 세션 수동 (2026-05-29)** — `unity-smoke/Assets/Scripts/RosSmokeDashboard.cs`의 `rosIP` 기본값 `192.168.0.138`이 DHCP라 매번 다름. Unity Editor → RosSmokeDashboard Inspector → `rosIP` 수동 입력 (현재 흐름). 개선: `tb3-unity-set-ip <ip>` helper 추가 검토 (다음 세션 여유 시).
+- **Arduino PIR 핀 D7→D2 정렬 미실행** — `sketches/pir_led/pir_led.ino` 코드 D7 ↔ SSOT/DECISION-LOG D2 불일치. SLAM과 무관하므로 경기장 출동에 영향 없음. `arduino-flash` 스킬로 재플래시 1회 필요 (선택).
 - (그 외 미해결 결정 없음)
 
 ---
