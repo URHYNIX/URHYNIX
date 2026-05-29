@@ -18,6 +18,12 @@
 | `/tb3_2/scan` | `sensor_msgs/LaserScan` | `urhynix_bringup_2` | unity_bridge, nav2 | 10 | |
 | `/tb3_2/camera/image_raw` | `sensor_msgs/Image` | `urhynix_bringup_2` (Pi cam) | unity_bridge, camera_confirm | 15 | tb3_2 확인용 |
 | `/tb3_2/cmd_vel` | `geometry_msgs/Twist` | Nav2 | TurtleBot HW | — | |
+| `/map` | `nav_msgs/OccupancyGrid` | `cartographer_node` (Robot 자체) | nav2, unity_bridge, map_saver_cli | 1.0 | SLAM 점유 그리드. cartographer가 robot 라즈베리파이에서 실행 (Mac Docker host networking inbound NAT 부적합, 2026-05-29 진단). 정적 매핑 시 30s 누적 후 `nav2_map_server map_saver_cli`로 `.pgm + .yaml` 저장. |
+| `/tf` | `tf2_msgs/TFMessage` | `urhynix_bringup_*` (turtlebot3_node) | cartographer, nav2, unity_bridge | 30+ | base_footprint↔odom↔map 트리. cartographer가 `map↔odom` 추정 발행. |
+| `/tb3_1/odom` | `nav_msgs/Odometry` | `urhynix_bringup_1` (turtlebot3_node) | cartographer, nav2, unity_bridge | 30 | OpenCR 휠 엔코더 기반. |
+| `/tb3_1/battery_state` | `sensor_msgs/BatteryState` | `urhynix_bringup_1` | unity_bridge | 1 | LiPo 전압 모니터링. |
+
+> **ROS2 환경변수 모드 통일 (필수)**: 모든 노드는 같은 도메인(`ROS_DOMAIN_ID=56`) + 같은 RMW(`rmw_fastrtps_cpp`) + 같은 발견 모드를 사용해야 통신 가능. 본 프로젝트 기본은 **multicast (`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`)** 단일 모드. Discovery Server(`ROS_DISCOVERY_SERVER`) 혼용 금지 — 한쪽이라도 다르면 같은 도메인이라도 발견 실패. 검증: `cat /proc/$(pgrep -f turtlebot3_node)/environ \| tr '\0' '\n' \| grep ROS_`.
 
 ### 1.2 보안 이벤트 토픽 (공통 네임스페이스, robot_id 포함)
 

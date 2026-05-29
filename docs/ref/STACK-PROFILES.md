@@ -183,7 +183,9 @@
   - `api-contract-guard`
 - Verify:
   - `bash scripts/check-project.sh`
-  - `colcon build --packages-select urhynix_msgs urhynix_bringup` (ROS2 워크스페이스 빌드 시)
+  - `colcon build --symlink-install --packages-select urhynix_msgs urhynix_bringup` (ROS2 워크스페이스 빌드 시)
+  - **RPi 4 메모리 제약**: `--parallel-workers 1 --executor sequential` 강제 (병렬 빌드는 4GB RAM + SD swap thrash로 SSH 응답 멈춤). 시간: 8 패키지 6-10분. `nohup ... &; disown`으로 SSH 끊겨도 빌드 살아남음. (2026-05-29 검증)
+  - **`~/turtlebot3_ws/build` 절대 삭제 금지** — install/setup.bash hook이 build 일부 파일 참조. 디스크 정리 시 build/ 보호. (2026-05-29 학습)
   - Unity Play Mode smoke (듀얼 로봇 pose 갱신 + 이벤트 마커 확인)
   - `python3 -c "import html.parser as h; h.HTMLParser().feed(open('docs/dev-plan.html').read())"`
 - File map starters:

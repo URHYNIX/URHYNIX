@@ -168,6 +168,18 @@
 |---|---|
 | Supabase 또는 로컬 Postgres | 현재: events / dispatches / camera_captures / session_meta 저장. 예정: pose_logs / media_artifacts / protected_assets |
 | Supabase Storage 또는 로컬 media 폴더 | 예정: 사진 / 짧은 영상 / 사운드 원본 저장, DB에는 path와 메타데이터 저장 |
-| ROS-TCP-Endpoint (Unity 측) | Unity ↔ ROS2 양방향 통신 |
+| ROS-TCP-Endpoint (Unity 측) | Unity ↔ ROS2 양방향 통신 (TCP 10000, NAT 통과 OK) |
 | Arduino IDE / serial | Uno R3 펌웨어 빌드 + `pyserial`로 RPi에서 수신 |
 | Pi Camera v2 | tb3_* 위 카메라 노드 |
+
+## SLAM/Nav2 처리 위치 (2026-05-29 확정)
+
+| 컴포넌트 | 위치 | 이유 |
+|---|---|---|
+| **cartographer (SLAM)** | **Robot 라즈베리파이** | macOS Docker host networking이 inbound NAT 미라우팅으로 DDS 분산 통신 부적합 (tcpdump 검증). Multipass/UTM의 QEMU bridged도 hang. Linux native 호스트(동료 Ubuntu)가 fallback. |
+| **nav2 (path planning)** | **Robot 라즈베리파이** | cartographer와 같은 머신에서 `/map` localhost 통신. |
+| **nav2_map_server (map_saver_cli)** | **Robot 라즈베리파이** | 1회성 저장, robot의 `~/maps/<name>.{pgm,yaml}`에 산출 |
+| **맵 결과 시각화** | **Mac (Unity Editor)** | `.pgm → .png` PIL 변환 + Plane scale 자동 계산. ROS-TCP-Connector는 별개로 5채널 LIVE 대시보드. |
+| 워크스페이스 빌드 | Robot 라즈베리파이 | `colcon build --symlink-install --parallel-workers 1 --executor sequential` (RPi 4 메모리 4GB + SD swap thrash 회피) |
+
+→ 자세히: `docs/ref/MAC-DOCKER-ROS2-PLAYBOOK.md` §6.5 (macOS Docker 한계 진단), `.claude/skills/slam-nav2-arena-survey/SKILL.md` (결정 트리)
