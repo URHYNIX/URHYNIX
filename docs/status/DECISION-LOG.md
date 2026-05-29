@@ -1,5 +1,34 @@
 # Decision Log
 
+## 2026-05-29
+
+### 🎉 SLAM end-to-end 첫 검증 PASS — Robot 직접 cartographer + Unity 임포트
+
+- 결정: SLAM은 Mac VM/Docker 우회 시도 모두 실패 후 **로봇 자체에서 cartographer 실행**하기로. multicast 모드(ROS_DISCOVERY_SERVER 미사용)로 통일.
+- 산출물: `docs/evidence/maps/desk_static_v1/{.pgm, .yaml, .png, eval.md}` — 5.90m × 5.40m 책상 환경 정적 매핑. Unity Plane scale `(0.5900, 1, 0.5400)` 자동 계산.
+- 검증: `/scan` 10Hz + `/map` 1.0Hz + map_saver_cli 정상 + scp + PIL pgm→png + tb3-map-to-unity 한 줄.
+- 영향: 경기장 출동 시 같은 흐름 (`tb3-up → tb3-slam → tb3-teleop → tb3-slam-save → tb3-fetch-map → tb3-map-to-unity`)을 25분 주행에 적용. Mac Docker/VM은 본 사례에 불필요로 확인.
+
+### Mac Docker로 외부 SLAM 실행 (라즈베리파이 디스크 회피)
+
+- 결정: cartographer/nav2/map-server를 라즈베리파이가 아니라 Mac Docker 컨테이너에서 실행한다. 로봇은 bringup만 담당.
+- 이유: 라즈베리파이 SD 15GB가 96%+ 사용 중이라 apt install이 dpkg hang을 일으킴. 4/4 패키지 commit은 끝났지만 ldconfig trigger가 디스크 0으로 hang. 또한 RPi 4 (4GB RAM)에서 cartographer 동시 실행 시 메모리 부담 큼.
+- 영향: 
+  - 호스트 종속 (Mac/Ubuntu) — 동료가 Ubuntu라면 native 가능, Mac은 Docker Desktop 4.34+ 호스트 네트워크 필요.
+  - 새 자산: `docs/ref/MAC-DOCKER-ROS2-PLAYBOOK.md` + `scripts/tb3.sh`의 `tb3-docker-*` 8 helpers.
+  - 이미지: `robotis/turtlebot3:jazzy-pc-latest` (5GB) — cartographer + nav2 + map-server 사전 설치.
+
+### 라즈베리파이 dpkg hang 복구 + 워크스페이스 클린 재빌드
+
+- 결정: dpkg hang (4/4 commit 완료 + trigger 단계 hang) 발견 후 reboot으로 회복. `~/turtlebot3_ws/install/build` 삭제 → `colcon build --symlink-install --parallel-workers 1 --executor sequential` 클린 재빌드.
+- 이유: 처음 디스크 정리 시 `~/turtlebot3_ws/build`를 같이 지웠는데 그 안에 install/setup.bash hook 일부가 있어서 launch가 깨짐. sequential 빌드로 메모리 부담 최소화 (8 패키지 6분 17초).
+- 영향: bringup 정상 publish (`/scan /odom /tf /battery_state` 등 13 토픽). 다음 세션부터 build/ 절대 지우지 말 것.
+
+### macOS Docker host networking — inbound UDP 미라우팅 미해결
+
+- 사실 확인: Docker Desktop 4.34+ host networking은 outbound는 작동(컨테이너에서 LAN ping OK)이지만 **inbound UDP가 컨테이너 프로세스로 라우팅되지 않음**. `lsof -nP -iUDP:11811` 결과 `com.docker`가 IPv6 dual-stack으로 listen하지만 Fast DDS Discovery Server에 robot 접속 메시지 0건.
+- 영향: Mac 컨테이너에서 robot `/scan` topic discovery 실패. 다음 세션 디버깅 출발점: (1) Cyclone DDS XML로 strict unicast peer, (2) `osrf/ros:jazzy-desktop` 다른 base 이미지 시도, (3) 동료 Ubuntu native (multicast 정상) fallback.
+
 ## 2026-05-26
 
 ### 로봇팔 제거 버전으로 MVP 진행

@@ -3,7 +3,7 @@
 > **다음 세션의 AI 에이전트가 첫 5분 안에 컨텍스트를 잡기 위한 1페이지.**
 > 이 파일만 읽으면 출발 가능. 자세한 건 아래 링크로 들어가면 됨.
 
-**Last updated**: 2026-05-29 (새 동료(Ubuntu) 첫 세팅 9단계 추가 ✅ / Day-1 후속 — Unity ROS-TCP 재기동 ✅ / RPi USB serial 영구 식별 ✅ / **DB 선정 완료 ✅** `ueupkrxwybuuqxflstvg` / 박물관·미술관 액자 보호 요구 SSOT 반영 / 로봇 셧다운 상태) · **세션 종료자**: 김주영
+**Last updated**: 2026-05-29 (**🎉 SLAM end-to-end 검증 PASS** — robot 직접 cartographer + 책상 정적 매핑 5.90m×5.40m + Unity Plane scale 자동 계산 / Mac Docker/Multipass/UTM 우회 검증 결과 robot 직접이 가장 빠름 / 새 helper 8개 + playbook 250줄 + 출동 체크리스트 + first map evidence 추가) · **세션 종료자**: 김주영
 
 ---
 
@@ -72,7 +72,71 @@ tb3-unity         # Unity Editor 자동 Play → 화면 가운데 한글 패널 
 
 ---
 
-## 🚀 지금 즉시 해야 할 일 (Top 1) — **DB 선정 + 마이그레이션 끝, 로봇 부팅만 남음 (2026-05-28)**
+## 🚀 지금 즉시 해야 할 일 (Top 1) — **경기장 출동 + 진짜 SLAM 25분 매핑 (Day-2 진입)**
+
+### 검증된 흐름 (오늘 책상 정적 매핑으로 통과)
+
+```bash
+. ~/.tb3rc && . ~/jason/URHYNIX/scripts/tb3.sh
+tb3-up                              # bringup + ros_tcp (12s)
+tb3-slam                            # cartographer multicast 모드 (10s)
+tb3-teleop                          # 매핑 주행 (천천히 한 방향 루프 + 출발점 복귀)
+tb3-slam-save arena_v1              # robot ~/maps/
+tb3-fetch-map arena_v1              # 호스트 docs/evidence/maps/ + PNG 자동
+tb3-map-to-unity arena_v1           # Unity Plane scale 자동 출력
+```
+
+→ 오늘 같은 흐름으로 책상 5.90m×5.40m 매핑 + Unity 임포트 검증 완료. 경기장은 25분 teleop 주행으로 확장.
+
+### 주의
+
+- **`~/turtlebot3_ws/build` 절대 지우지 말 것** (install/setup.bash hook 의존)
+- **multicast 모드만 사용** (ROS_DISCOVERY_SERVER 제거됨) — bringup·cartographer 모두 자동 발견
+- **로봇 디스크 1.1GB** (94%). 추가 SD 정리 필요 시 `tb3-disk-cleanup`
+- 로봇 dpkg trigger 4/4 commit 완료 + ldconfig 부수 미완은 영향 없음
+
+### 별도 트랙 (Mac 통신 영역)
+
+- macOS Docker host networking은 inbound NAT 미라우팅 → ROS2 분산 부적합 (오늘 진단)
+- Multipass macOS Apple Silicon QEMU hang (오늘 발견)
+- UTM QEMU bridged 좀비 lock 에러 (오늘 발견)
+- 향후 Mac에서 cartographer 띄울 필요 있으면 **OrbStack** 또는 **동료 Ubuntu native**가 정답 (`MAC-DOCKER-ROS2-PLAYBOOK.md §6.5` 참조)
+
+### 현재 상태 (출발점)
+
+| 항목 | 상태 |
+|---|---|
+| Robot bringup | ✅ `/scan /odom /tf` 13 topic publish |
+| Robot 워크스페이스 | ✅ 8 패키지 클린 재빌드 (sequential) |
+| Robot SD 디스크 | ⚠️ 1.1GB 남음 (94%). `build/` 절대 지우지 말 것 |
+| Robot dpkg trigger | ⚠️ 4/4 commit 완료지만 ldconfig trigger 미완. 영향 없음 |
+| Mac Docker Desktop 4.34+ host network | ✅ 활성 (컨테이너 ping robot 통과) |
+| `robotis/turtlebot3:jazzy-pc-latest` 이미지 | ✅ 5GB pull, cartographer/nav2/map-server 포함 |
+| `urhynix_dds` (Fast DDS Discovery Server) 컨테이너 | ✅ 11811 listen (`docker logs urhynix_dds`) |
+| Robot `ROS_DISCOVERY_SERVER=192.168.0.104:11811` 환경 export | ✅ |
+| Robot → Mac UDP 11811 nc 통과 | ✅ |
+| DS log에 robot 접속 메시지 | ❌ |
+| Mac container `ros2 topic list`에 robot 토픽 | ❌ |
+
+### 다음 시도 (우선순위)
+
+1. **컨테이너에서 `tcpdump`로 inbound UDP 11811 실제 수신 확인** — `apt install -y tcpdump` 후 `tcpdump -n -i any 'udp port 11811'`
+2. **Fast DDS XML 강제 unicast peer 설정** — `FASTDDS_DEFAULT_PROFILES_FILE` env로 robot IP 명시
+3. **Cyclone DDS 양쪽 설치 + XML unicast peer** — robot에 `ros-jazzy-rmw-cyclonedds-cpp` 추가 설치 (디스크 1.1GB 빡빡)
+4. **`osrf/ros:jazzy-desktop` 다른 base 이미지 시도** — robotis 이미지 내부 DDS 설정 검증 우회
+5. **동료 Ubuntu native fallback** — Docker 우회, multicast 정상 작동 기대
+
+### 검증 명령 (재현)
+
+```bash
+. ~/.tb3rc && . ~/jason/URHYNIX/scripts/tb3.sh
+tb3-ip                              # robot IP 확인
+tb3-up                              # bringup + ros_tcp 재기동
+docker logs urhynix_dds             # DS 작동 확인
+tb3-docker-topics                   # 컨테이너에서 robot 토픽 보이나
+```
+
+
 
 | # | 단계 | 담당 | 상태 |
 |---|---|---|---|

@@ -180,6 +180,239 @@ EXP
   echo "shutdown issued — verify with: ping -c2 $ip"
 }
 
+tb3-slam() {
+  # cartographer SLAM tmux 세션 (robot 측). bringup 이미 떠 있어야 함.
+  local ip; ip=$(tb3-ip) || return 1
+  expect <<EXP
+set timeout 18
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t slam 2>/dev/null; tmux new-session -d -s slam 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=False 2>&1 | tee /tmp/slam.log\"'; sleep 2; tmux ls"}
+expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
+EXP
+  echo "→ /map 토픽 송출까지 5-10s 대기 권장. 검증: ssh kim@$ip 'ros2 topic hz /map'"
+}
+
+tb3-slam-save() {
+  # 현재 SLAM 맵을 .pgm + .yaml 두 파일로 저장 (robot 측 ~/maps/<name>.*).
+  local name="${1:-arena_$(date +%Y%m%d_%H%M%S)}"
+  local ip; ip=$(tb3-ip) || return 1
+  expect <<EXP
+set timeout 25
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && mkdir -p \$HOME/maps && cd \$HOME/maps && ros2 run nav2_map_server map_saver_cli -f $name --ros-args -p save_map_timeout:=20.0 && ls -la $name.*"}
+expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
+EXP
+  echo "→ 로컬로 가져오기: tb3-fetch-map $name"
+}
+
+tb3-fetch-map() {
+  # robot ~/maps/<name>.{pgm,yaml} → 로컬 docs/evidence/maps/<name>/  (+ PNG 자동 변환)
+  local name="${1:?usage: tb3-fetch-map <map_name>}"
+  local ip; ip=$(tb3-ip) || return 1
+  local outdir="$TB3_REPO_ROOT/docs/evidence/maps/$name"
+  mkdir -p "$outdir"
+  echo "→ scp ~/maps/$name.{pgm,yaml} → $outdir/"
+  # brace expansion이 scp client에서 안 풀리는 환경 대비 — 두 파일 분리.
+  scp -o StrictHostKeyChecking=accept-new "$TB3_USER@$ip:maps/$name.pgm" "$outdir/" 2>&1 | tail -1
+  scp -o StrictHostKeyChecking=accept-new "$TB3_USER@$ip:maps/$name.yaml" "$outdir/" 2>&1 | tail -1
+  # pgm → png 변환 (Unity는 pgm 미지원). ImageMagick 우선, 없으면 PIL.
+  if command -v magick >/dev/null 2>&1; then
+    magick "$outdir/$name.pgm" "$outdir/$name.png" && echo "→ $name.png (ImageMagick)"
+  elif command -v convert >/dev/null 2>&1; then
+    convert "$outdir/$name.pgm" "$outdir/$name.png" && echo "→ $name.png (ImageMagick)"
+  elif python3 -c "from PIL import Image" >/dev/null 2>&1; then
+    python3 -c "from PIL import Image; Image.open('$outdir/$name.pgm').save('$outdir/$name.png')" \
+      && echo "→ $name.png (PIL)"
+  else
+    echo "⚠️ pgm → png 변환 도구 없음 (brew install imagemagick 또는 pip3 install Pillow)"
+  fi
+  ls -la "$outdir"
+}
+
+tb3-map-to-unity() {
+  # <name>.png + .yaml을 Unity Assets/Maps/로 복사하고 yaml의 resolution/origin 출력.
+  local name="${1:?usage: tb3-map-to-unity <map_name>}"
+  local src="$TB3_REPO_ROOT/docs/evidence/maps/$name"
+  local dst="$TB3_REPO_ROOT/unity-smoke/Assets/Maps"
+  [ -f "$src/$name.png" ] || { echo "missing $src/$name.png (run tb3-fetch-map first)"; return 1; }
+  [ -f "$src/$name.yaml" ] || { echo "missing $src/$name.yaml"; return 1; }
+  mkdir -p "$dst"
+  cp "$src/$name.png" "$src/$name.yaml" "$dst/"
+  echo "→ copied to $dst/"
+  echo ""
+  echo "=== Unity Plane scale 계산 ==="
+  python3 - "$src/$name.yaml" "$src/$name.png" <<'PY'
+import sys, yaml
+from PIL import Image
+y = yaml.safe_load(open(sys.argv[1]))
+img = Image.open(sys.argv[2])
+w, h = img.size
+res = float(y.get('resolution', 0.05))
+ox, oy, _ = y.get('origin', [0, 0, 0])
+mw, mh = w * res, h * res
+print(f"이미지: {w} x {h} px")
+print(f"resolution: {res} m/px")
+print(f"실제 크기: {mw:.2f} m × {mh:.2f} m")
+print(f"origin (ROS): x={ox} y={oy}")
+print(f"Unity Plane (10u 기본):")
+print(f"  scale.x = {mw/10:.4f}")
+print(f"  scale.z = {mh/10:.4f}")
+print(f"  scale.y = 1")
+print(f"Plane 중심을 (0,0,0)에 두고 PNG 텍스처 할당 → top-down 카메라로 확인")
+PY
+}
+
+tb3-teleop() {
+  # 수동 운전. SSH 인터랙티브 — 키보드 입력으로 로봇 움직임.
+  # i=전진 j=좌회전 l=우회전 , =후진 k=정지 q/z=속도조절
+  local ip; ip=$(tb3-ip) || return 1
+  ssh -t "$TB3_USER@$ip" 'bash -lc "source /opt/ros/jazzy/setup.bash && source $HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 run turtlebot3_teleop teleop_keyboard"'
+}
+
+tb3-rviz() {
+  # RViz를 로봇 측에서 띄움. VNC로 화면 확인.
+  local ip; ip=$(tb3-ip) || return 1
+  expect <<EXP
+set timeout 12
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t rviz 2>/dev/null; tmux new-session -d -s rviz 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export DISPLAY=:2 ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp && rviz2 -d \$HOME/turtlebot3_ws/src/turtlebot3/turtlebot3_cartographer/rviz/tb3_cartographer.rviz 2>&1 | tee /tmp/rviz.log\"'; sleep 1; tmux ls"}
+expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
+EXP
+  echo "→ tb3-vnc 로 화면 확인 (:2)"
+}
+
+tb3-nav2() {
+  # Nav2 stack 시작. <map_name>.yaml (robot의 ~/maps/) 기반 localization + 1-waypoint.
+  local map="${1:?usage: tb3-nav2 <map_name (~/maps/<name>.yaml)>}"
+  local ip; ip=$(tb3-ip) || return 1
+  expect <<EXP
+set timeout 18
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t nav2 2>/dev/null; tmux new-session -d -s nav2 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=False map:=\$HOME/maps/$map.yaml 2>&1 | tee /tmp/nav2.log\"'; sleep 2; tmux ls"}
+expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
+EXP
+  echo "→ RViz에서 2D Pose Estimate(초기 위치) + Nav2 Goal(목표) 클릭. 검증: ros2 topic echo /amcl_pose --once"
+}
+
+tb3-pkg-check() {
+  # 로봇에 SLAM/Nav2 필수 패키지 4종 존재 여부. SSH key 인증 후에는 expect 불필요.
+  local ip; ip=$(tb3-ip) || return 1
+  ssh -o BatchMode=yes -o ConnectTimeout=6 "$TB3_USER@$ip" \
+    "dpkg -l | grep -E 'ros-jazzy-(turtlebot3-cartographer|turtlebot3-navigation2|nav2-map-server|teleop-twist-keyboard)' | awk '{print \$2}'" 2>&1
+}
+
+tb3-pkg-install() {
+  # 누락된 SLAM/Nav2 패키지 설치 (sudo 비번 자동).
+  local ip; ip=$(tb3-ip) || return 1
+  ssh -t "$TB3_USER@$ip" "echo $TB3_PASSWORD | sudo -S apt update && echo $TB3_PASSWORD | sudo -S apt install -y ros-jazzy-turtlebot3-cartographer ros-jazzy-turtlebot3-navigation2 ros-jazzy-nav2-map-server ros-jazzy-teleop-twist-keyboard"
+}
+
+tb3-disk-cleanup() {
+  # apt cache + 오래된 로그 + 워크스페이스 빌드 잔재 정리 (apt 작업 완료 후에만 실행).
+  local ip; ip=$(tb3-ip) || return 1
+  echo "→ before:"; ssh -o BatchMode=yes "$TB3_USER@$ip" "df -h / | tail -1"
+  ssh -t "$TB3_USER@$ip" "
+    echo $TB3_PASSWORD | sudo -S apt clean
+    echo $TB3_PASSWORD | sudo -S journalctl --vacuum-size=50M
+    echo $TB3_PASSWORD | sudo -S apt autoremove -y
+    rm -rf ~/.cache/pip ~/.cache/colcon 2>/dev/null
+  "
+  echo "→ after:"; ssh -o BatchMode=yes "$TB3_USER@$ip" "df -h / | tail -1"
+}
+
+tb3-disk() {
+  # 디스크 한 줄 요약.
+  local ip; ip=$(tb3-ip) || return 1
+  ssh -o BatchMode=yes "$TB3_USER@$ip" "df -h / | tail -1"
+}
+
+# ───────── Mac Docker ROS2 SLAM helpers ─────────
+# 라즈베리파이 디스크 회피 — cartographer/nav2를 Mac 컨테이너에서 실행.
+# 전제: Docker Desktop 4.34+ + Settings > Resources > Network > Enable host networking ON.
+# 자세히: docs/ref/MAC-DOCKER-ROS2-PLAYBOOK.md
+export TB3_DOCKER_IMAGE="${TB3_DOCKER_IMAGE:-robotis/turtlebot3:jazzy-pc-latest}"
+export TB3_DOCKER_NAME="${TB3_DOCKER_NAME:-urhynix_slam}"
+
+tb3-docker-pull() {
+  # 5GB pull (1회용). 캐시 후 즉시.
+  docker pull --platform linux/arm64 "$TB3_DOCKER_IMAGE"
+}
+
+_tb3_docker_env() {
+  # 공통 env 인자 출력.
+  local robot_ip; robot_ip=$(tb3-ip 2>/dev/null) || robot_ip="$TB3_ROBOT_IP_HINT"
+  printf -- '-e ROS_DOMAIN_ID=56 -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp -e ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET -e ROS_STATIC_PEERS=%s -e TURTLEBOT3_MODEL=burger' "$robot_ip"
+}
+
+tb3-docker-shell() {
+  # 인터랙티브 bash 진입 (디버깅·검증·맵 저장 수동 작업).
+  # shellcheck disable=SC2046
+  docker run --rm -it \
+    --network host \
+    $(_tb3_docker_env) \
+    -v "$TB3_REPO_ROOT/docs/evidence/maps:/maps" \
+    "$TB3_DOCKER_IMAGE" \
+    bash -c "source /opt/ros/jazzy/setup.bash 2>/dev/null; [ -f /opt/turtlebot3_ws/install/setup.bash ] && source /opt/turtlebot3_ws/install/setup.bash; cd /maps; exec bash"
+}
+
+tb3-docker-topics() {
+  # 호스트에서 robot 토픽 발견 확인 (DDS 통신 검증).
+  # shellcheck disable=SC2046
+  docker run --rm \
+    --network host \
+    $(_tb3_docker_env) \
+    "$TB3_DOCKER_IMAGE" \
+    bash -c "source /opt/ros/jazzy/setup.bash && timeout 6 ros2 topic list 2>&1 | sort"
+}
+
+tb3-docker-slam() {
+  # detached 컨테이너로 cartographer launch.
+  docker rm -f "$TB3_DOCKER_NAME" 2>/dev/null
+  # shellcheck disable=SC2046
+  docker run -d --name "$TB3_DOCKER_NAME" \
+    --network host \
+    $(_tb3_docker_env) \
+    -v "$TB3_REPO_ROOT/docs/evidence/maps:/maps" \
+    "$TB3_DOCKER_IMAGE" \
+    bash -c "source /opt/ros/jazzy/setup.bash && ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=False"
+  echo "→ container: $TB3_DOCKER_NAME"
+  echo "→ 로그 보기: docker logs -f $TB3_DOCKER_NAME"
+  echo "→ /map 송출까지 5-10s 대기 권장. 검증: tb3-docker-mhz"
+}
+
+tb3-docker-mhz() {
+  # /map 토픽 hz (cartographer 살아있나).
+  docker exec "$TB3_DOCKER_NAME" bash -c "source /opt/ros/jazzy/setup.bash && timeout 6 ros2 topic hz /map 2>&1 | tail -5"
+}
+
+tb3-docker-save() {
+  # 현재 SLAM 맵을 host의 docs/evidence/maps/<name>/<name>.{pgm,yaml}로 저장.
+  local name="${1:?usage: tb3-docker-save <map_name>}"
+  local outdir="$TB3_REPO_ROOT/docs/evidence/maps/$name"
+  mkdir -p "$outdir"
+  docker exec "$TB3_DOCKER_NAME" bash -c "
+    source /opt/ros/jazzy/setup.bash
+    cd /maps/$name 2>/dev/null || mkdir -p /maps/$name && cd /maps/$name
+    ros2 run nav2_map_server map_saver_cli -f $name --ros-args -p save_map_timeout:=20.0
+    ls -la $name.*
+  "
+  # pgm → png 변환 (호스트에서)
+  if command -v magick >/dev/null 2>&1; then
+    magick "$outdir/$name.pgm" "$outdir/$name.png" && echo "→ $name.png (ImageMagick)"
+  elif python3 -c "from PIL import Image" >/dev/null 2>&1; then
+    python3 -c "from PIL import Image; Image.open('$outdir/$name.pgm').save('$outdir/$name.png')" \
+      && echo "→ $name.png (PIL)"
+  fi
+  ls -la "$outdir"
+}
+
+tb3-docker-stop() {
+  # 컨테이너 정리.
+  docker stop "$TB3_DOCKER_NAME" 2>/dev/null
+  docker rm "$TB3_DOCKER_NAME" 2>/dev/null
+  echo "→ stopped + removed: $TB3_DOCKER_NAME"
+}
+
+tb3-docker-logs() {
+  docker logs -f --tail 30 "$TB3_DOCKER_NAME"
+}
+
 tb3-unity() {
   local bin="${TB3_UNITY_BIN:-$(_tb3_unity_default)}"
   if [ -z "$bin" ] || [ ! -x "$bin" ]; then
@@ -270,6 +503,28 @@ URHYNIX TurtleBot helpers ($(uname -s))
   tb3-restart    ★ down + go (clean restart)
   tb3-logs       Tail bringup/ros_tcp/arduino_bridge logs + tmux ls
   tb3-key-setup  ★ ssh-copy-id 한 번 (이후 비번 prompt 영구 사라짐)
+
+  tb3-pkg-check     SLAM/Nav2 4개 패키지 존재 여부 확인
+  tb3-pkg-install   누락된 SLAM/Nav2 패키지 4종 일괄 apt install
+  tb3-disk          로봇 SD 카드 사용량 한 줄
+  tb3-disk-cleanup  apt cache + 로그 + 빌드 잔재 정리 (≈1GB 회복)
+
+  ── Mac Docker SLAM (라즈베리파이 디스크 회피) ──
+  tb3-docker-pull   robotis/turtlebot3:jazzy-pc-latest 5GB pull (1회)
+  tb3-docker-topics 호스트에서 robot 토픽 발견 검증 (DDS 통신)
+  tb3-docker-shell  컨테이너 인터랙티브 bash (디버깅·수동작업)
+  tb3-docker-slam   detached cartographer launch
+  tb3-docker-mhz    /map 토픽 hz 측정 (cartographer 검증)
+  tb3-docker-save N 현재 맵 저장 → docs/evidence/maps/<N>/{.pgm,.yaml,.png}
+  tb3-docker-logs   컨테이너 로그 tail -f
+  tb3-docker-stop   컨테이너 종료 + 정리
+  tb3-slam         cartographer SLAM tmux 시작 (/map 토픽 송출)
+  tb3-rviz         로봇 RViz (tb3-vnc로 화면 확인)
+  tb3-teleop       수동 운전 (i/j/k/l/, 키보드)
+  tb3-slam-save N    현재 맵 저장 ~/maps/<N>.{pgm,yaml}
+  tb3-fetch-map N    맵 파일 → docs/evidence/maps/<N>/ + PNG 자동 변환
+  tb3-map-to-unity N PNG+yaml → unity-smoke/Assets/Maps/ + Plane scale 계산
+  tb3-nav2 N         Nav2 stack 시작 (map=<N>.yaml, RViz에서 goal 클릭)
 
   tb3-unity      Launch Unity Editor on $TB3_UNITY_PROJECT (auto-Play)
 
