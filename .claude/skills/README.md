@@ -55,7 +55,7 @@
 | Skill | Use When | Output |
 |---|---|---|
 | `arduino-flash` | Arduino 스케치를 GUI IDE 없이 컴파일·업로드·시리얼 검증까지 한 번에 돌릴 때 (URHYNIX 센서 4종 반복 플래시) | 표준 핀 매핑, one-liner 명령, 비대화형 시리얼 캡처 우회 |
-| `slam-nav2-arena-survey` | TurtleBot3 + LDS-03으로 새 경기장/실내 공간에 처음 진입해 SLAM 매핑 + Nav2 베이스라인 + Unity 임포트 한 흐름이 필요할 때 | 6 Phase (연결→매핑→저장→평가→Unity→Nav2), 평가 체크리스트, 좌표축 변환 표 |
+| `slam-nav2-arena-survey` | TurtleBot3 + LDS-03으로 새 경기장/실내 공간에 처음 진입해 SLAM 매핑 + Nav2 베이스라인 + Unity 임포트 한 흐름이 필요할 때 | 6 Phase (연결→매핑→저장→평가→Unity→Nav2), Robot/Mac/Ubuntu 결정 트리, ROS 모드 통일 표, 트러블슈팅 매트릭스, 좌표축 변환 표 (2026-05-29 책상 매핑 통과 검증) |
 
 ## Selection Rule Of Thumb
 

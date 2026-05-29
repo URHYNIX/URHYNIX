@@ -40,8 +40,11 @@
 - [ ] git clone 최신 + `git pull origin main`
 
 ### 로봇 측 (네트워크 가능한 곳에서 사전 점검)
-- [ ] `tb3-pkg-check` — 4개 패키지 OK
+- [ ] `tb3-pkg-check` — 4개 패키지 OK (turtlebot3-cartographer, turtlebot3-navigation2, nav2-map-server, teleop-twist-keyboard)
+- [ ] `tb3-disk` — SD 여유 ≥ 800MB. 부족하면 `tb3-disk-cleanup` (200MB+ 회복)
+- [ ] `~/turtlebot3_ws/install/turtlebot3_bringup/share/...` 살아있음 (`build/` 지운 적 없는지)
 - [ ] `tb3-go` — bringup/ros_tcp/arduino_bridge tmux 3개 OK
+- [ ] `urhynix_robot_up.sh`에 `ROS_DISCOVERY_SERVER` 없음 확인 (multicast 모드)
 - [ ] `/dev/tb3_arduino` udev symlink 살아있음 (Arduino USB)
 - [ ] `tmux ls` 모두 정리 (`tb3-down` 후 출동)
 
@@ -66,6 +69,9 @@
 ## 🚨 비상 매뉴얼
 
 - **로봇 통신 끊김** → `tb3-down`, 라즈베리파이 재부팅(전원 ON/OFF), `tb3-go` 재시작
+- **SSH 응답 정지 (load avg ≥ 10)** → RAM OOM + SD swap thrash 가능. 메인 스위치 OFF→5초→ON. 부팅 후 `tb3-disk-cleanup`으로 200MB+ 회복.
+- **`/map` publish 0 (`/scan`은 정상)** → bringup·cartographer ROS 모드 불일치. `urhynix_robot_up.sh`에서 `ROS_DISCOVERY_SERVER` 라인 제거 → `tb3-down`→`tb3-up`→`tb3-slam`.
+- **`Package not found turtlebot3_bringup`** → 워크스페이스 깨짐. `cd ~/turtlebot3_ws && colcon build --symlink-install --parallel-workers 1 --executor sequential` (6-10분).
 - **LiPo 11.0V 이하** → 즉시 회수 + 교체. 절대 9V 이하로 방전 금지 (LiPo 영구손상)
 - **LiDAR 멈춤** → 메인 스위치 OFF → 5초 → ON. 그래도 안 되면 USB 재연결
 - **Nav2 충돌** → `tb3-down`, 안전 위치로 수동 이동, `tb3-nav2` 재시작
