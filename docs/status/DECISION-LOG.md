@@ -253,3 +253,32 @@
 - 보안:
   - 키는 passphrase 없이 생성됨 — 개인 머신 전제. 공용 PC에선 passphrase 사용 권장 + `ssh-agent`에 일시 add.
   - 키 회수: 로봇에서 `sed -i '/<MAC public key fingerprint>/d' ~/.ssh/authorized_keys`.
+
+### 박물관/미술관 액자 보호 컨셉 + 미디어/좌표 저장 요구 반영 (2026-05-28)
+
+- 결정: 디지털트윈경비로봇의 발표 컨셉을 **박물관/미술관 액자형 중요물품 보호**로 구체화한다. 사진이 붙은 액자형 타깃을 카메라가 보호 대상으로 인식하고, 외부자 판단은 PIR 단독이 아니라 **PIR + LiDAR 변화 + pose log** 조합으로 남긴다.
+- 이유:
+  - "무엇을 지키는 로봇인가"가 분명해져 발표 시나리오가 직관적이다.
+  - 화재 의심 이벤트에서 액자/중요물품 주변 카메라 확인, 영상 클립, 대응 좌표 로그를 함께 보여주면 DB/AI/Unity/로봇 파트가 하나의 체인으로 설명된다.
+  - 조도 센서가 어두움을 감지했을 때 LiDAR를 물리적으로 새로 켜는 구조가 아니라, 저속 순찰·스캔/pose 로그 저장 빈도 증가·확인 이벤트 강화로 "LiDAR 강화 모드"를 표현하는 편이 TurtleBot 구조와 맞다.
+- 영향:
+  - `PRD.md`: MVP/성공 기준/데이터 수집 전략/리스크에 액자형 중요물품, 좌표·사진·영상·사운드 저장 요구 추가.
+  - `ARCHITECTURE.md`: `protected_assets`, `pose_logs`, `media_artifacts`, 박물관/미술관 보호 컨셉, LiDAR 강화 모드 원칙 추가.
+  - `SCHEMA.md`/`CONTRACT.md`: 현재 실제 DB 4테이블과 분리해 `pose_logs`, `media_artifacts`, `protected_assets`, `protected_asset_id`, `asset_seen`/`asset_missing` 확장 예정 계약 추가.
+  - `PROJECT-PLAN.md`/`JIRA-MAP.md`: SCRUM-9/14/15/16/21/23 제목과 Sprint 작업을 보호 컨셉에 맞게 확장.
+- 잔여:
+  - 현재 Supabase에는 초기 4테이블이 적용되어 있다. `pose_logs`/`media_artifacts`/`protected_assets` 실제 마이그레이션은 SCRUM-23에서 별도 SQL로 적용한다.
+  - 카메라 인식 1차 구현은 AprilTag/QR/고대비 프레임 같은 보조 표식을 우선 후보로 둔다.
+  - 2026-05-28 REST 실조회 확인: `session_meta`, `events`, `dispatches`, `camera_captures`는 HTTP 200. `pose_logs`, `media_artifacts`, `protected_assets`는 HTTP 404(PGRST205)로 현재 미존재.
+
+### 매일 18:00 Confluence 회의록 기반 SSOT 자동화 예약 (2026-05-28)
+
+- 결정: Codex automation `urhynix-daily-ssot-sync-from-confluence`를 매일 18:00(KST) 실행하도록 생성한다.
+- 이유: 당일 Confluence 회의록의 결정/완료/블로커/다음 액션을 로컬 SSOT와 외부 Confluence/Jira에 반복 반영해야 하며, 사람이 매번 놓치기 쉽다.
+- 실행 기준:
+  - 작업 디렉터리: `/Users/family/jason/URHYNIX`
+  - 로컬 SSOT를 먼저 읽고 갱신한다.
+  - 실제 검증된 현재 상태와 예정안을 분리한다. DB/Jira 상태가 언급되면 가능한 범위에서 실조회 후 current로 승격한다.
+  - SSOT 변경이 보드에 영향을 주면 `python3 docs/whiteboards/build_bundle.py`를 실행하고 HTML 파싱 검증을 수행한다.
+  - Confluence/Jira는 회의록에서 명확히 영향받은 항목만 갱신한다.
+- 주의: 외부 문서 전체 덮어쓰기는 필요할 때만 수행하고, 기본은 검증된 변경만 반영한다.

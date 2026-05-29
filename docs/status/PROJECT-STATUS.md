@@ -4,22 +4,23 @@ Last updated: 2026-05-28
 
 ## 한 줄 상태
 
-방향을 **디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)**으로 전환하고, SSOT 8종 + 역할 매트릭스 + Sprint 일정을 재작성한 단계입니다.
+방향을 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)**으로 구체화하고, 카메라 중요물품 인식·LiDAR/PIR 외부자 판단·좌표/사진/영상/사운드 저장 요구를 SSOT에 반영한 단계입니다.
 
 ## 현재 방향
 
 - 팀명: UR HYNIX
 - 프로젝트 제목: 디지털트윈경비로봇
-- 핵심 목표: tb3_1이 센서 이벤트를 감지하면 Unity 관제 화면에 표시되고, tb3_2가 출동해 카메라로 확인하며, 모든 결과가 DB에 기록된다.
-- 시나리오 4종: 야간 모드(조도), 침입 감지(PIR), 이상 소음(소리), 화재 의심(불꽃·모의)
-- 포함 범위: SLAM/Nav2, 다중 로봇 이벤트 응답, 아두이노 센서 4종, Pi Camera, Unity 관제 UI, ROS-TCP, 영상 라이브 스트리밍, DB 기록, AI 보조 분류
+- 핵심 목표: tb3_1이 박물관/미술관 전시 구역을 순찰하며 액자형 사진 타깃과 센서 이벤트를 감지하면 Unity 관제 화면에 표시되고, tb3_2가 출동해 카메라로 확인하며, 이동 좌표·사진·영상·사운드와 모든 결과가 DB에 기록된다.
+- 시나리오 4종: 야간 모드(조도→LiDAR 강화), 침입/외부자 감지(PIR+LiDAR), 이상 소음(소리), 화재 의심(불꽃·모의+액자 주변 카메라 확인)
+- 포함 범위: SLAM/Nav2, 다중 로봇 이벤트 응답, 아두이노 센서 4종, Pi Camera, Unity 관제 UI, ROS-TCP, 영상 라이브 스트리밍, DB 기록, 이동 좌표 로그, 미디어 메타데이터 저장, AI 보조 분류, 액자형 중요물품 인식
 - 제외 범위: FR5 로봇팔, 실시간 사람 추적, 실제 화재 테스트, 완전 자동 보안 시스템
 - **하드웨어 확정**: 별도 Arduino Uno R3 + 미니 브레드보드 → Raspberry Pi USB serial. **별도 층 추가 없음** — Burger 상판 빈 공간(라즈베리파이 반대편)에 양면테이프로 부착. 전원은 OpenCR 5V 핀 → Arduino 5V 핀 점퍼 2줄.
 - **병렬 작업 매트릭스**: `docs/ref/PROJECT-PLAN.md` 앞부분에 주차×모듈 표와 S1 1주차 4팀 동시 시작 가이드 추가됨.
+- **오늘 추가 요구 반영 (2026-05-28)**: 박물관/미술관 컨셉, 액자형 사진 타깃 보호, 조도 기반 LiDAR 강화 모드, 외부자 PIR+LiDAR 판단을 SSOT에 반영. `pose_logs`/`media_artifacts`/`protected_assets`는 실제 DB 미적용 상태의 SCRUM-23 확장 예정안으로 분리.
 
 ## 현재 Jira 기준
 
-- 에픽: `SCRUM-7` (디지털트윈경비로봇으로 본문 갱신 예정)
+- 에픽: `SCRUM-7` (박물관/미술관 액자 보호형 디지털트윈경비로봇으로 본문 갱신 완료)
 - 다음 진행 카드: `SCRUM-8` MVP 범위·역할 매트릭스·SSOT 합의
 - 18개 카드 매핑 표는 `docs/ref/JIRA-MAP.md` 참조
 
@@ -27,11 +28,11 @@ Last updated: 2026-05-28
 
 | 시스템 | 페이지 | 역할 |
 |---|---|---|
-| Confluence | [기획안 (UR HYNIX) v10](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/327681) | **외부 정본 SSOT** |
+| Confluence | [기획안 (UR HYNIX) v12](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/327681) | **외부 정본 SSOT** |
 | Confluence | [역할 분배 보드](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1605636) | 5×4 매트릭스 + PNG 2장 |
 | Confluence | [2026-05-27 회의록](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1048633) | Day-1 작업 분담 |
 | Confluence | [브레인스토밍 마인드맵](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1540099) | 방향 전환 근거 |
-| Confluence | [상세 사용자 요구사항 v3](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/2555905) | 40 UR + 5 NFR |
+| Confluence | [기능 요구사항 정의서 v5](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/2555905) | 액자 보호 기능 요구사항 + 현재/예정 DB 분리 |
 | Jira | [SCRUM-7 에픽](https://jason1127.atlassian.net/browse/SCRUM-7) · [보드](https://jason1127.atlassian.net/jira/software/projects/SCRUM/boards/1) | 18 카드 부모 |
 | Slack | 채널 `C0B5Q43A27R` (⚠️ 봇 초대 필요) | 팀 소통 |
 | GitHub | [URHYNIX/URHYNIX](https://github.com/URHYNIX/URHYNIX) | 코드 정본 |
@@ -57,10 +58,10 @@ Last updated: 2026-05-28
 ## 현재 마일스톤
 
 - **M0 (완료, 2026-05-27)**: SSOT 전환 + 역할 매트릭스 확정 + Confluence 1605636(역할 분배 보드) 발행
-- **M1 (진행 예정, Sprint 1 종료 시점)**: tb3_1 순찰 + Unity pose 표시 + DB 스키마 초안
+- **M1 (진행 예정, Sprint 1 종료 시점)**: tb3_1 순찰 + Unity pose 표시 + DB 스키마 초안 + 보호 대상/미디어 확장 계획
 - **M2 (Sprint 2 종료)**: 센서 1종 이벤트 → Unity 마커
-- **M3 (Sprint 3 종료)**: tb3_2 출동 시뮬 + 카메라 확인 + DB 저장 전체 흐름
-- **M4 (Sprint 4 종료, 발표)**: 시나리오 4종 시연 + 발표 지표 표
+- **M3 (Sprint 3 종료)**: tb3_2 출동 시뮬 + 카메라 확인 + DB 저장 전체 흐름 + 좌표/미디어/보호 대상 저장 확장
+- **M4 (Sprint 4 종료, 발표)**: 박물관/미술관 액자 보호 컨셉으로 시나리오 4종 시연 + 발표 지표 표
 
 ## Day-1 작업 (2026-05-27 즉시 시작 · 확정)
 
@@ -153,6 +154,9 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | LDR(조도) 센서 A0 정렬 검증 | ✅ | 2026-05-28 LDR + 10kΩ 분압회로를 SSOT 일치 핀(A0)으로 재배선·재플래시·재캡처. 시리얼 `[LDR] A0=29~214` 진동으로 빛 변화 추종 + PIR 모션 동시 동작 충돌 없음 확인. 잔여: PIR=D7→D2 정렬 |
 | RPi USB serial 식별 + 권한 영구화 | ✅ | 2026-05-28 `/dev/ttyACM0`=OpenCR · `/dev/ttyACM1`=Arduino UNO(vendor 2341) 분리 확인. `usermod -aG dialout kim` + `/etc/udev/rules.d/99-urhynix-arduino.rules` (MODE=0666, SYMLINK `tb3_arduino`) 적용. 8초 캡처에서 `[MOTION] detected -> LED ON`, `[LDR] A0=...` 정상 수신. |
 | DB 선정 + 마이그레이션 적용 | ✅ | 2026-05-28 신규 Supabase 프로젝트 `ueupkrxwybuuqxflstvg` (ap-northeast-1) 선정. Management API SQL endpoint로 `db/migrations/2026-05-27_init_security.sql` 적용 (4테이블 + seed). service_role JWT INSERT 정상(row `c8c389b9-...`). publishable key는 RLS 차단(정상 보안). 이전 mungmungfit 시도는 egress quota 초과로 폐기. |
+| 실제 DB 구조 재확인 + 보호 컨셉 SSOT 정정 | ✅ | 2026-05-28 Supabase REST service_role 조회: `session_meta`/`events`/`dispatches`/`camera_captures` HTTP 200, `pose_logs`/`media_artifacts`/`protected_assets` HTTP 404(PGRST205). 따라서 좌표·사진·영상·사운드·액자 보호 테이블은 현재 구조가 아니라 SCRUM-23 확장 예정안으로 SCHEMA/CONTRACT/STATUS/HANDOFF/HTML에 분리 표기. `python3 docs/whiteboards/build_bundle.py` 재빌드 + 8개 dev-plan HTML 파싱 OK. |
+| Jira/Confluence 보호 컨셉 반영 | ✅ | 2026-05-28 Jira `SCRUM-7/9/14/15/16/21/23` 갱신. Confluence `기획안 (UR HYNIX)` page 327681 v12 갱신 + `기능 요구사항 정의서` page 2555905 v5 갱신 + `2026/05/28` draft 2883585 갱신. 폴더 parent 직접 생성은 Atlassian tool의 spaceId/parentId 해석 문제로 실패하여 정본 페이지 갱신으로 대체. |
+| Confluence 회의록 기반 SSOT 자동화 예약 | ✅ | 2026-05-28 Codex automation `urhynix-daily-ssot-sync-from-confluence` 생성. 매일 18:00에 `/Users/family/jason/URHYNIX`에서 당일 Confluence 회의록을 찾아 로컬 SSOT 우선 갱신, 현재/예정 상태 분리, dev-plan 번들 재빌드, Confluence/Jira 반영 리포트 생성. |
 | TurtleBot ↔ Unity ROS-TCP 재기동 (`turtlebot` 프로젝트) | ✅ | 2026-05-28 새 Unity 프로젝트 `/Users/family/jason/turtlebot`에 ROS-TCP-Connector v0.7.0 + smoke 자산 설치. RegisterSubscriber 4/4(`/scan`·`/odom`·`/battery_state`·`/tf`) + ESTAB 2 세션 확인. Mac IP `192.168.0.67`(DHCP 변경), 로봇 IP `192.168.0.138` 유지. |
 | Mac → Robot SSH 공개키 인증 | ✅ | 2026-05-28 `ssh-keygen ed25519` + `ssh-copy-id kim@192.168.0.138` 완료. `ssh -o BatchMode=yes kim@... hostname` → `kim-desktop` 무대화형 응답. 이후 모든 tb3-* 명령이 비번 prompt 없이 동작. `scripts/tb3.sh`에 `tb3-key-setup` 헬퍼 추가 (협업자 머신용). |
 | Arduino → DB 자동 insert (PIR + LDR) | ✅ | 2026-05-28 robot `arduino_bridge` tmux에서 PIR `[MOTION]` → events insert (severity=3) + LDR A0<200 edge-trigger → event_type='dark' (severity=1) 검증. 누적 `events` 45+ row. `sb-by-type` 결과 `pir 44 / dark 1`. |

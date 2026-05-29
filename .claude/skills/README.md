@@ -40,6 +40,8 @@
 | `migration-manifest` | 마이그레이션/대규모 리팩터링 시 | parity ID, wave plan, progress tracking |
 | `parallel-qa` | E2E 회귀를 빨리 넓게 돌리고 싶을 때 | grouped QA scenarios, pass/fail report |
 | `code-review-graph-ops` | docs-heavy / cross-cutting repo에서 영향 범위를 좁혀야 할 때 | graph-first impact analysis |
+| `ssot-board-sync` | SSOT(docs/ref/*, docs/status/*) 변경을 dev-plan HTML 7페이지 + 단일 번들에 동기화할 때 | 매핑 표 기반 양쪽 갱신 + 번들 재빌드 + 검증 grep |
+| `decision-broadcast` | 한 건의 결정을 DECISION-LOG → SSOT → HTML → Jira → Slack 5채널에 한 번에 동기화할 때 | 5채널 매핑 + Slack 템플릿 + Jira 갱신 절차 (ssot-board-sync 위임) |
 
 ## Agent Orchestration Skills
 
@@ -47,6 +49,12 @@
 |---|---|---|
 | `session-handoff` | 세션 종료 또는 pause 직전 | next entrypoint, blocker, first verify |
 | `failure-mode-playbooks` | 공통 실패 모드에서 안전한 복구 흐름이 필요할 때 | recovery steps, docs to update, verify to re-run |
+
+## Embedded / Hardware Skills
+
+| Skill | Use When | Output |
+|---|---|---|
+| `arduino-flash` | Arduino 스케치를 GUI IDE 없이 컴파일·업로드·시리얼 검증까지 한 번에 돌릴 때 (URHYNIX 센서 4종 반복 플래시) | 표준 핀 매핑, one-liner 명령, 비대화형 시리얼 캡처 우회 |
 
 ## Selection Rule Of Thumb
 
@@ -65,6 +73,7 @@
 - "세션을 넘겨야 한다" -> `session-handoff`
 - "계속 꼬이는 실패 패턴을 복구해야 한다" -> `failure-mode-playbooks`
 - "검증을 한 번에 넓게 돌리고 싶다" -> `parallel-qa`
+- "Arduino에 스케치 굽고 시리얼 확인해야 한다" -> `arduino-flash`
 
 ## Writing Rules
 

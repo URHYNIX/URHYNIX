@@ -3,7 +3,7 @@
 > **다음 세션의 AI 에이전트가 첫 5분 안에 컨텍스트를 잡기 위한 1페이지.**
 > 이 파일만 읽으면 출발 가능. 자세한 건 아래 링크로 들어가면 됨.
 
-**Last updated**: 2026-05-28 (Day-1 후속 — Unity ROS-TCP 재기동 ✅ / RPi USB serial 영구 식별 ✅ / **DB 선정 완료 ✅** `ueupkrxwybuuqxflstvg` / 로봇 셧다운 상태) · **세션 종료자**: 김주영
+**Last updated**: 2026-05-29 (새 동료(Ubuntu) 첫 세팅 9단계 추가 ✅ / Day-1 후속 — Unity ROS-TCP 재기동 ✅ / RPi USB serial 영구 식별 ✅ / **DB 선정 완료 ✅** `ueupkrxwybuuqxflstvg` / 박물관·미술관 액자 보호 요구 SSOT 반영 / 로봇 셧다운 상태) · **세션 종료자**: 김주영
 
 ---
 
@@ -14,6 +14,61 @@
 3. `docs/status/DECISION-LOG.md` 가장 아래 5건 — 오늘까지의 결정 흐름
 
 → 이 3개 다 읽어도 5분 이내. 자세한 SSOT는 필요할 때 들어가면 됨.
+
+---
+
+## 🆕 새 동료 첫 세팅 (Ubuntu/Mac 공통, 머신당 1회)
+
+> 처음 들어온 사람은 이 9단계만 따라가면 로봇과 직접 통신 가능. 자세한 OS별 분기는 [`unity-smoke/README.md`](../../unity-smoke/README.md).
+
+```bash
+# 0) 같은 LAN 확인 (필수) — 로봇은 192.168.0.0/24. 다른 망이면 작동 안 함.
+#    WSL2는 기본 NAT라 robot 탐색 실패 → mirrored networking 또는 native Ubuntu 권장.
+ip -4 addr show | grep 192.168.0   # Ubuntu
+ipconfig getifaddr en0             # macOS
+
+# 1) 의존성
+#    Ubuntu:
+sudo apt update && sudo apt install -y expect openssh-client netcat-openbsd jq curl git
+#    macOS (brew):
+brew install expect jq
+
+# 2) 레포 clone (콜라보레이터 권한 확인 후)
+git clone https://github.com/URHYNIX/URHYNIX.git ~/URHYNIX
+
+# 3) helpers source
+echo 'source ~/URHYNIX/scripts/tb3.sh' >> ~/.bashrc     # Ubuntu
+echo 'source ~/URHYNIX/scripts/tb3.sh' >> ~/.zshrc      # macOS
+
+# 4) 자격 증명 분리 (~/.tb3rc, repo 밖에 보관)
+cp ~/URHYNIX/scripts/tb3rc.example ~/.tb3rc
+chmod 600 ~/.tb3rc
+$EDITOR ~/.tb3rc    # TB3_PASSWORD / TB3_VNC_PASSWORD / SUPABASE_ACCESS_TOKEN 채우기
+
+# 5) 새 셸 + SSH 공개키 1회 (이후 비번 prompt 영구 사라짐)
+exec $SHELL
+tb3-key-setup
+
+# 6) Unity Hub + Editor 6000.0.64f1
+#    Ubuntu: https://unity.com/download → UnityHub.AppImage chmod +x → Hub에서 6000.0.64f1 설치
+#    macOS:  Unity Hub.dmg → 동일하게 6000.0.64f1 설치
+#    설치 후 Hub에서 ~/URHYNIX/unity-smoke 폴더 Add → 첫 Open 시 Library/ 자동 재생성 (5-10분)
+
+# 7) 로봇 부팅 (사람이 메인 스위치 ON) → 30초 대기
+
+# 8) 한 방 풀-기동 + DB 1행 검증
+tb3-go            # bringup + ros_tcp + arduino_bridge + verify
+sb-tail           # events count + 최근 5건 — PIR 손 흔든 뒤 row 증가 확인
+tb3-unity         # Unity Editor 자동 Play → 화면 가운데 한글 패널 LIVE 확인
+```
+
+체크포인트:
+- `tb3-myip` → `192.168.0.x` 라면 같은 망 ✅
+- `tb3-ip` → 로봇 IP 1개 반환 ✅
+- `tb3-port` → `Connection succeeded` ✅
+- `sb-count` → 숫자 응답 ✅ (Supabase token 작동)
+
+문제 발생 시 → `unity-smoke/README.md` 트러블슈팅 표.
 
 ---
 
@@ -84,7 +139,7 @@ PY
 | 영역 | 상태 |
 |---|---|
 | 방향 합의 | ✅ 완료 (다중 경비 로봇 디지털 트윈) |
-| SSOT 9개 | ✅ 갱신 완료 |
+| SSOT 9개 | ✅ 갱신 완료 — 2026-05-28 박물관/미술관 액자 보호 컨셉, LiDAR/PIR 외부자 판단 반영. 좌표·사진·영상·사운드 저장은 실제 DB 미적용 상태의 SCRUM-23 확장 예정안 |
 | HTML 보드 8개 + 단일 번들 (465KB) | ✅ 갱신 완료 |
 | Jira 18개 티켓 | ✅ 재작성 + 6개 Day-1 본문 |
 | Confluence 4페이지 | ✅ 모두 v최신 |
@@ -111,10 +166,10 @@ PY
 Day-1 PASS 확인 후 다음 액션:
 
 1. SCRUM-10 (tb3_1 SLAM/Nav2 베이스라인) 시작 — 임현찬·김선일
-2. SCRUM-16 (실내 트랙·waypoint 측정) 시작 — 박태진·임현찬
+2. SCRUM-16 (박물관/미술관 실내 트랙·액자형 보호 대상 waypoint 측정) 시작 — 박태진·임현찬
 3. 부족 센서 발주: 소리·불꽃 (키트 미포함분)
 4. OpenCR 5V 패드 위치 실측 + 점퍼 배선 도면 — 임현찬·김주영
-5. 김선일 Unity 기능 문서 → SCRUM-11/22 분해
+5. 김선일 Unity 기능 문서 → SCRUM-11/22 분해, 보호 대상 상태 패널은 SCRUM-21/23과 연결
 
 ---
 
@@ -122,7 +177,7 @@ Day-1 PASS 확인 후 다음 액션:
 
 | 시스템 | 페이지/ID | 역할 |
 |---|---|---|
-| **Confluence 327681** | [기획안 (UR HYNIX) v10](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/327681) | **외부 정본 SSOT** |
+| **Confluence 327681** | [기획안 (UR HYNIX) v11](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/327681) | **외부 정본 SSOT** |
 | Confluence 1605636 | [역할 분배 보드](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1605636) | 5×4 매트릭스 |
 | Confluence 1048633 | [2026-05-27 회의록](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1048633) | Day-1 분담 |
 | Confluence 1540099 | [브레인스토밍 마인드맵](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1540099) | 방향 전환 근거 |

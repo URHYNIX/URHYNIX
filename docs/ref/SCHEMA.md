@@ -7,7 +7,7 @@
 > 자세한 결정 흐름: `DECISION-LOG.md` 2026-05-28 "DB 선정 완료 — 신규 Supabase `ueupkrxwybuuqxflstvg`".
 > 키 운영: service_role JWT는 RPi `/etc/urhynix.env`에만 (commit 금지), publishable은 공개 가능.
 
-## Core Entities
+## Current Applied Entities
 
 ```text
 session_meta (1) ─── (N) events ─── (0..1) dispatches ─── (0..1) camera_captures
@@ -18,6 +18,8 @@ session_meta (1) ─── (N) events ─── (0..1) dispatches ─── (0..
 - 한 **세션**(시연 회차)은 다수 **이벤트**를 가진다.
 - 한 **이벤트**는 최대 한 번의 **출동**으로 이어진다.
 - 한 **출동**은 최대 한 번의 **카메라 확인**을 만든다.
+- 2026-05-28 실제 Supabase REST 확인 기준 현재 적용 테이블은 `session_meta`, `events`, `dispatches`, `camera_captures` 4개다.
+- 이동 좌표 로그, 사진/영상/사운드 메타데이터, 액자형 보호 대상 테이블은 아래 "Planned Extensions"이며 아직 실제 DB에 적용되지 않았다.
 
 ## Tables
 
@@ -54,6 +56,28 @@ Index:
 - `idx_events_type` on `(event_type)` — 시나리오별 집계
 - `idx_events_robot` on `(robot_id, ts)`
 
+## Planned Extensions (SCRUM-23)
+
+> 아래 구조는 박물관/미술관 액자 보호 요구를 위한 **확장 예정안**이다. 현재 Supabase에는 아직 없다. 적용 전 별도 migration SQL 작성 + 실제 DB 조회 검증이 필요하다.
+
+### `pose_logs` — 이동 좌표 로그 (예정)
+
+| Column | Type | NULL | 비고 |
+|---|---|---|---|
+| `id` | UUID PK | NO | |
+| `session_id` | UUID FK → session_meta | NO | |
+| `robot_id` | TEXT | NO | `tb3_1` / `tb3_2` |
+| `ts` | TIMESTAMPTZ | NO | pose 기록 시각 |
+| `x` | DOUBLE PRECISION | NO | meters |
+| `y` | DOUBLE PRECISION | NO | meters |
+| `theta` | DOUBLE PRECISION | NO | radians |
+| `source_topic` | TEXT | YES | `/tb3_1/pose` 등 |
+| `nav_mode` | TEXT | YES | `patrol` / `dispatch` / `lidar_boost` / `manual` |
+
+Index:
+- `idx_pose_logs_session_robot` on `(session_id, robot_id, ts)`
+- `idx_pose_logs_mode` on `(nav_mode, ts)`
+
 ### `dispatches` — tb3_2 출동 기록
 
 | Column | Type | NULL | 비고 |
@@ -81,6 +105,7 @@ Index:
 | `robot_id` | TEXT | NO | 보통 `tb3_2` |
 | `ts` | TIMESTAMPTZ | NO | |
 | `image_path` | TEXT | NO | 로컬 경로 또는 Supabase Storage URL |
+| `protected_asset_id` | TEXT | YES | 액자형 사진 타깃 또는 중요물품 ID |
 | `result` | TEXT | NO | `confirmed`/`false_alarm`/`missed`/`unverified` |
 | `ai_label` | TEXT | YES | M1 모델 결과 |
 | `ai_confidence` | REAL | YES | 0~1 |
@@ -89,9 +114,48 @@ Index:
 Index:
 - `idx_captures_dispatch` on `(dispatch_id)`
 
+### `media_artifacts` — 사진/영상/사운드 저장 메타데이터 (예정)
+
+| Column | Type | NULL | 비고 |
+|---|---|---|---|
+| `id` | UUID PK | NO | |
+| `session_id` | UUID FK → session_meta | NO | |
+| `event_id` | UUID FK → events | YES | 이벤트 연동 미디어 |
+| `dispatch_id` | UUID FK → dispatches | YES | 출동 확인 미디어 |
+| `robot_id` | TEXT | NO | |
+| `ts` | TIMESTAMPTZ | NO | 캡처/녹음 시각 |
+| `media_type` | TEXT | NO | `image` / `video` / `audio` |
+| `storage_path` | TEXT | NO | Supabase Storage URL 또는 로컬 경로 |
+| `duration_sec` | NUMERIC(6,2) | YES | 영상/사운드 길이 |
+| `mime_type` | TEXT | YES | `image/jpeg`, `video/mp4`, `audio/wav` 등 |
+| `metadata` | JSONB | YES | 해상도, 샘플레이트, 프레임 수, 파일 크기 |
+
+Index:
+- `idx_media_session` on `(session_id, ts)`
+- `idx_media_event` on `(event_id)`
+- `idx_media_type` on `(media_type, ts)`
+
+### `protected_assets` — 박물관/미술관 보호 대상 (예정)
+
+| Column | Type | NULL | 비고 |
+|---|---|---|---|
+| `asset_id` | TEXT PK | NO | 예: `frame_01` |
+| `session_id` | UUID FK → session_meta | NO | 시연 세션별 등록 가능 |
+| `name` | TEXT | NO | 액자/작품 이름 |
+| `asset_type` | TEXT | NO | `photo_frame` / `object` |
+| `x` | DOUBLE PRECISION | NO | 전시 위치 |
+| `y` | DOUBLE PRECISION | NO | 전시 위치 |
+| `marker_type` | TEXT | YES | `apriltag` / `qr` / `frame_color` / `manual` |
+| `marker_value` | TEXT | YES | 태그 ID 또는 색상/라벨 |
+| `expected_state` | TEXT | NO | `present` / `covered` / `unknown` |
+
+Index:
+- `idx_assets_session` on `(session_id, asset_id)`
+
 ## Migrations
 
-- 초기 생성 SQL: `db/migrations/2026-05-27_init_security.sql` (Sprint 1 SCRUM-14에서 작성 예정)
+- 초기 생성 SQL: `db/migrations/2026-05-27_init_security.sql` (4테이블 적용 완료)
+- 박물관/미술관 보호 확장 SQL: `pose_logs`, `media_artifacts`, `protected_assets`, `camera_captures.protected_asset_id`, `events.event_type` check 확장(`asset_seen`, `asset_missing`) 추가 예정 (SCRUM-23)
 - Supabase 사용 시 `supabase migration new` 워크플로 사용
 - 모든 DDL 변경은 `CONTRACT.md` 동시 갱신 PR로
 
@@ -101,6 +165,9 @@ Index:
 - ROS `Dispatch.id` ↔ `dispatches.id` 동일 UUID
 - ROS `CameraConfirm.dispatch_id` ↔ `dispatches.id` 매칭
 - `events.session_id`은 모든 후속 테이블에서 join 가능해야 한다 (직접 FK가 아니더라도 events 경유)
+- `pose_logs`는 이벤트 전후 이동 경로 재구성을 위해 최소 1Hz 샘플링을 기본값으로 한다. `dark` 진입 시 `nav_mode='lidar_boost'`로 저장 빈도를 높일 수 있다.
+- `camera_captures.protected_asset_id`와 `protected_assets.asset_id`는 액자형 사진 타깃 인식 결과를 연결한다.
+- 원본 사진/영상/사운드는 DB에 bytea로 넣지 않는다. `media_artifacts.storage_path`만 정본으로 저장한다.
 
 ## 발표용 KPI 쿼리 (예시)
 

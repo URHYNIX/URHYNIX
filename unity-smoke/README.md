@@ -13,7 +13,15 @@ ROS-TCP-Connector 기반 라이브 모니터. `/scan`·`/odom`·`/battery_state`
 
 ## 처음 한 번 (Mac / Ubuntu 동일)
 
+> **전제**: 이 머신이 로봇과 같은 LAN(`192.168.0.0/24`)에 있어야 한다. WSL2는 기본 NAT라 로봇 탐색 실패 — mirrored networking 또는 native Ubuntu 권장.
+
 ```bash
+# 0) OS별 의존성
+#    Ubuntu:
+sudo apt update && sudo apt install -y expect openssh-client netcat-openbsd jq curl git
+#    macOS (Homebrew):
+brew install expect jq
+
 # 1) URHYNIX repo clone
 git clone https://github.com/URHYNIX/URHYNIX.git ~/URHYNIX
 
@@ -35,7 +43,9 @@ source ~/.zshrc   # or ~/.bashrc
 tb3-key-setup     # ssh-copy-id 한 방 + 검증
 
 # 5) Unity Hub 설치 + Editor 6000.0.64f1 설치
-#    https://unity.com/download
+#    macOS:  https://unity.com/download → UnityHubSetup.dmg 설치
+#    Ubuntu: https://unity.com/download → UnityHub.AppImage 다운로드 후
+#            chmod +x UnityHub.AppImage && ./UnityHub.AppImage
 #    Hub > Installs > 6000.0.64f1 (Universal Render Pipeline 템플릿 호환)
 
 # 6) Unity Hub > Open > URHYNIX/unity-smoke 폴더 선택

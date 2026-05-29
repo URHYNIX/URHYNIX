@@ -1,18 +1,35 @@
 # URHYNIX
 
-프로젝트 루트의 짧은 진입점이다.
+프로젝트 루트의 짧은 진입점이다. 다중 TurtleBot 디지털트윈경비로봇.
 
-## Loading Order
+## 🚀 빠른 시작 (이거만 읽으면 출발 가능)
 
-1. `CLAUDE.md`
-2. `AGENTS.md`
-3. `AGENT.md`
+1. **`docs/status/HANDOFF.md`** — 다음 세션 진입 캡슐. 첫 5분에 무엇을 할지 1페이지.
+2. **`docs/status/PROJECT-STATUS.md`** — 한 줄 상태 + 역할 매트릭스 + Day-1 작업.
+3. **`docs/status/DECISION-LOG.md`** 가장 아래 항목 — 가장 최근 결정의 흐름.
+
+→ 위 3개로 5분 안에 출발 가능. 나머지는 필요할 때 들어가면 됨.
+
+## 📚 전체 로딩 순서 (필요 시)
+
+1. `CLAUDE.md` (이 파일)
+2. `AGENTS.md`, `AGENT.md`
+3. `docs/status/HANDOFF.md` ← 빠른 시작 캡슐 (NEW)
 4. `docs/status/PROJECT-STATUS.md`
-5. `docs/ref/PROJECT-PLAN.md`
-6. `docs/ref/STACK-PROFILES.md`
+5. `docs/status/DECISION-LOG.md`
+6. `docs/ref/PROJECT-PLAN.md`
 7. `docs/ref/ARCHITECTURE.md`
-8. `.claude/skills/README.md`
-9. 필요 시 `docs/ref/PRD.md`, `docs/ref/SCHEMA.md`
+8. `docs/ref/CONTRACT.md`, `docs/ref/SCHEMA.md`
+9. `docs/ref/STACK-PROFILES.md`, `docs/ref/JIRA-MAP.md`
+10. `.claude/skills/README.md`
+11. 필요 시 `docs/ref/PRD.md`
+
+## 🔧 즉시 활용 가능 자산
+
+- 시각 보드: `docs/dev-plan-bundle.html` (단일 HTML 465KB, 더블클릭으로 7페이지 다 열림)
+- 빌더: `python3 docs/whiteboards/build_bundle.py` (SSOT 갱신 후 재빌드)
+- PNG 생성기: `python3 docs/whiteboards/generate_role_board.py` (역할 변경 시)
+- 자주 쓰는 스킬: `ssot-board-sync` (SSOT↔HTML), `decision-broadcast` (5채널 동기화)
 
 ## Hard Rules
 
