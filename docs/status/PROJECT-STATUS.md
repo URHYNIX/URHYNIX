@@ -145,6 +145,7 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 
 | 검증 항목 | 상태 | 비고 (2026-05-29) |
 |---|---|---|
+| Git 추적 PNG 제거 | ✅ | 2026-06-01 `git ls-files '*.png'` 기준 383개 PNG를 `git rm`으로 제거. 완료 검증은 동일 명령 0건으로 확인 |
 | 옛 방향/제거 범위 본문 잔재 grep | ✅ | 활성 문서에서 제거 대상 키워드와 이전 제목 잔재 없음. DECISION-LOG의 전환 기록만 예외 |
 | `tb3_1`/`tb3_2` 일관 사용 grep | ✅ | 10개 파일에서 등장 (SSOT 8 + DECISION-LOG + dev-plan.html) |
 | 역할 매트릭스 일치 (STATUS / JIRA-MAP / dev-plan.html) | ✅ | M4 = 김주영·임현찬·박태진으로 동기화 |
