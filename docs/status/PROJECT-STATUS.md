@@ -1,9 +1,13 @@
 # Project Status
 
-Last updated: 2026-06-01 evening + Windows RealSense D435 streaming smoke PASS
+Last updated: 2026-06-01 evening + Robot2 RealSense D435 ROS2 smoke PASS
 
 ## 2026-06-01 Addendum
 
+- Robot2(`t1@192.168.0.250`, hostname `rb`)에서 Intel RealSense D435 ROS2 smoke PASS. Ubuntu 24.04.4 + ROS2 Jazzy + `realsense2_camera`로 color/depth/aligned depth 토픽이 모두 약 30Hz로 발행됨.
+- Robot2 장치 정보: Serial `254522075185`, Product ID `0B07`, Firmware `5.17.0.10`, USB 3.2, ROS launch profile depth `848x480x30`, color `640x480x30`.
+- Robot2에서 일반 사용자 접근을 위해 `t1`을 `video,plugdev` 그룹에 추가함. 이후 `rs-enumerate-devices -s`가 sudo 없이 PASS.
+- Evidence: `docs/evidence/2026-06-01-robot2-realsense-d435-ros2-smoke.md`
 - Windows workstation에서 Intel RealSense D435 streaming smoke PASS. `pyrealsense2==2.58.1.10581`로 depth/color `640x480` frame 수신 확인.
 - 장치 정보: Serial `254522075185`, Product ID `0B07`, Firmware `5.17.0.10`, center depth sample `0.159 m`.
 - 기존 Mac evidence의 streaming BLOCKED 결론은 macOS Tahoe + Homebrew librealsense 조합에 한정. 카메라 하드웨어와 Windows SDK path는 정상.
@@ -12,7 +16,7 @@ Last updated: 2026-06-01 evening + Windows RealSense D435 streaming smoke PASS
 
 ## 한 줄 상태
 
-방향은 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)** 그대로. **2026-06-01 저녁: RealSense 카메라 모델 D435 확정 (D435i 아님, IMU 없음, FW 5.15.1.55)**. Mac에서 `sudo rs-enumerate-devices` PASS지만 `rs-hello-realsense` streaming은 macOS Tahoe(26) + brew 빌드 옵션 누락으로 차단 → Pi4 이전 결정 (잔여 액션 #6, 30분). 박물관 매핑 계획 95% 유지 (VIO만 폐기, RGB-D SLAM + LDS-03 + wheel odom). evidence: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md` + DECISION-LOG 2026-06-01. **2026-06-01 점심**: 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 스택 한 세션 완전 부트스트랩 PASS. `ssh urhynix-robot` 한 줄 진입.
+방향은 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)** 그대로. **2026-06-01 저녁: Robot2(`t1@192.168.0.250`)에서 RealSense D435 ROS2 smoke PASS** — color/depth/aligned depth 토픽이 약 30Hz로 정상 발행됨. 카메라는 **D435 확정 (D435i 아님, IMU 없음, Serial `254522075185`, FW `5.17.0.10`)**. Mac에서 `sudo rs-enumerate-devices` PASS지만 `rs-hello-realsense` streaming은 macOS Tahoe(26) + brew 빌드 옵션 누락으로 차단되며, Windows bench와 Robot2 ROS2 경로는 정상. 박물관 매핑 계획 95% 유지 (VIO만 폐기, RGB-D SLAM + LDS-03 + wheel odom). evidence: `docs/evidence/2026-06-01-robot2-realsense-d435-ros2-smoke.md` + `docs/evidence/2026-06-01-realsense-d435-windows-pyrealsense2-smoke.md` + `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md`. **2026-06-01 점심**: 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 스택 한 세션 완전 부트스트랩 PASS. `ssh urhynix-robot` 한 줄 진입.
 
 ## 현재 방향
 
