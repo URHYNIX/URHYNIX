@@ -23,7 +23,10 @@
   - [Sepideh Shamsizadeh — IMX219 on Ubuntu 24.04 LTS 가이드](https://medium.com/@sepideh.92sh/setup-and-troubleshooting-of-raspberry-pi-camera-module-v2-1-imx219-on-ubuntu-24-04-lts-fb518f4576c0)
   - [Hackaday — Bringing Up IMX219 on Pi 5 with Ubuntu 24.04](https://hackaday.io/project/203704-gesturebot/log/242459)
 - **D435와의 역할 분담**: IMX219 = 일반 RGB 영상(라이브 스트림 + YOLO 4종 인식 + 녹화 MP4/rosbag). D435 = Depth + RGB(3D 매핑, 가벽 detection). 박물관 시연에서 **두 카메라 동시 사용**.
-- **근거 evidence**: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md` (예정, 빌드 완료 후 작성)
+- **빌드 완료 (16:36)**: libcamera Pi fork v0.7.1+rpt20260429 + rpicam-apps v1.12.0 6분만에 빌드 PASS. capabilities `egl:1 qt:1 drm:1 libav:0`. 캡처 검증도 통과: `rpicam-still` 1920×1080 JPG 283KB + `rpicam-vid` 1280×720@30Hz × 5초 H.264 2.9MB.
+- **잡은 함정 3건** (Ubuntu 24.04 특이): ① ports repo에 rpicam-apps 없음 → 소스 빌드. ② `libepoxy-dev` deps 누락 (preview/meson.build:32) → apt 추가. ③ libavcodec 60.31.x가 rpicam-apps master 요구 API보다 오래됨 → `-Denable_libav=disabled` 우회 (mp4 인코딩은 별도 ffmpeg).
+- **재사용 가능 스크립트**: `scripts/build-picamera.sh` — sudo keeper 50s + setsid + 함정 3건 모두 반영. 다음 SD 또는 협업자 머신에서 한 줄(`nohup bash build-picamera.sh > picam-build.log 2>&1 &`)로 30~60분 안에 동일 빌드 가능.
+- **근거 evidence**: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md` (산출물: JPG 283KB + H.264 2.8MB 동봉)
 
 ### RealSense 카메라 모델 D435 확정 (D435i 아님) + Mac SDK streaming 차단 → Pi4 이전 결정
 
