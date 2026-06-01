@@ -1,6 +1,14 @@
 # Project Status
 
-Last updated: 2026-06-01 저녁
+Last updated: 2026-06-01 evening + Windows RealSense D435 streaming smoke PASS
+
+## 2026-06-01 Addendum
+
+- Windows workstation에서 Intel RealSense D435 streaming smoke PASS. `pyrealsense2==2.58.1.10581`로 depth/color `640x480` frame 수신 확인.
+- 장치 정보: Serial `254522075185`, Product ID `0B07`, Firmware `5.17.0.10`, center depth sample `0.159 m`.
+- 기존 Mac evidence의 streaming BLOCKED 결론은 macOS Tahoe + Homebrew librealsense 조합에 한정. 카메라 하드웨어와 Windows SDK path는 정상.
+- 로봇 실기 통합 결정은 계속 Pi4 + ROS2 `realsense2_camera` 우선. Windows는 bench smoke host로 사용 가능.
+- Evidence: `docs/evidence/2026-06-01-realsense-d435-windows-pyrealsense2-smoke.md`
 
 ## 한 줄 상태
 

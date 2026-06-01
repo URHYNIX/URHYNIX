@@ -1,5 +1,7 @@
 # RealSense D435 — Mac SDK smoke (2026-06-01)
 
+> 2026-06-01 추가 확인: 같은 D435는 Windows workstation에서 `pyrealsense2==2.58.1.10581` streaming smoke를 PASS했다. Depth/Color `640x480` frame 수신과 center depth sample `0.159 m` 확인. 따라서 이 문서의 BLOCKED 결론은 macOS Tahoe + Homebrew librealsense 경로에 한정한다. Windows evidence: `docs/evidence/2026-06-01-realsense-d435-windows-pyrealsense2-smoke.md`
+
 > 주인님 손에 있는 RealSense 카메라가 D435i가 아니라 **D435**로 확정. Mac에서 SDK enumeration까지는 통과했지만 macOS Tahoe(26) + brew formula 호환성 문제로 **실제 streaming은 차단**. 박물관 매핑(arena_v2_3d) 진입은 라즈베리파이4로 이전하기로 결정한 근거.
 
 ## 환경

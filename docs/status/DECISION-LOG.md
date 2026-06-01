@@ -2,6 +2,15 @@
 
 ## 2026-06-01
 
+### RealSense D435 Windows streaming PASS (pyrealsense2) 추가 확인
+
+- **검증 결과**: Windows workstation에서 RealSense D435가 OS 장치 인식뿐 아니라 `pyrealsense2` RGB-D streaming pipeline까지 PASS. RGB/Depth 장치가 Windows PnP에서 `OK`로 보였고, Python pipeline에서 depth/color `640x480` frame 수신을 확인했다.
+- **장치 정보**: `Intel RealSense D435`, Serial `254522075185`, Product ID `0B07`, Firmware `5.17.0.10`.
+- **프레임 결과**: `depth 640x480`, `color 640x480`, center depth sample `0.159 m`.
+- **해석**: 기존 Mac evidence의 streaming BLOCKED 결론은 macOS Tahoe + Homebrew librealsense 조합에 한정한다. 카메라 하드웨어 자체와 Windows SDK 경로는 정상이다.
+- **프로젝트 결정 유지**: 실제 로봇/ROS2 통합은 Pi4 + `realsense2_camera` 경로를 계속 우선한다. Windows는 빠른 RGB-D bench test host로 사용할 수 있다.
+- **근거 evidence**: `docs/evidence/2026-06-01-realsense-d435-windows-pyrealsense2-smoke.md`
+
 ### Pi Camera 모델 확정 (Module v2 / Sony IMX219) + Ubuntu 24.04 ports repo 미제공 → 소스 빌드 결정
 
 - **모델 확정**: 신규 128GB SD 부트스트랩 후 첫 진단에서 Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464 최대 해상도) 확정. 근거: `lsmod`에 `imx219` 로드, `i2c-10` address `0x10` 응답, `/dev/video0` = `unicam-image` (CSI MMIO `fe801000.csi`).
