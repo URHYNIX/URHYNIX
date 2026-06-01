@@ -9,8 +9,9 @@
 # ---- Tunables ----
 export TB3_MAC_PATTERN='2c:cf:67:47:38:0?3'   # robot Wi-Fi MAC (leading-zero tolerant)
 export TB3_USER='kim'
-export TB3_ROBOT_IP_HINT='192.168.0.138'       # last known
-export TB3_LAN_CIDR='192.168.0'                # /24 to sweep
+export TB3_HOSTNAME='urhynix-robot'             # mDNS hostname (avahi publishes <hostname>.local)
+export TB3_ROBOT_IP_HINT='192.168.0.138'       # last known (fallback only)
+export TB3_LAN_CIDR='192.168.0'                # /24 to sweep (fallback only)
 
 # Passwords live OUTSIDE the repo. Put them in ~/.tb3rc (see scripts/tb3rc.example):
 #   export TB3_PASSWORD='your-ssh-password'
@@ -52,6 +53,17 @@ tb3-myip() {
 
 tb3-ip() {
   local hit
+  # 0. mDNS (fastest, IP-drift proof) — avahi publishes <TB3_HOSTNAME>.local
+  if [ -n "$TB3_HOSTNAME" ]; then
+    hit=$(ping -c1 -W1 "${TB3_HOSTNAME}.local" 2>/dev/null \
+          | head -1 \
+          | grep -oE '([0-9]+\.){3}[0-9]+' \
+          | head -1)
+    if [ -n "$hit" ]; then
+      echo "$hit"
+      return 0
+    fi
+  fi
   # try last known first
   if ping -c1 -W1 "$TB3_ROBOT_IP_HINT" >/dev/null 2>&1; then
     if [ "$(uname -s)" = "Linux" ]; then

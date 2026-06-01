@@ -56,6 +56,8 @@
 |---|---|---|
 | `arduino-flash` | Arduino 스케치를 GUI IDE 없이 컴파일·업로드·시리얼 검증까지 한 번에 돌릴 때 (URHYNIX 센서 4종 반복 플래시) | 표준 핀 매핑, one-liner 명령, 비대화형 시리얼 캡처 우회 |
 | `slam-nav2-arena-survey` | TurtleBot3 + LDS-03으로 새 경기장/실내 공간에 처음 진입해 SLAM 매핑 + Nav2 베이스라인 + Unity 임포트 한 흐름이 필요할 때 | 6 Phase (연결→매핑→저장→평가→Unity→Nav2), Robot/Mac/Ubuntu 결정 트리, ROS 모드 통일 표, 트러블슈팅 매트릭스, 좌표축 변환 표 (2026-05-29 책상 매핑 통과 검증) |
+| `map-quality-eval` | `tb3-slam-save → tb3-fetch-map` 직후 매핑 quality를 정량 평가하고 다음 액션(재매핑/Nav2 진입)을 정해야 할 때 | 픽셀 통계(occupied/free/unknown), use case go/no-go, 표준 `eval.md` 자동 생성 + 백업 (2026-05-29 arena_v1 dry-run 검증) |
+| `ip-drift-resync` | DHCP로 robot IP가 변경됐고 Unity Scene/Script/known_hosts를 일괄 동기화해야 할 때 (매 세션 첫 5분) | Unity Editor 종료 → sed patch → known_hosts purge 자동화. Unity 자동 save back 함정 회피 (2026-05-29 발견) |
 
 ## Selection Rule Of Thumb
 

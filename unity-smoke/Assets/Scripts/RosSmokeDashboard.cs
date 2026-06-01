@@ -7,7 +7,7 @@ using RosMessageTypes.Std;
 public class RosSmokeDashboard : MonoBehaviour
 {
     [Header("ROS Connection")]
-    public string rosIP = "192.168.0.138";
+    public string rosIP = "urhynix-robot.local";
     public int rosPort = 10000;
 
     // --- ROS topic state ---
