@@ -1,5 +1,40 @@
 # Decision Log
 
+## 2026-06-01
+
+### Pi Camera 모델 확정 (Module v2 / Sony IMX219) + Ubuntu 24.04 ports repo 미제공 → 소스 빌드 결정
+
+- **모델 확정**: 신규 128GB SD 부트스트랩 후 첫 진단에서 Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464 최대 해상도) 확정. 근거: `lsmod`에 `imx219` 로드, `i2c-10` address `0x10` 응답, `/dev/video0` = `unicam-image` (CSI MMIO `fe801000.csi`).
+- **하드웨어 상태**: 100% 정상 (CSI controller + `bcm2835_unicam` + `bcm2835_isp` + `bcm2835_codec` 전부 로드). 케이블/sensor 응답 정상.
+- **차단 원인**: Ubuntu 24.04 LTS for Raspberry Pi ports repo는 `rpicam-apps`/`libcamera-apps` **미제공**. `apt install` 시 "패키지를 찾을 수 없습니다". Ubuntu는 upstream libcamera만 포함하고 Pi ISP/IPA는 Raspberry Pi fork에만 존재.
+- **결정**: libcamera Pi fork(`github.com/raspberrypi/libcamera`) + rpicam-apps(`github.com/raspberrypi/rpicam-apps`) **소스 빌드 진행** (30~60분, Pi4 풀로드). 한 번 빌드 후 영구 사용. W2 진입 전 박물관 시연 풀 기능 확보.
+- **HANDOFF 잔여 액션 #4 갱신**: 기존 "Pi 카메라 동작 검증 3분"에서 "Module v2 (IMX219) user-space 풀 빌드 30~60분"으로 정정. 검증 자체는 이미 통과 (하드웨어 정상).
+- **외부 근거**:
+  - [rpicam-apps#388 — Libcamera-apps not available for Ubuntu](https://github.com/raspberrypi/rpicam-apps/issues/388)
+  - [Sepideh Shamsizadeh — IMX219 on Ubuntu 24.04 LTS 가이드](https://medium.com/@sepideh.92sh/setup-and-troubleshooting-of-raspberry-pi-camera-module-v2-1-imx219-on-ubuntu-24-04-lts-fb518f4576c0)
+  - [Hackaday — Bringing Up IMX219 on Pi 5 with Ubuntu 24.04](https://hackaday.io/project/203704-gesturebot/log/242459)
+- **D435와의 역할 분담**: IMX219 = 일반 RGB 영상(라이브 스트림 + YOLO 4종 인식 + 녹화 MP4/rosbag). D435 = Depth + RGB(3D 매핑, 가벽 detection). 박물관 시연에서 **두 카메라 동시 사용**.
+- **근거 evidence**: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md` (예정, 빌드 완료 후 작성)
+
+### RealSense 카메라 모델 D435 확정 (D435i 아님) + Mac SDK streaming 차단 → Pi4 이전 결정
+
+- **모델 확정**: 주인님 손에 있는 카메라는 `Intel RealSense D435` (Product ID `0B07`, Serial `254522075185`, Asic Serial `350423023342`, FW `5.15.1.55`). `Imu Type: IMU_Unknown` 으로 D435i가 아닌 D435 확정. 그동안 SSOT의 "D435i 도입 후보" 표기는 모두 D435로 정정 대상.
+- **Mac 검증 결과**: `sudo /opt/homebrew/bin/rs-enumerate-devices` verbose는 PASS (Depth/RGB/IR 모든 stream profile 노출). 그러나 `rs-hello-realsense`에서 `Frame didn't arrive within 15000` + `Dispatcher: mutex lock failed: Invalid argument` 로 실제 streaming은 차단.
+- **차단 원인 (3중 호환 이슈)**:
+  1. macOS Monterey+ 이후 librealsense는 sudo 필수 (해결됨)
+  2. brew formula 2.58.1은 `-DHWM_OVER_XU=false`, `-DFORCE_RSUSB_BACKEND=true` 빌드 옵션 누락 → 알려진 timeout 버그
+  3. macOS Tahoe(26.3.1)은 librealsense 공식 미지원 + Apple Silicon adhoc 서명에 IOUSBHost entitlement 부재
+- **결정**: macOS source 재빌드(1~2시간, 성공률 ~40%)는 시도하지 않는다. Pi4 이전(30분, 95%)으로 진행. **근거**: 어차피 ROS2 Jazzy는 macOS 미지원 → 박물관 매핑은 Pi4가 정답. URHYNIX 시연 흐름(카메라=Pi4 직결 → ROS topic 발행 → Unity(Mac) 구독)에서 카메라가 Mac에 꽂혀있을 일 자체가 없음.
+- **박물관 매핑 계획 영향**:
+  - VIO (Visual-Inertial Odometry) 폐기 → odom 보정은 LDS-03 + wheel odom으로
+  - RTAB-Map RGB-D SLAM, 가벽 detection (낮은 가벽 depth로 잡기), 액자 YOLO+depth 위치 식별, Pi 카메라 자리 흡수, Unity 3D mesh import — 모두 그대로 살아있음
+  - 전체 계획의 95% 유지, IMU 의존 부분만 빠짐
+- **잔여 액션**:
+  1. 카메라 케이블 → Pi4 USB 3.0 직결 (사람 작업, 1분)
+  2. `ssh urhynix-robot` + `sudo apt install ros-jazzy-realsense2-camera` (5분)
+  3. `ros2 launch realsense2_camera rs_launch.py` + 토픽 30Hz hz 검증 (5분)
+- **근거 evidence**: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md` (Phase별 결과, 명령 로그, 외부 이슈 트래커 6건 인용)
+
 ## 2026-05-29
 
 ### 🎉 SLAM end-to-end 첫 검증 PASS — Robot 직접 cartographer + Unity 임포트
@@ -28,6 +63,66 @@
 
 - 사실 확인: Docker Desktop 4.34+ host networking은 outbound는 작동(컨테이너에서 LAN ping OK)이지만 **inbound UDP가 컨테이너 프로세스로 라우팅되지 않음**. `lsof -nP -iUDP:11811` 결과 `com.docker`가 IPv6 dual-stack으로 listen하지만 Fast DDS Discovery Server에 robot 접속 메시지 0건.
 - 영향: Mac 컨테이너에서 robot `/scan` topic discovery 실패. 다음 세션 디버깅 출발점: (1) Cyclone DDS XML로 strict unicast peer, (2) `osrf/ros:jazzy-desktop` 다른 base 이미지 시도, (3) 동료 Ubuntu native (multicast 정상) fallback.
+
+### 경기장 진입 + 라이브 SLAM 사이클 검증 (arena_v1)
+
+- 결정: 어제 책상 매핑에서 검증된 흐름(`tb3-up → tb3-slam → save → fetch → map-to-unity`)을 경기장에 그대로 적용해 1차 매핑 산출물 `arena_v1`을 생성. Mac Docker 우회는 시도조차 안 함 (어제 결정대로 robot 직접 cartographer + multicast 모드).
+- 근거: `/scan` 10.04Hz + `/map` 1.000Hz 안정. 158×151 px @ 0.05 m/px = 7.90×7.55m. robot/local evidence/Unity Assets 3곳 저장 OK. SSH key 인증 무대화형 통과. ARENA-DEPLOYMENT-CHECKLIST 첫 10단계 절차 작동 검증.
+- 영향: `docs/evidence/maps/arena_v1/{pgm,yaml,png,eval.md}` 신규 + `unity-smoke/Assets/Maps/arena_v1.{png,yaml}` 임포트 자동. 어제 결정 "robot 직접 cartographer가 정답"이 경기장 환경에서 재검증됨.
+
+### DHCP IP 변경 대응 — `.138` → `.33` + Unity scene 일시 패치
+
+- 결정: 경기장 Wi-Fi에서 robot이 DHCP로 `192.168.0.33`을 받음. `scripts/tb3.sh`의 `TB3_ROBOT_IP_HINT='192.168.0.138'`는 유지(tb3-ip가 MAC sweep으로 자동 발견). Unity 측 `unity-smoke/Assets/Scenes/SampleScene.unity:151` + `unity-smoke/Assets/Scripts/RosSmokeDashboard.cs:10`의 `rosIP`를 `.138 → .33`으로 임시 패치 + Mac `known_hosts`에서 `.138` 엔트리 정리.
+- 근거: ARP MAC 매칭으로 진짜 robot IP가 `.33`으로 검증됨 (`.138`은 다른 기기가 응답해 SSH refused + host key 충돌). Unity Inspector 수동 입력은 시간 낭비라 코드/Scene 직접 수정으로 자동화.
+- 영향:
+  - 다음 세션 DHCP가 또 바뀌면 같은 패치 반복 필요 (Scene + Script 두 곳).
+  - 잔여 결정: helper에 `tb3-unity-set-ip <ip>` 신설 후보 (Scene + Script 일괄 패치 → `tb3-ip` 결과 자동 주입). 미실행.
+  - HANDOFF "Unity rosIP 매 세션 수동" 이슈에 패치 절차 추가 + git status에 두 파일 변경 잡힘 (commit 시점에 임시방편임 명시).
+
+### 회전만 매핑의 한계 인식 + 하이브리드 패턴 표준화
+
+- 결정: 경기장 중앙에서 회전만 5~6바퀴 매핑한 결과 가벽이 LDS-03 반경 3.5m 안에 부분적으로만 들어옴을 확인. **다음 매핑(arena_v2)부터 하이브리드 (회전 + 작은 stop & rotate 이동) 패턴을 표준**으로 한다. arena_v1은 회전만 매핑의 비교 evidence로 영구 보존.
+- 근거: arena_v1 픽셀 통계 = occupied 1.9% / free 98.1% / **unknown 0.0%**. unknown 0은 회전 5바퀴라 모든 방향 관측 완료이지만 외곽이 둥글게 끊기고 가벽 연결선 없음 = 가벽 일부가 LiDAR 반경 밖. PNG 시각 검증 결과 박물관 보호 영역 시각화로는 부적합.
+- 하이브리드 표준 절차 (다음 매핑 채택):
+  1. 출발점에서 360° 1바퀴 (각속도 0.2 rad/s)
+  2. 천천히 1m 직진 (선속 0.10 m/s)
+  3. 360° 1바퀴
+  4. (2)~(3) 반복 3~4 stop으로 가벽 전체 도달
+  5. 출발점 복귀 후 360° 한 번 더 → 루프 클로저 강제
+  6. 총 ~5분 예상
+- 영향:
+  - `docs/ref/ARENA-DEPLOYMENT-CHECKLIST.md` §"현장 도착 후 첫 10분" 8단계 매핑 주행을 하이브리드로 갱신 (잔여 작업).
+  - HANDOFF Top 1을 "arena_v2 하이브리드 매핑 OR W2 SCRUM-10 진입" 분기 결정으로 갱신.
+  - 발표 시연용 maps는 arena_v2 후보. arena_v1은 발표 자료에 "회전만의 한계" 비교 슬라이드용 활용 가능.
+
+### 매핑 실패 진단 정정 — "회전 한계"가 아니라 "가벽 높이 < LiDAR 스캔 평면" (회의록 기반)
+
+- 결정: 위의 "회전만 매핑의 한계" 진단을 **정정한다**. 실제 원인은 **경기장 가벽 높이가 TurtleBot3 Burger의 LDS-03 LiDAR 스캔 평면(약 192mm 지상고)보다 낮아서 LiDAR가 가벽 상단을 over-shoot한 것**. 회전 횟수·반경과는 무관.
+- 근거: 2026-05-29 Confluence 회의록 (page `3932161`) 김주영 발언 직접 인용: *"png파일 얻었지만 라이다높이보다 가벽이낮아서 벽 매핑실패. 하지만 좌표값읽기 성공"*. arena_v1 픽셀 통계의 occupied 1.9% / unknown 0%는 같은 증상이지만 원인은 **평면(거리)이 아니라 수직(높이)**.
+- 영향:
+  - **하이브리드 매핑 권장 폐기** — 가벽 높이가 부족하면 회전을 더 해도 stop & rotate를 추가해도 해결 안 됨.
+  - `arena_v1/eval.md` Verdict + Recommendation 재정정 (하이브리드 권장 제거).
+  - `HANDOFF.md` Top 1 분기 재정의: "가벽 높이 측정 + 보강" 우선, 보강 후 hybrid 매핑.
+  - `.claude/skills/map-quality-eval/eval.py` classify() 로직에 **수직 차원 가능성** 추가.
+  - 다음 매핑 전 사람이 줄자로 가벽 실측 높이를 eval.md에 기록.
+- 잠재 해법 (다음 매핑 전 결정 분기):
+  - (A) 가벽을 200mm 이상으로 물리적 보강 (테이프·종이·박스)
+  - (B) LiDAR를 더 낮게 마운트 (Burger 구조상 어려움, 비추천)
+  - (C) 카메라 vision 기반 가벽 인식으로 보완 (임현찬 YOLO 라인 활용)
+  - (D) 가벽을 obstacle이 아닌 **"보호 영역 경계 마커"**로 정의 변경 (Unity 디지털 트윈 + DB 좌표만 사용, Nav2 cost map 미반영)
+- 잠금: arena_v1의 **"좌표값 읽기 성공"**(odom·TF·map 좌표 1:1)은 그대로 유효. 시각 텍스처용 PNG만 한계.
+
+### Pi 카메라 토픽 검증 + YOLO/OpenCV 환경 통과 + MVP 4 클래스 잠금 (임현찬)
+
+- 결정: Raspberry Pi 카메라 ROS 토픽 3종(`/camera/image_raw`, `/camera/camera_info`, `/camera/image_raw/compressed`)을 30Hz 정상 publish로 검증 완료. MP4 + ROS bag 동시 녹화 스크립트(`/home/pi/camera_recordings/scripts/record_bag_mp4.sh`)를 표준 녹화 도구로 채택. 노트북 Ubuntu에 YOLO/OpenCV 환경 + `yolo11n.pt` 기본 모델 + 실시간 카메라 스트림 인식 통과. **MVP 학습 클래스 4종 잠금: 로봇 · 사람 · 중요품 · 불**.
+- 근거: 2026-05-29 Confluence 회의록 (page `3932161`) 임현찬 진척 보고 직접 인용.
+- 영향:
+  - `docs/ref/PRD.md` 카메라 인식 범위에 4 클래스 명시.
+  - `docs/ref/ARCHITECTURE.md` Vision 파이프라인에 MP4/bag 분리 (MP4 = 즉시 확인, bag = 재처리) 추가.
+  - `docs/ref/CONTRACT.md`에 카메라 토픽 3종 + 30Hz 명시.
+  - `docs/ref/JIRA-MAP.md` SCRUM-19/20에 진척 반영.
+  - 다음 작업: 자체 데이터셋 촬영 + 라벨링 + 커스텀 YOLO 학습 (W2 후반).
+- 잠금: 기본 `yolo11n.pt`로는 박물관 도메인(액자·중요품) 인식 한계 — 발표 시연 전에 커스텀 학습 필수.
 
 ## 2026-05-26
 
@@ -311,3 +406,42 @@
   - SSOT 변경이 보드에 영향을 주면 `python3 docs/whiteboards/build_bundle.py`를 실행하고 HTML 파싱 검증을 수행한다.
   - Confluence/Jira는 회의록에서 명확히 영향받은 항목만 갱신한다.
 - 주의: 외부 문서 전체 덮어쓰기는 필요할 때만 수행하고, 기본은 검증된 변경만 반영한다.
+
+### 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 부트스트랩 (2026-06-01)
+
+- 결정: 라즈베리파이4의 기존 16GB SD를 128GB로 교체하고, Mac에서 직접 `dd` + cloud-init 사전설정 박는 방식으로 새 부팅 환경을 잠근다. ROS2 Jazzy + turtlebot3 메타 + ld08_driver + ros_tcp_endpoint까지 한 세션에 풀 셋업.
+- 이유:
+  - 기존 SD가 디스크 1.1GB(94%) 빡빡해서 colcon build/패키지 추가가 위험. 128GB로 여유 확보.
+  - Raspberry Pi Imager GUI는 매번 수동 클릭이 필요하지만, cloud-init `user-data`/`network-config`/`meta-data` 3개 파일을 `system-boot` 파티션 루트에 두면 Pi용 `preinstalled-server-arm64+raspi.img.xz`가 자동 인식한다. 재현성과 자동화에 더 좋다.
+  - Opus 자기리뷰가 "NoCloud datasource_list 명시 필요 / cloud/ 서브디렉토리 필요"라고 했지만, 실제 검증에서는 둘 다 불필요했다. Ubuntu Pi 이미지의 cloud-init은 system-boot 파티션 루트의 user-data를 자동으로 NoCloud datasource로 인식한다 (`status: done` `DataSourceNoCloud [seed=/dev/mmcblk0p1]`).
+- 잠금 사항:
+  - 이미지: `ubuntu-24.04.4-preinstalled-server-arm64+raspi.img.xz` (SHA256 `790652fa...0d37`)
+  - 사용자: `kim` / 비번 `1234` (학원 LAN 한정, 발표 후 변경 권장)
+  - hostname: `urhynix-robot`, timezone `Asia/Seoul`, locale `ko_KR.UTF-8`
+  - SSH 키 인증 자동 (Mac `~/.ssh/id_ed25519` 등록), `ssh_pwauth: true` (helper 호환)
+  - 네트워크: 유선 eth0 DHCP. 학원이 `192.168.0.x` ↔ `192.168.10.x` 라우팅을 해줘서 robot이 `192.168.10.59`에 있어도 Mac에서 직접 SSH/ping 가능. 단 mDNS multicast는 라우터 못 건너 `.local` 미작동 → Mac `~/.ssh/config` 별칭 `urhynix-robot` 으로 우회.
+  - ROS2 Jazzy + `ros-jazzy-turtlebot3` 메타(2.3.6) + cartographer + nav2-bringup + hls-lfcd-lds-driver + dynamixel-sdk + rmw-cyclonedds-cpp 모두 apt
+  - src 빌드: `ld08_driver` (jazzy 브랜치, LDS-03 LiDAR) + `ros_tcp_endpoint` (main-ros2 0.7.0, Unity 통신)
+  - `~/.bashrc`에 ros-jazzy setup + ws setup + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + ROS_DOMAIN_ID=30 자동 source
+  - udev rules `/dev/tb3_arduino` (Arduino UNO 2341:0043, 2a03:0043) + `/dev/tb3_opencr` (STM 0483:5740) 안정 심볼링크
+  - `/etc/urhynix.env` 템플릿 (640 root:kim, SUPABASE_KEY 자리는 `PASTE_SERVICE_ROLE_JWT_HERE` 로 비워둠 — 발표 직전 주인님이 채움)
+- 잔여:
+  - 다음 세션 첫 5분에 `/etc/urhynix.env` SUPABASE_KEY 주입 (service_role JWT, 절대 commit 금지)
+  - OpenCR firmware 재플래시, Arduino UNO PIR/LDR 스케치 재플래시 (D2 핀 SSOT 정렬)
+  - Pi 카메라 동작 검증 (`libcamera-hello -t 0`)
+  - bringup `/scan` `/odom` topic 검증 (LiPo ON 필요)
+  - 그 다음에 가벽 보강(옵션 A) + arena_v2 매핑
+- 근거: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md`
+
+### IP-drift zero-touch 화 — Unity rosIP + helper mDNS hostname 기반화 (2026-06-01 오후)
+
+- 결정: DHCP IP가 바뀔 때마다 Unity Scene/Script/helper의 hardcoded IP를 patch하던 매 세션 첫 5분 표준 작업(`ip-drift-resync` 스킬 호출)을 mDNS hostname 기반화로 zero-touch 한다.
+- 이유: 신규 SD 부트스트랩 후 robot이 학원 Wi-Fi(codelab_5G)에 영구 연결됐고 avahi-daemon이 `urhynix-robot.local`을 publish. Mac과 robot이 같은 192.168.0.x 서브넷에 있으므로 mDNS multicast 작동. 모든 진입점에 hostname을 박으면 IP 변경에 무관.
+- 잠금 사항:
+  - `unity-smoke/Assets/Scenes/SampleScene.unity:151` rosIP=`urhynix-robot.local`
+  - `unity-smoke/Assets/Scripts/RosSmokeDashboard.cs:10` 기본값=`urhynix-robot.local`
+  - `scripts/tb3.sh`에 `export TB3_HOSTNAME='urhynix-robot'` 추가 + `tb3-ip()` 맨 앞에 mDNS 우선 시도 (`ping <hostname>.local`에서 IP 추출, 실패 시 기존 ARP sweep으로 fallback)
+  - Mac `~/.ssh/config` `Host urhynix-robot` 별명 → `HostName urhynix-robot.local`
+- 효과: IP 바뀌어도 `ssh urhynix-robot` / `tb3-ip` / Unity 모두 자동 follow. `ip-drift-resync` 스킬은 호출 거의 불필요 (다른 망 가거나 mDNS 죽었을 때만 안전망으로 남음).
+- 검증: 랜선 분리 + 재기동 후 무선 단독 PASS (eth0 IP 비어있는 상태로 wlan0=192.168.0.82만으로 ssh + ros2 진입 OK).
+- 근거: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md` §"IP-drift zero-touch 화"

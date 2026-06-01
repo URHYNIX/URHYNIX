@@ -1,10 +1,10 @@
 # Project Status
 
-Last updated: 2026-05-28
+Last updated: 2026-06-01 저녁
 
 ## 한 줄 상태
 
-방향을 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)**으로 구체화하고, 카메라 중요물품 인식·LiDAR/PIR 외부자 판단·좌표/사진/영상/사운드 저장 요구를 SSOT에 반영한 단계입니다.
+방향은 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1 순찰/감지 + tb3_2 출동/확인)** 그대로. **2026-06-01 저녁: RealSense 카메라 모델 D435 확정 (D435i 아님, IMU 없음, FW 5.15.1.55)**. Mac에서 `sudo rs-enumerate-devices` PASS지만 `rs-hello-realsense` streaming은 macOS Tahoe(26) + brew 빌드 옵션 누락으로 차단 → Pi4 이전 결정 (잔여 액션 #6, 30분). 박물관 매핑 계획 95% 유지 (VIO만 폐기, RGB-D SLAM + LDS-03 + wheel odom). evidence: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md` + DECISION-LOG 2026-06-01. **2026-06-01 점심**: 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 스택 한 세션 완전 부트스트랩 PASS. `ssh urhynix-robot` 한 줄 진입.
 
 ## 현재 방향
 
@@ -17,6 +17,12 @@ Last updated: 2026-05-28
 - **하드웨어 확정**: 별도 Arduino Uno R3 + 미니 브레드보드 → Raspberry Pi USB serial. **별도 층 추가 없음** — Burger 상판 빈 공간(라즈베리파이 반대편)에 양면테이프로 부착. 전원은 OpenCR 5V 핀 → Arduino 5V 핀 점퍼 2줄.
 - **병렬 작업 매트릭스**: `docs/ref/PROJECT-PLAN.md` 앞부분에 주차×모듈 표와 S1 1주차 4팀 동시 시작 가이드 추가됨.
 - **오늘 추가 요구 반영 (2026-05-28)**: 박물관/미술관 컨셉, 액자형 사진 타깃 보호, 조도 기반 LiDAR 강화 모드, 외부자 PIR+LiDAR 판단을 SSOT에 반영. `pose_logs`/`media_artifacts`/`protected_assets`는 실제 DB 미적용 상태의 SCRUM-23 확장 예정안으로 분리.
+- **오늘 회의록 반영 (2026-05-29)**:
+  - SLAM: 책상 환경에서 SLAM end-to-end 테스트 성공(스킬화). 경기장에서 SLAM+Unity 좌표값 정렬도 **성공**(PNG 확보)했으나, **LiDAR 높이보다 낮은 가벽** 때문에 벽 매핑이 실패(블로커) — 트랙/가벽 조건 재검토 필요.
+  - 사용자 요구사항: Confluence `사용자 요구사항 정의서(3112961)` 수정 보완(세부 diff는 미확인, 회의록 언급 근거).
+  - 카메라: RPi 카메라 토픽(`/camera/image_raw`, `/camera/camera_info`, `/camera/image_raw/compressed`) 정상 + `/camera/image_raw` ~30Hz 확인.
+  - 녹화: MP4 + ROS bag 동시 저장 스크립트 `/home/pi/camera_recordings/scripts/record_bag_mp4.sh` 구성(영상 즉시 확인용 MP4, 재처리용 rosbag 분리).
+  - 비전: 노트북 Ubuntu에서 YOLO/OpenCV 환경 구성 + `yolo11n.pt`로 녹화 영상/실시간 스트림 인식 화면 확인 완료. 프로젝트 전용은 커스텀 학습 필요(예정: 로봇/사람/중요품/불 중심 클래스).
 
 ## 현재 Jira 기준
 
@@ -31,6 +37,7 @@ Last updated: 2026-05-28
 | Confluence | [기획안 (UR HYNIX) v12](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/327681) | **외부 정본 SSOT** |
 | Confluence | [역할 분배 보드](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1605636) | 5×4 매트릭스 + PNG 2장 |
 | Confluence | [2026-05-27 회의록](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1048633) | Day-1 작업 분담 |
+| Confluence | [2026/05/29 회의록](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/3932161) | SLAM 테스트 성공 + 경기장 Unity 좌표 정렬 예정 |
 | Confluence | [브레인스토밍 마인드맵](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/1540099) | 방향 전환 근거 |
 | Confluence | [기능 요구사항 정의서 v5](https://jason1127.atlassian.net/wiki/spaces/SCRUM/pages/2555905) | 액자 보호 기능 요구사항 + 현재/예정 DB 분리 |
 | Jira | [SCRUM-7 에픽](https://jason1127.atlassian.net/browse/SCRUM-7) · [보드](https://jason1127.atlassian.net/jira/software/projects/SCRUM/boards/1) | 18 카드 부모 |
@@ -136,7 +143,7 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 
 ## Evidence Status
 
-| 검증 항목 | 상태 | 비고 (2026-05-27) |
+| 검증 항목 | 상태 | 비고 (2026-05-29) |
 |---|---|---|
 | 옛 방향/제거 범위 본문 잔재 grep | ✅ | 활성 문서에서 제거 대상 키워드와 이전 제목 잔재 없음. DECISION-LOG의 전환 기록만 예외 |
 | `tb3_1`/`tb3_2` 일관 사용 grep | ✅ | 10개 파일에서 등장 (SSOT 8 + DECISION-LOG + dev-plan.html) |
@@ -148,6 +155,9 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | TurtleBot3 live ROS2 bringup | ✅ | `192.168.0.138` / MAC `2c:cf:67:47:38:03` 검증. `/dev/ttyACM0`, `/scan`, `/odom`, `/battery_state`, `/tf` 확인. `/scan` 약 10Hz |
 | RViz visual route | ✅ | Robot `DISPLAY=:2`, TigerVNC `5902`, RViz 실행 확인. Mac Screen Sharing 경로는 `vnc://192.168.0.138:5902` |
 | ROS-TCP → Unity smoke | ✅ | ROS-TCP-Endpoint `main-ros2` 빌드, `10000` listen, Unity mini project subscriber 등록 확인 (`/scan`, `/odom`, `/battery_state`, `/tf`) |
+| SLAM end-to-end 1차 PASS | ✅ | 2026-05-29 책상 환경에서 Robot cartographer 실행 → map save → Unity 임포트까지 검증 PASS. 다음: 경기장 실환경에서 SLAM+Unity 좌표 정렬(plane scale/원점) 재검증 |
+| RPi 카메라 토픽/프레임레이트 확인 | ✅ | 2026-05-29 `/camera/image_raw` ~30Hz + `/camera/camera_info` + `/camera/image_raw/compressed` 정상(회의록 3932161 근거). 녹화 스크립트 `/home/pi/camera_recordings/scripts/record_bag_mp4.sh` 구성 |
+| 경기장 벽 매핑 실패 원인 기록 | ⚠️ | 2026-05-29 PNG 확보/좌표 정렬은 성공했으나, LiDAR 높이보다 낮은 가벽으로 벽 매핑 실패(회의록 3932161). 트랙/가벽 조건 변경 또는 매핑 전략 보완 필요 |
 | TurtleBot helper aliases | ⚠️ | Mac helper는 `/Users/family/.zshrc` 반영 완료. Robot helper installer는 `/tmp/install_tb3_helpers.py` 복사 후 SSH timeout으로 원격 실행 미검증 |
 | Arduino PIR 플래시 (cli 자동화) | ✅ | 2026-05-28 `arduino-cli` 1.5.0 + AVR core 1.8.8로 `sketches/pir_led/`를 `/dev/cu.usbmodem1101`(Arduino UNO)에 업로드, 시리얼 raw 캡처 30초에서 MOTION/CLEAR 로그 확인. 핀: 코드는 PIR=D7·LED=D2, SSOT는 PIR=D2 → 다음 작업분에서 정렬 |
 | `arduino-flash` 스킬 등록 | ✅ | `.claude/skills/arduino-flash/SKILL.md` + README Embedded/Hardware 표 추가. 센서 4종 반복 플래시 표준화 |
@@ -160,3 +170,14 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | TurtleBot ↔ Unity ROS-TCP 재기동 (`turtlebot` 프로젝트) | ✅ | 2026-05-28 새 Unity 프로젝트 `/Users/family/jason/turtlebot`에 ROS-TCP-Connector v0.7.0 + smoke 자산 설치. RegisterSubscriber 4/4(`/scan`·`/odom`·`/battery_state`·`/tf`) + ESTAB 2 세션 확인. Mac IP `192.168.0.67`(DHCP 변경), 로봇 IP `192.168.0.138` 유지. |
 | Mac → Robot SSH 공개키 인증 | ✅ | 2026-05-28 `ssh-keygen ed25519` + `ssh-copy-id kim@192.168.0.138` 완료. `ssh -o BatchMode=yes kim@... hostname` → `kim-desktop` 무대화형 응답. 이후 모든 tb3-* 명령이 비번 prompt 없이 동작. `scripts/tb3.sh`에 `tb3-key-setup` 헬퍼 추가 (협업자 머신용). |
 | Arduino → DB 자동 insert (PIR + LDR) | ✅ | 2026-05-28 robot `arduino_bridge` tmux에서 PIR `[MOTION]` → events insert (severity=3) + LDR A0<200 edge-trigger → event_type='dark' (severity=1) 검증. 누적 `events` 45+ row. `sb-by-type` 결과 `pir 44 / dark 1`. |
+| 경기장 SLAM v1 (회전만 5바퀴) | 🟡 | 2026-05-29 18:14 경기장 중앙에서 회전만 5~6바퀴 매핑 → `arena_v1` 산출. 158×151 @ 0.05m/px = **7.90×7.55m**, origin [-3.767,-3.939]. robot `~/maps/` + 로컬 `docs/evidence/maps/arena_v1/` + Unity `Assets/Maps/` 3곳 저장 OK. 픽셀: occupied 1.9% / free 98.1% / unknown 0.0%. 가벽이 LiDAR 반경 3.5m 일부 외 → 발표용 임팩트 약, `arena_v2` 하이브리드 재매핑 후보. eval.md 참조. |
+| DHCP IP 변경 대응 (.138 → .33) | 🟡 | 2026-05-29 경기장 Wi-Fi에서 robot DHCP `.33` 할당. Unity `SampleScene.unity:151` + `RosSmokeDashboard.cs:10` rosIP 일시 patch (.138→.33). known_hosts에서 .138 제거. tb3-ip는 MAC sweep으로 자동 발견하므로 helper 코드는 미변경. 다음 세션 출발 시 IP 재검증 + 같은 패치 반복 필요 가능. |
+| 매핑 실패 진단 정정 (회의록 5/29 기반) | 🟥 | 2026-05-29 Confluence 회의록 page `3932161` 김주영 발언으로 확인: arena_v1 가벽 매핑 실패의 **진짜 원인은 "라이다 높이 > 가벽 높이" (수직 차원)**, 회전 한계가 아님. 하이브리드 매핑 권장 폐기. DECISION-LOG/eval.md/HANDOFF/map-quality-eval 스킬 정정 완료. **다음 매핑 전 가벽 실측 높이 측정 + 192mm 이상 보강 또는 vision/마커 fallback 결정 필요**. |
+| Pi 카메라 + YOLO 환경 + MVP 4 클래스 잠금 (회의록 5/29 기반) | ✅ | 2026-05-29 임현찬 진척: Pi 카메라 토픽 3종 30Hz 정상 + MP4/rosbag 동시 녹화 스크립트 + 노트북 YOLO/OpenCV 실시간 인식 통과. **MVP 학습 클래스 4종 잠금: 로봇·사람·중요품·불**. 자체 데이터셋 + 커스텀 YOLO 학습은 W2 후반. PRD/ARCHITECTURE/CONTRACT/JIRA-MAP 반영 잔여. |
+| 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 부트스트랩 | ✅ | 2026-06-01 SD 16GB→128GB 교체 후 cloud-init 사전설정으로 부팅 → ros-jazzy-turtlebot3 메타(2.3.6) + cartographer + nav2 + dynamixel + hls-lfcd + ld08_driver(jazzy) + ros_tcp_endpoint(0.7.0) 한 세션 셋업. udev `/dev/tb3_arduino` + `/dev/tb3_opencr` + `/dev/tb3_lidar` 추가. `/etc/urhynix.env` 템플릿 작성 (SUPABASE_KEY 빈 상태). evidence: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md`. |
+| 학원 Wi-Fi(codelab_5G) 영구 연결 + mDNS + IP-drift zero-touch | ✅ | 2026-06-01 netplan `60-wifi.yaml`로 wlan0=192.168.0.82(Mac과 같은 망) 영구 자동 연결. 랜선 분리 + 재기동 검증 PASS. avahi-daemon → `urhynix-robot.local` mDNS 작동. **B+C 작업: Unity Scene/Script rosIP=`urhynix-robot.local` + `scripts/tb3.sh`에 TB3_HOSTNAME + tb3-ip mDNS 우선 추가**. Mac `~/.ssh/config` 별칭 `Host urhynix-robot`. 이후 DHCP IP 변경 시 ssh/helper/Unity 모두 자동 follow (zero-touch). `ip-drift-resync` 스킬은 안전망으로만 남음. |
+| Arduino UNO + OpenCR + LDS-03 USB 12+ 단계 검증 | ✅ | 2026-06-01 lsusb: Arduino UNO `2341:0043` + OpenCR `0483:5740` + CP2102(LDS-03) `10c4:ea60` 모두 정상. udev 심볼링크 3종 작동. Arduino 시리얼 캡처: "=== PIR + LDR Test === / Warming up.........". 스케치 살아있음 확인. (재플래시는 D2 핀 정렬용으로 별도 잔여.) |
+| RealSense 카메라 모델 확정 (D435, D435i 아님) | ✅ | 2026-06-01 저녁 `sudo rs-enumerate-devices` 검증: Product ID `0B07`, Serial `254522075185`, Asic Serial `350423023342`, FW `5.15.1.55`, USB 3.2 SuperSpeed, `Imu Type: IMU_Unknown`. Depth/RGB/IR stream profile 전체 노출(Depth 1280×720@30 등). evidence: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md`. **영향**: VIO 폐기, RGB-D SLAM + LDS-03 + wheel odom으로 매핑. 박물관 계획 95% 유지. |
+| RealSense Mac SDK streaming 검증 | 🟥 | 2026-06-01 저녁 `rs-hello-realsense` Frame timeout 15s + Dispatcher `mutex lock failed: Invalid argument`. 원인 3중 호환 이슈: ① macOS Monterey+ sudo 필수(해결) ② brew formula 빌드 옵션 누락(`HWM_OVER_XU`/`FORCE_RSUSB_BACKEND`) ③ macOS Tahoe(26.3.1) 공식 미지원 + adhoc 서명 IOUSBHost entitlement 부재. 결정: Pi4 이전(HANDOFF 잔여 액션 #6). |
+| Pi Camera 모델 확정 (Module v2 / Sony IMX219) | ✅ | 2026-06-01 저녁 신규 SD에서 첫 진단: `lsmod`에 `imx219` 로드, `bcm2835_unicam`+`bcm2835_isp`+`bcm2835_codec` 활성, `i2c-10` 0x10 응답, `/dev/video0`=unicam-image, `/dev/media0~4`. 즉 **하드웨어/드라이버 100% 정상**. 모델: Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464). evidence: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md`. |
+| Pi Camera user-space 도구 (rpicam-apps/libcamera Pi fork) | 🟡 | 2026-06-01 저녁 Ubuntu 24.04 LTS ports repo에 rpicam-apps/libcamera-apps **미제공** 확인 (`apt install` "패키지를 찾을 수 없습니다"). Ubuntu는 upstream libcamera만 포함하고 Pi ISP/IPA 미지원 → libcamera Pi fork + rpicam-apps 소스 빌드 필수. 빌드 진행 중 (HANDOFF 잔여 액션 #4). 근거: rpicam-apps#388, Sepideh Shamsizadeh Medium 가이드. |

@@ -3,7 +3,7 @@
 > **다음 세션의 AI 에이전트가 첫 5분 안에 컨텍스트를 잡기 위한 1페이지.**
 > 이 파일만 읽으면 출발 가능. 자세한 건 아래 링크로 들어가면 됨.
 
-**Last updated**: 2026-05-29 (**🎉 SLAM end-to-end 검증 PASS** — robot 직접 cartographer + 책상 정적 매핑 5.90m×5.40m + Unity Plane scale 자동 계산 / Mac Docker/Multipass/UTM 우회 검증 결과 robot 직접이 가장 빠름 / 새 helper 8개 + playbook 250줄 + 출동 체크리스트 + first map evidence 추가) · **세션 종료자**: 김주영
+**Last updated**: 2026-06-01 저녁 (**📷 RealSense 카메라 D435 확정 (D435i 아님) + Mac SDK enumeration PASS, streaming BLOCKED → Pi4 이전 결정**. 자세히: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md` + DECISION-LOG 2026-06-01. **이전(2026-06-01 점심)**: 💾 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 부트스트랩 + Wi-Fi 영구 + Arduino/OpenCR/LDS-03 USB 12+ 단계 검증 PASS — cloud-init 부팅 → SSH 키 → ros-jazzy-turtlebot3 풀 스택 → 학원 Wi-Fi(codelab_5G) netplan 영구 연결(wlan0=192.168.0.82, Mac과 같은 망) → mDNS `urhynix-robot.local` 작동 → Arduino UNO(`/dev/tb3_arduino`) + OpenCR(`/dev/tb3_opencr`) + LDS-03 CP2102(`/dev/tb3_lidar`) 3종 udev 모두 PASS + 스케치 살아있음 확인. `ssh urhynix-robot` 한 줄 진입(유선/무선 무관). 다음 세션 첫 행동은 `/etc/urhynix.env` SUPABASE_KEY 주입 + OpenCR/Arduino 재플래시 + 카메라 검증 + bringup `/scan` `/odom` 검증 + 가벽 보강) · **세션 종료자**: 김주영
 
 ---
 
@@ -22,10 +22,12 @@
 > 처음 들어온 사람은 이 9단계만 따라가면 로봇과 직접 통신 가능. 자세한 OS별 분기는 [`unity-smoke/README.md`](../../unity-smoke/README.md).
 
 ```bash
-# 0) 같은 LAN 확인 (필수) — 로봇은 192.168.0.0/24. 다른 망이면 작동 안 함.
+# 0) 같은 LAN 확인 (필수) — 로봇은 학원 Wi-Fi(codelab_5G)에 wlan0=192.168.0.x, eth0=192.168.10.x.
+#    Mac도 192.168.0.x이면 같은 서브넷. 다른 서브넷이라도 학원 라우터가 0.x ↔ 10.x 라우팅하므로 도달 가능.
+#    가장 빠른 진입: `ssh urhynix-robot` (mDNS, 같은 서브넷에서만 동작) 또는 ssh kim@192.168.0.x.
 #    WSL2는 기본 NAT라 robot 탐색 실패 → mirrored networking 또는 native Ubuntu 권장.
-ip -4 addr show | grep 192.168.0   # Ubuntu
-ipconfig getifaddr en0             # macOS
+ip -4 addr show | grep -E "192.168.0|192.168.10"   # Ubuntu (둘 중 하나 잡히면 OK)
+ipconfig getifaddr en0                              # macOS (0.x 권장)
 
 # 1) 의존성
 #    Ubuntu:
@@ -63,8 +65,9 @@ tb3-unity         # Unity Editor 자동 Play → 화면 가운데 한글 패널 
 ```
 
 체크포인트:
-- `tb3-myip` → `192.168.0.x` 라면 같은 망 ✅
-- `tb3-ip` → 로봇 IP 1개 반환 ✅
+- `tb3-myip` → Mac IP가 `192.168.0.x`면 robot wlan0와 같은 서브넷 ✅ (eth0(10.x)도 라우팅으로 도달 가능)
+- `tb3-ip` → 로봇 IP 1개 반환 ✅ (mDNS 우선 → 실패 시 MAC sweep)
+- `ssh urhynix-robot` → 한 줄로 진입 (mDNS, IP-drift zero-touch) ✅
 - `tb3-port` → `Connection succeeded` ✅
 - `sb-count` → 숫자 응답 ✅ (Supabase token 작동)
 
@@ -72,21 +75,101 @@ tb3-unity         # Unity Editor 자동 Play → 화면 가운데 한글 패널 
 
 ---
 
-## 🚀 지금 즉시 해야 할 일 (Top 1) — **경기장 출동 + 진짜 SLAM 25분 매핑 (Day-2 진입)**
+## 🚀 지금 즉시 해야 할 일 (Top 1) — **/etc/urhynix.env SUPABASE_KEY 주입 + bringup 검증**
 
-### 검증된 흐름 (오늘 책상 정적 매핑으로 통과)
+> **2026-06-01 점심에 새 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 부트스트랩 완료.** 자세히는 `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md`. 다음 세션 첫 5분에 해야 할 액션은 이 표.
+
+### 새 환경 진입점 (한 줄)
 
 ```bash
-. ~/.tb3rc && . ~/jason/URHYNIX/scripts/tb3.sh
-tb3-up                              # bringup + ros_tcp (12s)
-tb3-slam                            # cartographer multicast 모드 (10s)
-tb3-teleop                          # 매핑 주행 (천천히 한 방향 루프 + 출발점 복귀)
-tb3-slam-save arena_v1              # robot ~/maps/
-tb3-fetch-map arena_v1              # 호스트 docs/evidence/maps/ + PNG 자동
-tb3-map-to-unity arena_v1           # Unity Plane scale 자동 출력
+ssh urhynix-robot   # ~/.ssh/config 별칭 (HostName=192.168.10.59, User=kim, IdentityFile id_ed25519). 비번 없이 즉시
+# 또는: ssh kim@192.168.10.59
 ```
 
-→ 오늘 같은 흐름으로 책상 5.90m×5.40m 매핑 + Unity 임포트 검증 완료. 경기장은 25분 teleop 주행으로 확장.
+robot 안에서 `~/.bashrc`가 ROS2 환경(ros-jazzy + ~/turtlebot3_ws + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + ROS_DOMAIN_ID=30)을 자동 source 하므로 즉시 `ros2 launch ...` 가능.
+
+### 잔여 액션 6건 (주인님 손이 꼭 필요)
+
+| # | 액션 | 명령 | 소요 |
+|---|---|---|---|
+| 1 | `/etc/urhynix.env` SUPABASE_KEY 주입 | `ssh urhynix-robot 'sudo nano /etc/urhynix.env'` → `PASTE_SERVICE_ROLE_JWT_HERE` 자리에 service_role JWT 붙여넣기. 절대 commit 금지 | 1분 |
+| 2 | OpenCR firmware 재플래시 (USB micro 케이블 + 부트로더 모드) | 본 evidence §"잔여" 참조 | 5분 |
+| 3 | Arduino UNO PIR+LDR 스케치 재플래시 (D2 핀 SSOT 정렬) | Mac에서 `arduino-flash` 스킬 + USB 연결 | 5분 |
+| 4 | **Pi Camera Module v2 (Sony IMX219, 8MP) user-space 풀 빌드** — Ubuntu 24.04 ports repo는 rpicam-apps/libcamera-apps 미제공이므로 libcamera Pi fork + rpicam-apps 소스 빌드 필수. 하드웨어/드라이버는 100% 정상 확인됨 (`imx219` kernel module 로드, `i2c-10` 0x10 응답, `/dev/video0` unicam-image). 자세히: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md` | 30~60분 |
+| 5 | bringup `/scan` `/odom` 검증 (LiPo ON 필요) | `ssh urhynix-robot 'source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && ros2 launch turtlebot3_bringup robot.launch.py'` | 10분 |
+| 6 | **RealSense D435 → Pi4 이전 + ros-jazzy-realsense2-camera setup** | 케이블 옮긴 후 `ssh urhynix-robot 'sudo apt install -y ros-jazzy-realsense2-camera ros-jazzy-realsense2-description && ros2 launch realsense2_camera rs_launch.py align_depth.enable:=true pointcloud.enable:=true'` → 별도 터미널에서 `ros2 topic hz /camera/camera/color/image_raw` 30Hz 확인. **카메라는 D435i가 아니라 D435 확정 (IMU 없음, Serial 254522075185, FW 5.15.1.55)** | 15분 |
+
+### 그 다음 — arena_v2 매핑 (가벽 보강 후)
+
+이전 매핑 실패 진단(`라이다 높이 > 가벽 높이`)은 그대로 유효. 옵션 A(물리 보강) 추천. 자세히 ↓ "가벽 높이 측정 + 보강" 섹션.
+
+---
+
+## 📌 (이전) 가벽 높이 측정 + 보강 결정 (arena_v2 매핑 전 필수 선행)
+
+### 배경: 매핑 실패의 진짜 원인은 "라이다 높이 > 가벽 높이" (회의록 5/29)
+
+- 어제 evening에 작성한 "회전만의 한계" 진단을 **정정함**.
+- **진짜 원인**: TurtleBot3 Burger의 LDS-03 LiDAR 스캔 평면(~192mm 지상고)이 경기장 가벽 상단보다 높음 → LiDAR가 가벽을 over-shoot.
+- 회전을 더 해도, 하이브리드(stop & rotate)를 해도 **수직 차원 문제는 해결 안 됨**.
+- 근거: Confluence 회의록 page `3932161` 김주영 발언 — "라이다높이보다 가벽이낮아서 벽 매핑실패. 하지만 좌표값읽기 성공".
+- 좌표값(odom·TF·map 1:1)은 그대로 유효 → Unity 디지털 트윈 좌표 매핑은 가능.
+
+### 결정 분기 (다음 매핑 전 사람이 결정)
+
+| 옵션 | 절차 | 시간 | 위험 |
+|---|---|---|---|
+| **A. 가벽 물리 보강** | 가벽 상단에 종이/테이프/박스로 200mm 이상으로 올림 | 5분 | 가장 단순. 시연 외관 약간 손상 |
+| **B. 카메라 vision fallback** | YOLO에 가벽 클래스 추가 학습 (임현찬 라인) | 수일 | 발표 일정 위험 |
+| **C. 가벽을 obstacle 아니라 "보호 영역 경계 마커"로 재정의** | Unity 디지털 트윈 + DB 좌표만 사용, Nav2 cost map 미반영 | 1시간 | Nav2가 가벽 밖으로 갈 위험 → 출동 시뮬 시 주의 |
+| **D. LiDAR 더 낮게 마운트** | Burger 구조 개조 | 수시간 | 비추천, 안정성 손상 |
+
+→ **A 추천** (시간/리스크/검증성 모두 최선). 가벽 보강 후 정상 매핑 가능.
+
+### A 선택 시 실행 흐름
+
+```bash
+# 0) 가벽 실측 (사람 작업)
+줄자로 가벽 상단 지상고 측정 → 200mm 이상으로 종이/테이프 보강 → 측정값을 eval.md에 기록
+
+# 1) 출발 (DHCP IP 변경 가능)
+bash .claude/skills/ip-drift-resync/resync.sh
+. ~/.tb3rc && . ~/jason/URHYNIX/scripts/tb3.sh
+tb3-up && tb3-slam
+
+# 2) 별도 터미널: tb3-teleop → 회전만 2~3바퀴 (가벽 보강됐으면 5바퀴 불필요)
+#    또는 하이브리드 (회전 + 작은 이동)
+
+# 3) 저장 + Unity 임포트
+tb3-slam-save arena_v2
+tb3-fetch-map arena_v2
+tb3-map-to-unity arena_v2
+
+# 4) 정량 평가
+python3 .claude/skills/map-quality-eval/eval.py arena_v2
+# → occupied ≥ 5% AND 가벽 연결성 OK 면 통과
+```
+
+### W2 진입은 매핑 통과 후 (SCRUM-10 Nav2 베이스라인)
+
+- arena_v1 그대로 W2 진입은 비추천 — 가벽 detect 안 됨 = Nav2 cost map 부정확 = 시연 실패 위험.
+
+### 사전 점검 (2026-06-01 부트스트랩 후 — 다음 세션 출발 시 재검증)
+
+| 항목 | 2026-06-01 최신 |
+|---|---|
+| 로봇 hostname | `urhynix-robot` (mDNS — IP drift-proof 진입점) |
+| 로봇 wlan0 IP | `192.168.0.82` (학원 Wi-Fi codelab_5G, Mac과 같은 망) |
+| 로봇 eth0 IP | `192.168.10.59` (랜선 꽂으면 잡힘, 평소엔 안 꽂아도 됨) |
+| Mac IP | `192.168.0.71` (학원 LAN) |
+| 배터리 | (재부팅 후 미측정 — 다음 세션에 LiPo ON 시 확인) |
+| 디스크 | 128GB SD, rootfs 117G 중 8.6G 사용 (8%) — 여유 충분 |
+| `~/turtlebot3_ws/build` | 6/1 신규 (ld08_driver + ros_tcp_endpoint colcon build OK) |
+| Unity scene rosIP | `urhynix-robot.local` (mDNS — IP 바뀌어도 자동 follow) |
+| `scripts/tb3.sh` | TB3_HOSTNAME + mDNS 우선 추가 (IP-drift zero-touch) |
+| `/etc/urhynix.env` | ✅ 6/1 신규 작성 (640 root:kim, **SUPABASE_KEY=PASTE_... 빈 상태**) |
+| Arduino/OpenCR/LDS-03 udev | ✅ `/dev/tb3_arduino` / `/dev/tb3_opencr` / `/dev/tb3_lidar` 모두 활성 |
+| Arduino 스케치 | ✅ 살아있음 ("=== PIR + LDR Test === / Warming up..." 시리얼 출력) |
 
 ### 주의
 
@@ -270,6 +353,10 @@ Day-1 PASS 확인 후 다음 액션:
 | TurtleBot env check evidence | `docs/evidence/2026-05-27-unity-ros2-turtlebot-env-check.md` | Mac/Unity/ROS2/참고 repo 환경 점검 결과 |
 | 스킬 `urhynix-turtlebot-unity-ros2-success-pattern` | `/Users/family/.codex/skills/urhynix-turtlebot-unity-ros2-success-pattern/SKILL.md` | TurtleBot3 Burger → ROS2 → RViz → ROS-TCP → Unity smoke 재현 패턴 |
 | Mac TurtleBot helpers | `/Users/family/.zshrc` | `tb3-ip`, `tb3-ssh`, `tb3-vnc`, `tb3-port`, `tb3-unity`, `tb3-help` |
+| 경기장 1차 매핑 evidence | `docs/evidence/maps/arena_v1/{pgm,yaml,png,eval.md}` | 회전만 5바퀴 매핑 결과 + 픽셀 통계 + 시각 검증 + 재현 명령 + 다음 매핑 권장 (`eval.md`) |
+| Unity Maps Assets | `unity-smoke/Assets/Maps/arena_v1.{png,yaml}` + `desk_static_v1.*` | Unity Plane 텍스처용 PNG + scale 계산 yaml. `tb3-map-to-unity`가 자동 복사 |
+| 스킬 `map-quality-eval` | `.claude/skills/map-quality-eval/{SKILL.md,eval.py}` | 매핑 직후 픽셀 통계 + use case go/no-go + eval.md 자동 생성 (백업 포함). 2026-05-29 arena_v1 dry-run 검증. one-liner: `python3 .claude/skills/map-quality-eval/eval.py <map_name>` |
+| 스킬 `ip-drift-resync` | `.claude/skills/ip-drift-resync/{SKILL.md,resync.sh}` | DHCP IP 변경 시 Unity Scene + Script + known_hosts 일괄 동기화. Unity 자동 save back 함정 자동 회피 (Editor 종료→patch→재시작 순). one-liner: `bash .claude/skills/ip-drift-resync/resync.sh [new_ip]` |
 
 ---
 
@@ -321,20 +408,28 @@ tb3-help
 ## 🚨 미해결 이슈
 
 - ~~DB 미선정~~ → ✅ **해소 (2026-05-28)**: Supabase `ueupkrxwybuuqxflstvg` 잠금. DECISION-LOG "DB 선정 완료".
-- **로봇 셧다운 상태 (2026-05-28)** — `sudo shutdown -h now` 후 ping/SSH 모두 무응답. LiDAR도 메인 LiPo로 도는 걸 막기 위해 메인 슬라이드 스위치 OFF 권장. 다음 세션 첫 행동은 **사람이 메인 스위치 ON** → 30초 부팅 대기.
+- ~~로봇 셧다운~~ → ✅ **해소 (2026-06-01)**: 신규 128GB SD로 풀 부트스트랩 완료. `ssh urhynix-robot` 한 줄 진입.
+- **🟥 `/etc/urhynix.env` SUPABASE_KEY 비어있음 (2026-06-01)** — `PASTE_SERVICE_ROLE_JWT_HERE` 자리. 다음 세션 첫 1분에 채워야 Supabase row insert 작동.
+- ~~mDNS `.local` 안 잡힘~~ → ✅ **해소 (2026-06-01 오후)**: 학원 Wi-Fi(codelab_5G) 추가로 wlan0=192.168.0.82 (Mac과 같은 망) → mDNS multicast 정상. `ssh urhynix-robot` = `urhynix-robot.local` resolve.
+- ~~LAN sweep robot 못 찾음~~ → ✅ **해소**: wlan0가 Mac과 같은 192.168.0.x 망. ARP broadcast 직접 도달.
+- ~~LAN 케이블 위치 주의~~ → ✅ **해소**: Wi-Fi 영구 추가됨. 랜선 없이도 자동 무선 연결. (단 codelab_5G 비번 발표 후 변경되면 다시 박아야 함)
+- ~~Unity rosIP / helper IP hardcoded → IP 변경 시 `ip-drift-resync` 스킬 호출 필요~~ → ✅ **해소 (2026-06-01 오후)**: Unity Scene/Script rosIP를 `urhynix-robot.local` (mDNS) 로 박음 + `scripts/tb3.sh`에 `TB3_HOSTNAME` + mDNS 우선 시도 추가. **이후 IP 변경 시 zero-touch** (`ssh`/`tb3-ip`/Unity 모두 자동 follow). `ip-drift-resync` 스킬은 안전망으로만 남음. 자세히: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md` §"IP-drift zero-touch 화".
 - **`/etc/urhynix.env` 미작성** — 로봇 부팅 직후 한 번만 (service_role JWT 주입). 코드 commit 절대 금지.
 - **팀 Slack 채널 봇 권한 부족** — 채널 `C0B5Q43A27R`에 Claude 봇 초대 필요. 그때까지 결정 공지는 본인 DM으로만 가능.
 - **TurtleBot helper 설치 마무리 대기** — Mac helper는 `/Users/family/.zshrc`에 반영 완료. Robot helper installer는 `/tmp/install_tb3_helpers.py`까지 복사됐으나, teardown 이후 `192.168.0.138:22` SSH가 timeout되어 원격 실행은 미검증. 로봇 전원/네트워크가 돌아오면 위 `python3 /tmp/install_tb3_helpers.py` 실행으로 마무리. (2026-05-28 재접속 확인 — 다음 세션에서 즉시 실행 가능)
 - **경기장 Wi-Fi 대역 변경 가능성 (2026-05-29)** — robot DHCP IP가 192.168.0.x 아니면 `scripts/tb3.sh`의 `TB3_LAN_CIDR='192.168.0'` 수정 필요. 또는 휴대폰 핫스팟 SSID/PW를 robot이 이전에 연결했던 Wi-Fi와 동일하게 설정 (가장 단순). 자세히: `docs/ref/ARENA-DEPLOYMENT-CHECKLIST.md` §🚨.
-- **Unity rosIP 매 세션 수동 (2026-05-29)** — `unity-smoke/Assets/Scripts/RosSmokeDashboard.cs`의 `rosIP` 기본값 `192.168.0.138`이 DHCP라 매번 다름. Unity Editor → RosSmokeDashboard Inspector → `rosIP` 수동 입력 (현재 흐름). 개선: `tb3-unity-set-ip <ip>` helper 추가 검토 (다음 세션 여유 시).
+- **Unity rosIP 매 세션 수동 (2026-05-29)** — 어제 evening에 `RosSmokeDashboard.cs:10` + `SampleScene.unity:151` 둘 다 `.33`으로 일시 패치 (Inspector 수동 입력 우회). DHCP 또 바뀌면 두 파일 같이 재패치. 개선 후보: `tb3-unity-set-ip <ip>` helper (sed로 두 파일 일괄 patch, `tb3-ip` 결과 자동 주입) — 미실행.
+- **arena_v1 매핑 실패 — 가벽 높이 < LiDAR 스캔 평면 (2026-05-29 late evening, 회의록 기반 정정)** — 회전 한계가 아니라 수직 차원 문제로 진단 정정. **다음 세션 첫 결정**: 가벽 높이 측정 + 옵션 A(물리 보강) / B(vision YOLO 학습) / C(보호 영역 경계 마커 재정의) / D(LiDAR 마운트 변경). A 추천. 자세히: `docs/evidence/maps/arena_v1/eval.md` + DECISION-LOG "매핑 실패 진단 정정".
+- **`scripts/tb3.sh` helper의 RViz config 경로 오류 (2026-05-29 evening)** — `tb3-rviz` 함수는 `$HOME/turtlebot3_ws/src/turtlebot3/turtlebot3_cartographer/rviz/tb3_cartographer.rviz`를 가리키지만 실제 경로는 `/opt/ros/jazzy/share/turtlebot3_cartographer/rviz/tb3_cartographer.rviz`. 어제 SLAM 세션에서는 직접 ssh로 우회 실행함. 다음 세션에서 helper 수정 1줄.
 - **Arduino PIR 핀 D7→D2 정렬 미실행** — `sketches/pir_led/pir_led.ino` 코드 D7 ↔ SSOT/DECISION-LOG D2 불일치. SLAM과 무관하므로 경기장 출동에 영향 없음. `arduino-flash` 스킬로 재플래시 1회 필요 (선택).
+- **🟥 RealSense 카메라 D435 확정 + Mac streaming 차단 (2026-06-01)** — 주인님 손에 있는 건 D435i가 아니라 **D435** (Product ID `0B07`, Serial `254522075185`, FW `5.15.1.55`, **IMU 없음**). Mac에서 `sudo rs-enumerate-devices` verbose는 PASS지만 `rs-hello-realsense` Frame timeout 15s. 원인: brew formula 빌드 옵션 누락(`HWM_OVER_XU`/`FORCE_RSUSB_BACKEND`) + macOS Tahoe(26) 공식 미지원. 결정: **Pi4 이전** (잔여 액션 #6). 박물관 매핑 계획은 VIO 폐기만 빼고 95% 살아있음. 자세히: `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md` + DECISION-LOG 2026-06-01 항목.
 - (그 외 미해결 결정 없음)
 
 ---
 
 ## 📜 한줄정리
 
-PIR + LDR(A0) + Arduino + 시리얼은 2026-05-28에 `arduino-cli` 자동화로 절반 통과 (LDR은 SSOT 정렬 완료). 남은 일은 **PIR D7→D2 정렬 + 시리얼 → DB 한 줄 insert 1건**. 통과되면 W2(SCRUM-10 SLAM, SCRUM-16 트랙)로 진입. 나머지는 모두 잠겨 있어요.
+신규 128GB SD에 Ubuntu 24.04.4 + cloud-init 사전설정 + SSH 키 인증 + ROS2 Jazzy 풀 스택(turtlebot3 메타 / cartographer / nav2 / ld08_driver / ros_tcp_endpoint) **한 세션에 완전 부트스트랩 완료**. `ssh urhynix-robot` 한 줄 진입. 다음 세션 첫 5분은 `/etc/urhynix.env` SUPABASE_KEY 주입 + OpenCR/Arduino 재플래시 + bringup 검증 → 그 다음 가벽 보강 + arena_v2 매핑.
 
 ---
 

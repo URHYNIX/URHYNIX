@@ -170,7 +170,8 @@
 | Supabase Storage 또는 로컬 media 폴더 | 예정: 사진 / 짧은 영상 / 사운드 원본 저장, DB에는 path와 메타데이터 저장 |
 | ROS-TCP-Endpoint (Unity 측) | Unity ↔ ROS2 양방향 통신 (TCP 10000, NAT 통과 OK) |
 | Arduino IDE / serial | Uno R3 펌웨어 빌드 + `pyserial`로 RPi에서 수신 |
-| Pi Camera v2 | tb3_* 위 카메라 노드 |
+| Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464) | tb3_* 위 일반 RGB 카메라 노드. Ubuntu 24.04에서는 libcamera Pi fork + rpicam-apps 소스 빌드 필수 (DECISION-LOG 2026-06-01 참조) |
+| Intel RealSense D435 (USB 3.2, Depth+RGB+IR, IMU 없음) | tb3_* 위 3D 깊이 카메라. RGB-D SLAM(RTAB-Map) + 가벽 detection + 액자 3D 위치 식별 |
 
 ## SLAM/Nav2 처리 위치 (2026-05-29 확정)
 
