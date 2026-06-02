@@ -19,7 +19,8 @@ session_meta (1) ─── (N) events ─── (0..1) dispatches ─── (0..
 - 한 **이벤트**는 최대 한 번의 **출동**으로 이어진다.
 - 한 **출동**은 최대 한 번의 **카메라 확인**을 만든다.
 - 2026-05-28 실제 Supabase REST 확인 기준 현재 적용 테이블은 `session_meta`, `events`, `dispatches`, `camera_captures` 4개다.
-- 이동 좌표 로그, 사진/영상/사운드 메타데이터, 액자형 보호 대상 테이블은 아래 "Planned Extensions"이며 아직 실제 DB에 적용되지 않았다.
+- **2026-06-02 추가**: `pose_logs` 적용 완료 (Supabase CLI `db query --linked --file scripts/sql/pose_logs.sql`). 인덱스 2종(`idx_pose_logs_session_robot`, `idx_pose_logs_mode`) + RLS 정책 2종(`anon_insert_pose`, `anon_select_pose`) 검증 PASS.
+- 사진/영상/사운드 메타데이터, 액자형 보호 대상 테이블은 아래 "Planned Extensions"이며 아직 실제 DB에 적용되지 않았다.
 
 ## Tables
 
@@ -59,8 +60,9 @@ Index:
 ## Planned Extensions (SCRUM-23)
 
 > 아래 구조는 박물관/미술관 액자 보호 요구를 위한 **확장 예정안**이다. 현재 Supabase에는 아직 없다. 적용 전 별도 migration SQL 작성 + 실제 DB 조회 검증이 필요하다.
+> **`pose_logs`는 2026-06-02 적용 완료** — 표는 참고용으로 유지(Current Applied 항목과 동일 컬럼).
 
-### `pose_logs` — 이동 좌표 로그 (예정)
+### `pose_logs` — 이동 좌표 로그 (✅ 2026-06-02 적용 완료)
 
 | Column | Type | NULL | 비고 |
 |---|---|---|---|

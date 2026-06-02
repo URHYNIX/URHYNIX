@@ -7,8 +7,9 @@
 1. **`docs/status/HANDOFF.md`** — 다음 세션 진입 캡슐. 첫 5분에 무엇을 할지 1페이지.
 2. **`docs/status/PROJECT-STATUS.md`** — 한 줄 상태 + 역할 매트릭스 + Day-1 작업.
 3. **`docs/status/DECISION-LOG.md`** 가장 아래 항목 — 가장 최근 결정의 흐름.
+4. **`docs/ref/TECH-INDEX.md`** — Unity/ROS2/Arduino/DB/카메라/하네스 작업별 빠른 ref 라우팅.
 
-→ 위 3개로 5분 안에 출발 가능. 나머지는 필요할 때 들어가면 됨.
+→ 위 4개로 5분 안에 출발 가능. 나머지는 필요할 때 들어가면 됨.
 
 ## 📚 전체 로딩 순서 (필요 시)
 
@@ -17,12 +18,13 @@
 3. `docs/status/HANDOFF.md` ← 빠른 시작 캡슐 (NEW)
 4. `docs/status/PROJECT-STATUS.md`
 5. `docs/status/DECISION-LOG.md`
-6. `docs/ref/PROJECT-PLAN.md`
-7. `docs/ref/ARCHITECTURE.md`
-8. `docs/ref/CONTRACT.md`, `docs/ref/SCHEMA.md`
-9. `docs/ref/STACK-PROFILES.md`, `docs/ref/JIRA-MAP.md`
-10. `.claude/skills/README.md`
-11. 필요 시 `docs/ref/PRD.md`
+6. `docs/ref/TECH-INDEX.md`
+7. `docs/ref/PROJECT-PLAN.md`
+8. `docs/ref/ARCHITECTURE.md`
+9. `docs/ref/CONTRACT.md`, `docs/ref/SCHEMA.md`
+10. `docs/ref/STACK-PROFILES.md`, `docs/ref/JIRA-MAP.md`
+11. `.claude/skills/README.md`
+12. 필요 시 `docs/ref/tech/*.md`, `docs/ref/PRD.md`
 
 ## 🔧 즉시 활용 가능 자산
 

@@ -2,6 +2,199 @@
 
 ## 2026-06-02
 
+### Unity ControlRoom Phase 진행 전략 — 옵션 D (UI Polish First) + Phase 2.5 신설
+
+- **결정**: Phase 3(데이터 모델/Registry) 진입 전에 **Phase 2.5 UI Visual Completion**을 신설해 UI를 contract로 먼저 100% 잠근다. 그 뒤 Phase 3~8은 UXML/USS/View 코드 0줄 수정 원칙으로 안만 채운다. fake interaction 깊이 = **알람 popup만** (시나리오 버튼 클릭 시 알람만 띄움, 센서 spike/로봇 dot animation 등은 안 함, Phase 3 이후 실 데이터로 자연 동작).
+- **배경**: SSOT vs 현재 구현 cross-check 결과 View 14개 중 ✅4 / ⚠️3 / ❌7 — UI 자체가 절반 미완성. Map/Robot/Features/Sensors/Ros 5개 폴더는 통째 0%. 옵션 A(SSOT 순차)/B(Map 우선)/C(하이브리드)/D(UI Polish First) 4개 비교 후 D 채택. 이유: 기능 phase에서 UI를 또 바꾸면 두 번 작업 위험 → UI를 contract로 먼저 잠그면 꼬임 방지 + 시각 시연 가성비 최고.
+- **Phase 2.5 산출물 (9 View 클래스 + UXML/USS 채움)**:
+  - Scripts/UI/MovePanelView, ModePanelView, FeatureToggleListView(정적), WaypointListView, RobotTabView, PowerButtonView, HardwarePanelView, SensorCardListView, ProtectedTargetView
+  - UXML 보강: 좌측 순회 지점 더미 5줄, 우측 하드웨어/센서 5종(PIR/화재 추가), MapPanel 격자+dot/waypoint placeholder, TopBar 전원 확인 모달
+  - USS 보강: 격자 패턴, marker 스타일, 알람 popup polish
+- **5단계 분해 (3~4일)**: ① 좌측 View 4개(0.5일) ② 상단바·우측 View 4개(0.5일) ③ 맵 placeholder 시각 완성(1일) ④ 카메라+로그 polish(0.5일) ⑤ 시나리오 알람 popup(1일).
+- **검증 매트릭스 10건**: View 14 전부 ✅, 좌측 토글 시각 반응, 탭 전환 시 우측 갱신, 시나리오 4 알람, 맵 dot/waypoint/보호대상, 카메라 placeholder 자연스러움, 로그 5초 주기 push, 센서 5종, 전원 확인 모달, 30분 demo 녹화 시 "진짜 시연 같음".
+- **핵심 학습**: 옵션 B/C(시각 가성비)는 기능 짜다 UI 또 만지는 두 번 작업 위험. 옵션 A(SSOT 순차)는 1주 작업해도 시각 변화 0. **UI를 contract로 먼저 잠그면 둘 다 잡힘**.
+- **부수 산출물**: `docs/ref/UNITY-CONTROLROOM-CONVERSION-PLAN.md` §13에 Phase 2.5 신설 (Phase 2와 Phase 3 사이).
+- **다음 진입**: Phase 2.5 단계 1 — 좌측 패널 View 4개 클래스 작성. 첫 파일: `Scripts/UI/MovePanelView.cs` (URHYNIX.ControlRoom.UI namespace, 순회 시작/정지 버튼 클릭 핸들러 + active 토글).
+
+### 14:30 회의 Jira 최신 반영 — 티원/젠지, ROS_DOMAIN_ID 230, Teachable Machine 분류 스파이크
+
+- **결정/확인**: 14:30 회의록 기준 로봇 별명과 역할을 다시 잠금. **젠지** = Pi Camera + 센서 탑재 로봇, **티원** = 비전 카메라 탑재 로봇. ROS 도메인은 `ROS_DOMAIN_ID=230`으로 통일한다.
+- **검증 완료**: Unity에서 두 로봇 카메라 화면 동시 송출을 확인했다. 회의 근거는 Confluence `2026.06.02`(page `6127617`)와 `image-20260602-031954.png`.
+- **AI 분류 스파이크**: Google Teachable Machine으로 TensorFlow/Keras 모델을 만들고, 1차 학습 클래스는 `빈공간`, `박스`, `마우스(검정/흰색)`, `손`으로 둔다. 목적은 로봇 카메라 영상에서 빠른 객체 분류 테스트다.
+- **기존 비전 범위와의 관계**: 5/29 YOLO/OpenCV MVP 클래스(로봇/사람/중요품/불)는 발표 시나리오용 큰 범위로 유지한다. 6/2 Teachable Machine 클래스는 카메라 입력과 Keras 추론 경로를 빠르게 검증하는 별도 스파이크다.
+- **Jira 반영 완료**: `SCRUM-44`, `SCRUM-51`, `SCRUM-54`, `SCRUM-56`, `SCRUM-61`, `SCRUM-62`, `SCRUM-64` 설명에 회의 최신 내용을 추가했다.
+- **다음 검증**: 같은 도메인 230에서 `/tb3_1/...`와 `/tb3_2/...` 카메라 토픽이 동시에 보이는지, Keras 모델 추론 결과가 Unity 또는 테스트 로그에 클래스/신뢰도로 찍히는지 확인한다.
+
+### Play UI 미표시 해결 — Scene 파일 m_PanelSettings 직접 GUID 패치 + unityctl screenshot 한계 확인
+
+- **증상**: Play 진입 후 Game View가 Skybox+ground만 표시, UI Toolkit 6패널이 안 보임.
+- **원인 1 (본질)**: Scene 파일 `ControlRoomMain.unity:439`의 `m_PanelSettings: {fileID: 0}` — Unity 6.3 LTS UIDocument.panelSettings setter가 직렬화 안 됨. `doc.panelSettings = panel` 호출 후 SaveScene 해도, SerializedObject.FindProperty("m_PanelSettings").objectReferenceValue 박아도 fileID 0으로 남음. sourceAsset(visualTreeAsset)은 정상 직렬화되어 대조됨. (Unity 6.3 버그 의심)
+- **해결**: Scene 파일 직접 GUID 박음: `m_PanelSettings: {fileID: 11400000, guid: 22cd8904c7c224cd0a7d5e03ef3240ee, type: 2}` (PanelSettings asset의 mainObjectFileID + meta GUID 사용). Editor가 다음 reload에 그대로 인식.
+- **이중 안전망**: `Assets/Scripts/UI/ControlRoomBinder.cs` Awake에 runtime fallback 추가 — `uiDoc.panelSettings == null`이면 `#if UNITY_EDITOR` LoadAssetAtPath로 박음. 다음 Setup 호출에서도 panel 누락되면 자동 복구.
+- **원인 2 (부수)**: 본 fix 후에도 `unityctl screenshot capture --view game`이 검은 화면 또는 카메라만 캡처. `ScreenshotHandler.cs:83`이 `camera.Render()`만 호출 → UI Toolkit ScreenSpaceOverlay 미포함.
+- **부수 해결**: `vendor/unityctl-plugin/.../ScreenshotHandler.cs:22` 패치 — view=game일 때 `includeOverlayUi` 기본 true. 그러나 `CaptureGameViewWithOverlay`의 `ScreenCapture.CaptureScreenshotAsTexture`가 sync 호출 timing 한계로 빈 frame 반환 (검은 화면). plugin level 본질 해결 어려움.
+- **시각 검증 권장**: macOS native `screencapture -x` + `osascript "System Events" "Unity" set frontmost`로 캡처. Unity 활성화 + Game View 영역 캡처 → UI Toolkit overlay 포함 완벽 캡처 PASS. 박물관 시연 좌230(시나리오/모드) + 중앙(맵+카메라+로그) + 우240(배터리/센서) 6패널 모두 렌더링 확인.
+- **핵심 학습 추가** (이전 entry 3건 + 2건):
+  4. **UIDocument.panelSettings 직렬화 우회는 Scene YAML 직접 패치가 가장 확실**. setter도 SerializedObject도 fail 케이스 있음. GUID + mainObjectFileID(보통 `11400000`) 알면 직접 박기 가능.
+  5. **`unityctl screenshot`은 UI Toolkit Overlay 캡처 신뢰 불가** — Native `screencapture` + Unity activate 우회 패턴 권장.
+- **부수 산출물**:
+  - `vendor/unityctl-plugin/src/Unityctl.Plugin/Editor/Commands/ScreenshotHandler.cs` 1줄 patch (URHYNIX 표시 주석 포함, upstream과 diverge — 다음 vendor 갱신 시 재적용 필요).
+  - `Assets/Scripts/UI/ControlRoomBinder.cs:30-43` Awake fallback 블록 추가.
+  - `Assets/Scenes/ControlRoomMain.unity:439` m_PanelSettings GUID 박음.
+- **다음 진입**: Editor Game View에서 시각 검증 7체크리스트(시계 / 시나리오 버튼 클릭 → 로그+Alert / 2D 3D 토글 / 배터리 변동 / 센서 카드 갱신 / 로그 자동 스크롤 / AlertPopup 모달) 직접 수행.
+
+### unityctl 통합 테스트 10/10 PASS — 5 FAIL 전부 해소 + plugin vendor 영구화 + 핵심 학습 3건
+
+- **결정**: 이전 entry의 5 FAIL(`scene open` 500 / `screenshot` 502 / `exec` 502 / `test` 504 / 휘발성 경로) 모두 해소. unityctl 자동화 baseline → **풀 자동화 가능** 단계 진입.
+- **해소 절차** (재현 가능):
+  1. **Plugin source 영구화**: `rsync -a --exclude='.git' /tmp/unityctl-repo/ vendor/unityctl-plugin/` (4.3MB, 383 파일). `manifest.json` 경로 변경: `file:/tmp/unityctl-repo/...` → `file:../../../vendor/unityctl-plugin/src/Unityctl.Plugin` (Packages/ 기준 상대경로).
+  2. **SceneSetup Camera 추가**: `Assets/Editor/ControlRoomSceneSetup.cs:38` `NewSceneSetup.EmptyScene` → `NewSceneSetup.DefaultGameObjects` 1줄 패치. Scene rootCount 5 → 7 (Main Camera + Directional Light 자동 포함).
+  3. **Editor 재시작**: SIGTERM 60258 → nohup 신규 시동 → `osascript activate` (포커스가 IPC Bootstrap 트리거 조건).
+  4. **Scene 재생성**: `unityctl exec ExecuteMenuItem("URHYNIX/Setup ControlRoom Scene")` (1차 Play 모드라 NewScene InvalidOperationException → `play stop` 후 2차 PASS).
+- **10/10 결과 매트릭스**:
+  | Step | 명령 | 결과 |
+  |---|---|---|
+  | 1 | `doctor` (IPC probe) | ✅ pipe `unityctl_4147f01858f6edf8` 활성 |
+  | 2 | `check --type compile` | ✅ 31 assemblies, 0 error |
+  | 3 | `scene hierarchy` | ✅ rootCount 7 (MainCamera + DirLight + 5 app GO) |
+  | 4 | `screenshot capture --view game` | ✅ 1920×1080 PNG 270KB → `/tmp/controlroom-game-view.png` |
+  | 5 | `screenshot capture --view scene` | ✅ 102KB → `/tmp/controlroom-scene-view.png` |
+  | 6 | `play start` | ✅ isPlaying=true |
+  | 7 | `exec RaiseScenarioTriggered("fire")` ×4 | ✅ 4 시나리오 (fire/intruder/noise/theft) 전부 success=true |
+  | 8 | `screenshot capture` (post-scenario) | ✅ Alert popup 포함 화면 캡처 |
+  | 9 | `console get-count` | ✅ 5 logs / 7 warnings / 0 errors |
+  | 10 | `play stop` + `test --mode edit` | ✅ 3 passed, 0 failed (2.4s) |
+- **핵심 학습 3건** (다음 세션 진입 캡슐):
+  1. **Editor focus가 IPC Bootstrap 활성화 필수 조건**. `nohup Unity -projectPath ...` 만으로는 IPC pipe 안 뜸. 반드시 `osascript -e 'tell application "Unity" to activate'` 또는 사용자가 직접 Editor 클릭. doctor 메시지 "Editor not focused"가 진짜 단서.
+  2. **`exec --code` void method 호출 OK** — 이전 entry의 "void method 거부" 노트는 부정확. `URHYNIX.ControlRoom.App.ControlRoomEvents.RaiseScenarioTriggered("fire")`처럼 직접 호출 가능 (result: null 반환). Roslyn evaluator가 expression-statement 허용.
+  3. **`unityctl` plain 출력 Spectre 'Busy' style 버그** — Editor Busy 상태(Play 진입 직후 등)에서 plain CLI 출력이 `StyleParser` exception. **`--json` 옵션 권장** (모든 명령 지원). 그러면 안정적.
+- **부수 사실**:
+  - Scene 재생성 시 Play 모드면 `EditorSceneManager.NewScene` InvalidOperationException. **반드시 `play stop` 선행**.
+  - `vendor/unityctl-plugin/` git 추적 대상 (5MB, `vendor/CLAUDE.md`에 갱신 절차 박음). `.git` 제외해서 read-only 스냅샷 보관.
+  - Plugin 컴파일 warning ~30개 (Unity 6.3에서 deprecated API). 동작 무관, 0.2.0 → 신규 버전 시 정리 가능.
+- **다음 진입**: 풀 자동화 가능. Phase 3(데이터 모델/Registry 확장) 또는 박물관 시연 7체크리스트 GUI 1차 검증으로 진행.
+
+### unityctl IPC 자동화 도구 도입 + 통합 테스트 10단계 부분 PASS (5/10 PASS, 5 후속 보강)
+
+- **결정**: Unity Editor를 IPC로 원격 조작하는 `unityctl` 0.2.0(`Jason-hub-star/unityctl`, dotnet tool)을 자동 테스트 워크플로의 표준 도구로 채택. ControlRoom 프로젝트에 brigde plugin 설치.
+- **설치 절차** (재현 가능):
+  1. `dotnet tool install -g unityctl unityctl-mcp` (이미 설치됨)
+  2. `git clone --depth 1 https://github.com/Jason-hub-star/unityctl.git /tmp/unityctl-repo`
+  3. `unityctl init --project unity/ControlRoom --source /tmp/unityctl-repo/src/Unityctl.Plugin` → `manifest.json`에 `com.unityctl.bridge`(file: 경로) 박힘
+  4. `ProjectSettings/UnityctlSettings.asset` 박음: `{"Enabled": true, "InstallSourceKind": "local", "InstalledVersion": "0.2.0"}` — **plugin Bootstrap이 이 파일 + Enabled=true 확인 후에만 IPC server 시작**
+  5. Editor 재시작 → `Library/ScriptAssemblies/UnityctlBridge.dll` 생성 + IPC named pipe(`unityctl_4147f01858f6edf8`) 활성
+- **10단계 시퀀스 결과** (`/tmp/urhynix-test-suite.sh`):
+  | Step | 명령 | 결과 |
+  |---|---|---|
+  | 1 | `ping` | ✅ PASS (즉시 통과) |
+  | 2 | `check --type compile` | ✅ PASS — 31 assemblies, scriptCompilationFailed: false |
+  | 3 | `test --mode edit` | ❌ FAIL (504, "Test run failed before execution") |
+  | 4 | `scene open ControlRoomMain.unity` | ❌ FAIL (500, log에 scene-open error 기록) |
+  | 5 | `play start` | ✅ PASS ("Already in play mode") |
+  | 6 | `screenshot capture --view game` | ❌ FAIL (502, "No camera found in the scene") |
+  | 7 | `exec --code "RaiseScenarioTriggered(\"fire\");"` × 4 | ❌ FAIL (502, syntax — void method statement 미허용) |
+  | 8 | `screenshot capture --view game` | ❌ FAIL (502, 동일) |
+  | 9 | `log --last 100` | ✅ PASS — 100 entry 수집 |
+  | 10 | `play stop` | ✅ PASS — isPlaying: false |
+- **밝혀진 문제 4건과 해결 방향**:
+  1. **Scene에 Camera 없음** — `Assets/Editor/ControlRoomSceneSetup.cs`가 `NewSceneSetup.EmptyScene`으로 생성해서 MainCamera + Directional Light 자동 추가 안 됨. UI Toolkit만 쓰면 카메라 불필요하지만 Game View 캡처에 필수. 후속: `NewSceneSetup.DefaultGameObjects` 모드로 바꾸거나 `gameobject create Camera` 추가.
+  2. **`exec --code` syntax 제약** — expression 평가 모드라 `Type.Method(args);` statement 거부. 안내 메시지: "For structured calls, prefer `exec invoke`". 그러나 `unityctl --help`에 `exec invoke` 미노출 (0.2.0). 후속: `batch execute --file <C#>` 또는 PlayMode test로 시나리오 트리거 자동화.
+  3. **`scene open` 500** — 자세 에러 메시지 없음. ControlRoomMain.unity 자체 OK여도 Editor 상태 또는 plugin 호환성 문제 가능. 후속: 재현 + Editor.log 상세 디버그.
+  4. **`test --mode edit` 504** — Test Runner 시작 단계 에러. NUnit asmdef 호환성 또는 unityctl test 호출 방식. 후속: smoke test EditMode 직접 Test Runner 윈도우로 검증.
+- **PASS 확보된 baseline**: 컴파일 31 assembly 검증 + Play 모드 진입/종료 + IPC log 100 entry 수집. 즉 Unity Editor를 CLI에서 무대조작 가능한 기초 라인은 살아있음.
+- **부수 산출물**:
+  - `Assets/Tests/EditMode/URHYNIX.ControlRoom.Tests.EditMode.asmdef` + `SmokeTests.cs` (NUnit Math/String/Float 3 테스트)
+  - `Packages/manifest.json` 변경: `"com.unityctl.bridge": "file:/tmp/unityctl-repo/src/Unityctl.Plugin"` 추가 — **주의**: `/tmp/` 휘발성, macOS reboot 시 plugin source 손실 risk. 영구 위치 (`~/.unityctl/plugin/` 또는 vendor commit)로 이전 필요.
+  - `/tmp/urhynix-test-suite.sh` 시퀀스 script (재실행 가능)
+  - `/tmp/urhynix-test-suite/*.json` 10개 결과 파일
+
+### Unity ControlRoom UI Toolkit skeleton PASS (Phase 2 완료, 19 산출물, batch 컴파일+Scene 생성 검증)
+
+- **결정**: HTML 관제(`robot_control_system.html`) → Unity UI Toolkit 전환의 첫 phase(UI skeleton + fake data) 완료. 박물관 시연 6패널이 Play 모드에서 살아 움직임.
+- **레이아웃 A 채택**: 상단바 + 좌 230px(시나리오/모드/순회/특수) + 중앙flex(맵 + 카메라+로그) + 우 240px(배터리/센서/하드웨어). HTML 직접 이식 톤.
+- **색상 톤**: 박물관 고품격 밝은 슬레이트 (`#f1f5f9` bg / `#1e293b` text / `#2563eb` accent / `#10b981` ok / `#dc2626` danger / `#f59e0b` warn). USS 변수 10개 SSOT(`ControlRoomTokens.uss`) + C# 상수 1:1(`Design/UiTokens.cs`).
+- **만든 파일 19개**:
+  - App 3: `ControlRoomApp.cs`, `ControlRoomState.cs`, `ControlRoomEvents.cs`
+  - Design 2: `UiTokens.cs`, `IconNames.cs`
+  - Data 1: `RobotInfo.cs`
+  - Simulation 2: `FakeSensorData.cs`(Perlin/Sin 1.5Hz), `DemoScenarioService.cs`(4 시나리오 트리거)
+  - UI Markup 8: `ControlRoomMain.uxml` + Style/Tokens.uss + Parts 5개(TopBar/LeftControl/Map/CameraAndLog/RightStatus)
+  - UI Views 7: `ControlRoomBinder.cs` + 7 View(TopBar/Scenario/Map/Camera/Log/Telemetry/AlertPopup)
+  - Editor 1: `ControlRoomSceneSetup.cs` (batch Scene 자동 조립)
+  - Config 1: `Resources/RobotConfig/default_robots.json` (티원/젠지 메타)
+  - Scene 1: `Scenes/ControlRoomMain.unity` + `UI/ControlRoomPanelSettings.asset` (1920×1080 reference)
+  - 추가 stub: `Database/SupabaseClient.cs` (PoseLogRepository 의존 해소, Phase 7에서 실 구현)
+- **검증**: Unity 6000.3.16f1 batch 2회 (1차 컴파일 에러 2건 → Binder.camera 변수명 + SupabaseClient stub → 2차 PASS). `Assembly-CSharp.dll` 컴파일 PASS, error CS 0건, Scene 저장 PASS, `Exiting batchmode successfully` exit 0.
+- **2D/3D 토글 처리**: `MapPanel.uxml`에 2D/3D 버튼 활성, 3D 클릭 시 placeholder + "Phase 6 예정 (URDF Importer)" 라벨. ControlRoomState.MapViewMode 상태 + OnMapViewModeChanged 이벤트.
+- **fake data 흐름**: FakeSensorData 1.5Hz tick → ControlRoomEvents 발화 → TelemetryPanelView가 현재 선택 로봇 값만 표시. 배터리 87% ±3% Perlin, 가스/소음 sin, 조도 sin.
+- **시나리오 흐름**: ScenarioPanelView 버튼 클릭 → ControlRoomEvents.RaiseScenarioTriggered → DemoScenarioService 수신 → 로그 + 위험 경보 발화 → AlertPopupView 모달 + TopBarView 경보 카운트 증가.
+- **다음 진입**: Unity Hub에서 `unity/ControlRoom` Open → `Assets/Scenes/ControlRoomMain.unity` 더블클릭 → Play 모드 → 7 체크리스트 검증 (TopBar 시계, 시나리오 버튼 클릭, 2D/3D 토글, 배터리 변동, 센서 카드 갱신, 로그 자동 스크롤, AlertPopup 모달).
+- **남은 단계 (다음 phase)**: Phase 3 데이터 모델/Registry 확장(default_features/sensors/office_base_map.json) → Phase 5 ROS 실제 연결(`CameraPanelView` unity-smoke 재이식) → Phase 6 URDF 3D → Phase 7 Supabase 실 통합.
+
+### `pose_logs` 테이블 Supabase 적용 완료 (CLI `db query --linked`)
+
+- **결정**: `scripts/sql/pose_logs.sql`을 Supabase 프로젝트 `ueupkrxwybuuqxflstvg`에 적용.
+- **적용 명령**: `supabase link --project-ref ueupkrxwybuuqxflstvg` → `supabase db query --linked --file scripts/sql/pose_logs.sql --agent=yes` (CLI v2.84.2, env에 박힌 `SUPABASE_ACCESS_TOKEN` + `SUPABASE_PROJECT_REF` 사용).
+- **검증** (모두 PASS):
+  - 컬럼 9개 — id/session_id/robot_id/ts/x/y/theta/source_topic/nav_mode, NOT NULL/NULL 정합.
+  - 인덱스 3개 — `pose_logs_pkey`, `idx_pose_logs_session_robot`, `idx_pose_logs_mode`.
+  - RLS 정책 2개 — `anon_insert_pose` (INSERT, anon), `anon_select_pose` (SELECT, anon). UPDATE/DELETE 기본 거부 유지.
+  - `select count(*) from public.pose_logs` → 0 rows (정상 빈 상태).
+- **부수 효과**: `supabase/.temp/` CLI 캐시 폴더 생성 → 루트 `.gitignore`에 `supabase/.temp/`, `supabase/.branches/` 추가.
+- **SCHEMA.md 갱신**: "Current Applied Entities" 섹션에 적용 사실 박음. "Planned Extensions" 표는 참고용으로 유지(컬럼 동일, ✅ 마킹).
+- **scripts/sql/CLAUDE.md 갱신**: `pose_logs.sql` 상태 `미실행` → `✅ 2026-06-02 적용 완료`.
+- **다음 진입**: 로봇 PC(`scripts/pose_logger.py`)에 `URHYNIX_ROBOT_ID` + `URHYNIX_SESSION_ID` + `SUPABASE_ANON_KEY` env 박고 systemd로 띄우면 실기기 좌표 자동 INSERT 시작.
+
+### 로봇 현재 위치 저장 기능 부품 박음 (`pose_logs` 첫 부품 + Unity/Python/SQL 3측)
+
+- **결정**: SSOT 핵심 목표 "이동 좌표·사진·영상·사운드와 모든 결과가 DB에 기록된다" 중 **이동 좌표** 부품을 폴더 구조에 반영. SCHEMA.md의 SCRUM-23 Planned Extension `pose_logs`를 실 코드 진입점까지 연결.
+- **저장 경로**: 로봇 PC가 주 쓰기, Unity는 read 우선. service_role 키 절대 미반입(anon + RLS).
+- **추가된 파일**:
+  - `unity/ControlRoom/Assets/Scripts/Data/RobotPoseEntry.cs` — pose 1행 POCO, SCHEMA.md 컬럼 1:1.
+  - `unity/ControlRoom/Assets/Scripts/Database/PoseLogRepository.cs` — read 우선 + 보조 INSERT 골격(Phase 7 구현).
+  - `scripts/pose_logger.py` — 로봇 PC가 `/tb3_*/pose` 구독 → Supabase `pose_logs` INSERT (ROS2 + supabase-py + UTC ISO ts + quaternion→yaw 변환).
+  - `scripts/sql/pose_logs.sql` — 테이블 + 인덱스 2종 + RLS 정책 3종(anon INSERT/SELECT, UPDATE/DELETE 기본 거부) migration.
+  - `scripts/sql/CLAUDE.md` — migration SQL 운영 규칙 (실행 경로 3종, 검증 흐름, 명명 규칙, 보안).
+- **CLAUDE.md 갱신**: `Assets/Scripts/Data/`, `Assets/Scripts/Database/` 두 곳 예정 파일 표에 ✅ 마킹.
+- **다음 단계 (적용 전 결정)**:
+  - `pose_logs.sql`을 실제 Supabase에 실행할 시점 — 시연 직전 또는 Phase 7 진입 시.
+  - 적용 후 `SCHEMA.md` "Planned Extensions" → "Current Applied" 이전.
+  - 환경변수 `URHYNIX_ROBOT_ID`, `URHYNIX_SESSION_ID`, `SUPABASE_ANON_KEY`를 `/etc/urhynix.env`에 박는 절차.
+
+### Unity ControlRoom 첫 batch import PASS (Library + .meta 자동 생성)
+
+- **결정**: `unity/ControlRoom/` 프로젝트가 Unity 6000.3.16f1로 첫 batch import 성공. Unity Hub의 Add Project 절차 없이 바로 Open 가능 상태.
+- **검증**: `Unity.app -batchmode -quit -nographics -projectPath unity/ControlRoom -logFile /tmp/unity-controlroom-first-open.log` exit code 0 + `Exiting batchmode successfully now!`. License 채널 정상 활성, 어셈블리 에러 0건.
+- **산출물**:
+  - `Library/` 12개 하위 생성 (BuildInstructions/PackageCache/ScriptAssemblies/ShaderCache/Bee 등)
+  - `Assets/**/.meta` 83개 자동 생성 (CLAUDE.md.meta 24개, PNG.meta 26개 포함)
+  - `ProjectSettings/ProjectVersion.txt`에 Unity revision hash `a56f230f6470` 자동 박힘
+  - Tests 폴더 추가: `Assets/Tests/{EditMode, PlayMode}/` + `CLAUDE.md` (Opus 자기리뷰 caveat #1 해결)
+- **무시한 warning**: `Access token is unavailable` (Unity Cloud Analytics 미인증, Personal 사용에 무관), `Curl error 42` (Telemetry 호출 중단, 무관), License 첫 채널 handshake 실패 후 재시도로 success (정상 패턴).
+- **다음 진입**: Unity Hub에서 `unity/ControlRoom` Open (Add Project 불필요 — 이미 등록됨). 첫 Open 시 Library 재생성 없이 즉시 열림.
+
+### Unity ControlRoom 신규 프로젝트 분리 + Unity 6.3 LTS (6000.3.16f1) 채택
+
+- **결정**: HTML 관제(`robot_control_system.html` 2727줄)를 Unity C# 관제로 전환하기 위해 **`unity/ControlRoom/`** 신규 Unity 프로젝트를 만들고 **Unity 6.3 LTS (6000.3.16f1)**를 사용한다.
+- **버전 선택 근거**:
+  - Unity 6.3 LTS는 2025-12 출시, **2027-12까지 지원** (Unity 6.0 LTS는 2026-10 EOL).
+  - 박물관 시연 이후에도 장기 안정. unity-smoke(6000.0.64f1)는 카메라 검증용 자료실로 보존.
+  - URDF Importer는 Unity 6 계열에서 호환성 미검증이라 Phase 6 진입 전 별도 smoke 필요 — fallback: community fork(gkjohnson urdf-loaders) 또는 사전 변환된 prefab.
+- **폴더 구조**: `URHYNIX/unity/ControlRoom/` (Unity 프로젝트 루트). 기존 `unity-smoke/`(카메라 검증 PASS, 자료실로 보존), `unity-src/`(PNG 시트만 채워진 빈 껍데기, Art는 신규로 이관)는 그대로 둔다.
+- **scaffold 완료**: ProjectSettings = unity-smoke 복사, manifest.json = ROS-TCP-Connector v0.7.0 + Universal RP 17.0.4 + UI Toolkit (`com.unity.modules.uielements`) 베이스, ProjectVersion.txt = `6000.3.16f1`, .gitignore = Unity 표준 + Supabase 키 차단, PNG 26개 이관(`Assets/Art/IconsPng/`).
+- **다음 진입**: 주인님이 Unity Hub에서 **6000.3.16f1 설치 → Add Project → `unity/ControlRoom` 선택** → 첫 Open 시 Library/ 자동 재생성(5~10분) → URDF Importer smoke 1건 결정.
+
+### Supabase 연동 URL + write path 정책 확정
+
+- **결정**: Unity ControlRoom의 Supabase 진입점을 **`https://ueupkrxwybuuqxflstvg.supabase.co`** 로 박는다.
+- **write path 정책 (시뮬은 최대한 실기기 기반)**:
+  - 로봇 PC(젠지/티원 Python ROS2 노드) = **주 쓰기 주체**. anon key + RLS 정책으로 events/dispatches/pose_logs INSERT.
+  - Unity ControlRoom = **read + 제한 INSERT만**. `dispatches`(출동 명령), `session_meta` 등 사람 액션만 쓰기. service_role 키 **절대 미반입**.
+  - 민감 작업(전원 종료, RLS 우회) = Supabase **Edge Function** 호출만.
+- **키 보관**: anon key는 `Assets/Resources/SupabaseConfig.local.asset` (`.gitignore` 차단). template 파일 `SupabaseConfig.template.asset`만 커밋.
+- **SDK**: `supabase-csharp` + `kamyker/supabase-unity` git URL (또는 NuGetForUnity), UniTask 필수.
+- **dual naming**: DB `robot_id`는 `tb3_1`/`tb3_2` 그대로. 사람 UI 표기는 티원/젠지 별명.
+
 ### ROS_DOMAIN_ID 230 통일 (티원 기준에 젠지 맞춤)
 
 - **결정**: 두 로봇의 `ROS_DOMAIN_ID`를 **230**으로 통일한다.

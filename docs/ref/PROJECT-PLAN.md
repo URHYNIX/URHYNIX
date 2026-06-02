@@ -1,15 +1,25 @@
 # Project Plan
 
-> 디지털트윈경비로봇 — 7주 / 4 스프린트
-> 모든 카드는 JIRA-MAP.md의 SCRUM ID와 1:1 매칭. 담당자는 공동(최대 3명)까지 허용한다.
+> 디지털트윈경비로봇 — 7주 / 스크럼 1~7 관리자 에픽 + 기존 실행 카드
+> 스크럼 에픽은 관리자 타임라인/보드/캘린더용이고, 기존 SCRUM-8~25 카드는 실행 상세용이다. 담당자는 공동(최대 3명)까지 허용한다.
+> Jira 카드 제목과 설명은 2026-06-02 밤 기준 `스크럼 1`~`스크럼 7`의 쉬운 한글 표현으로 정리했다. 실제 Jira Sprint 객체 이름은 Backlog 화면에서 직접 수정한다.
 
 ## Intake Verdict
 
 - verdict: `doc-sync`
 - chosen skill: `task-intake-router`
-- next skill: `decision-broadcast`, `ssot-board-sync`, `evidence-review`
+- next skill: `doc-sync`, `evidence-review`
+- tech ref: `docs/ref/tech/OPS-HARNESS.md`
 - sub-agent needed: no
-- reasoning: 박물관/미술관 액자 보호 컨셉, 카메라 중요물품 인식, LiDAR/PIR 외부자 판단, 조도 기반 LiDAR 강화, 좌표·사진·영상·사운드 DB 저장 요구를 로컬 SSOT와 Jira/Confluence에 동기화하는 요청이다.
+- reasoning: Claude/Codex 스킬 하네스와 ref 로딩 흐름을 기술별로 분리해 Unity/ROS2/Arduino/DB/카메라/운영 작업마다 필요한 최소 ref만 빠르게 읽게 하는 문서 구조 개선 요청이다.
+
+### Tech Ref Routing Update (2026-06-02)
+
+- 변경 목적: `docs/ref` 전체를 매번 읽는 비용을 줄이고, 요청 기술별 첫 문서가 명확해지게 한다.
+- 새 인덱스: `docs/ref/TECH-INDEX.md`
+- 새 기술 ref: `docs/ref/tech/UNITY.md`, `docs/ref/tech/ROS2-ROBOT.md`, `docs/ref/tech/ARDUINO-SENSORS.md`, `docs/ref/tech/DATABASE-SUPABASE.md`, `docs/ref/tech/VISION-CAMERA.md`, `docs/ref/tech/OPS-HARNESS.md`
+- Unity 작업 기본 진입: `docs/ref/tech/UNITY.md` -> `unity/ControlRoom/README.md` -> `docs/ref/UNITY-CONTROLROOM-CONVERSION-PLAN.md`
+- 하네스 연결: `AGENTS.md`, `AGENT.md`, `CLAUDE.md`, `ai-context/START-HERE.md`, `.claude/skills/README.md`, `task-intake-router`
 
 ## 병렬 작업 원칙
 
@@ -35,6 +45,24 @@
 | **W5** | SCRUM-23 저장 확장(좌표·사진·영상·사운드) | — | SCRUM-25 라이브 스트림 | SCRUM-17 추가 센서 | SCRUM-12 tb3_2 출동 | — |
 | **W6** | SCRUM-21 AI 분류 + 액자 인식 라벨 | — | (SCRUM-25 계속) | (SCRUM-17 계속) | (SCRUM-12 계속) | — |
 | **W7** | SCRUM-15 지표 시연 | — | SCRUM-24 발표 영상 | — | — | SCRUM-18 시연 환경 |
+
+### Jira 관리자 보기 (2026-06-02 밤 가독성 정리 반영)
+
+| 주차 | Jira Epic | 기간 | 담당 | 상태 | 관리자 화면에서 보는 의미 |
+|---|---|---|---|---|---|
+| 스크럼 1 | SCRUM-39 | 2026-05-26 ~ 2026-06-01 | 김주영 | 완료 | 팀명, 사용자 요구사항, 프로젝트 주제 선정 완료 |
+| 스크럼 2 | SCRUM-40 | 2026-06-02 ~ 2026-06-08 | 김선일 | 완료 | 기능 요구사항, Unity 화면 초안, 비전 자료조사 완료 |
+| 스크럼 3 | SCRUM-41 | 2026-06-09 ~ 2026-06-15 | 임현찬 | 해야 할 일 | 로봇 주행과 센서 연결 |
+| 스크럼 4 | SCRUM-42 | 2026-06-16 ~ 2026-06-22 | 김선일 | 해야 할 일 | Unity 관리자 화면 만들기 |
+| 스크럼 5 | SCRUM-43 | 2026-06-23 ~ 2026-06-29 | 김주영 | 해야 할 일 | 데이터 저장과 출동 흐름 연결 |
+| 스크럼 6 | SCRUM-44 | 2026-06-30 ~ 2026-07-06 | 김주영 | 해야 할 일 | AI 비전 테스트와 통합 리허설 |
+| 스크럼 7 | SCRUM-45 | 2026-07-07 ~ 2026-07-13 | 박태진 | 해야 할 일 | 최종 발표 준비 |
+
+스크럼 1/2 완료 산출물은 하위 카드로도 분리했다. 기존 완료 기록은 스크럼 1: SCRUM-46 팀명 정하기, SCRUM-47 사용자 요구사항 정리하기, SCRUM-48 프로젝트 주제 정하기. 스크럼 2: SCRUM-49 기능 요구사항 정리하기, SCRUM-50 Unity 화면 초안 만들기, SCRUM-51 비전 자료 조사하기.
+
+사용자가 Jira 화면에서 직접 만든 실제 Sprint 1/2에는 Backlog에서 새 카드 `SCRUM-67`~`SCRUM-72`를 드래그해 넣는다. 이 6개 카드는 일부러 `해야 할 일` 상태로 두었다. 스프린트에 들어간 뒤 완료 컬럼으로 옮기면 된다.
+
+관리자가 쉽게 보려면 Jira에서 필터 `project = SCRUM AND summary ~ "스크럼" ORDER BY duedate ASC`를 저장하고, 보드는 Epic 기준, 타임라인은 Epic+Due date 기준, 캘린더는 Due date 기준으로 표시한다. Sprint 1/2 수동 이동용 카드는 `key in (SCRUM-67, SCRUM-68, SCRUM-69, SCRUM-70, SCRUM-71, SCRUM-72)`로 바로 찾는다.
 
 ### S1 W1 Day-1 (2026-05-27 확정) — 즉시 시작 3팀
 
@@ -69,9 +97,19 @@
 ### 2대 로봇 역할 분리 (2026-06-01 회의록 기반, 계획/진행 중)
 
 - 변경 목적: 2대 실기 운용 시 모듈 병렬을 막는 역할 충돌을 줄이기 위해, 로봇별 탑재를 고정한다.
-- `tb3_1`(로봇 1, 별명 **티원**): 비전 중심 (RealSense `D435` 3층 정면 부착 예정). 호스트 `t1@192.168.0.250` (hostname `rb`).
-- `tb3_2`(로봇 2, 별명 **젠지**): 센서/확인 중심 (Arduino 센서 4종 스택 + Pi Camera(IMX219) 부착 예정). 호스트 `urhynix-robot` (kim@192.168.0.82).
-- 주의: “장착 완료 + 토픽/DB 라인 검증” 전까지는 계획으로만 취급하고, 증거(evidence)로 현재 상태 승격 금지.
+- `tb3_1`(로봇 1, 별명 **티원**): 비전 중심 (RealSense `D435`). 호스트 `t1@192.168.0.250` (hostname `rb`).
+- `tb3_2`(로봇 2, 별명 **젠지**): 센서/확인 중심 (Arduino 센서 4종 스택 + Pi Camera(IMX219)). 호스트 `urhynix-robot` (kim@192.168.0.82).
+- 2026-06-02 14:30 회의 기준 `ROS_DOMAIN_ID=230`으로 통일한다.
+- Unity에서 두 로봇 카메라 화면 동시 송출은 검증 완료로 취급한다. 근거: Confluence `2026.06.02`, `image-20260602-031954.png`, `docs/evidence/2026-06-02-camera-ros2-topic-unity-batch-setup.md`.
+
+### AI 객체 분류 스파이크 (2026-06-02 회의 기준)
+
+- 변경 목적: 로봇 카메라 영상에서 빠르게 객체 분류가 되는지 확인한다.
+- 학습 도구: Google Teachable Machine.
+- 모델 형식: TensorFlow/Keras.
+- 1차 학습 클래스: 빈공간, 박스, 마우스(검정/흰색), 손.
+- 적용 Jira: `SCRUM-44`(스크럼 6 에픽), `SCRUM-61`(AI 비전 인식 기준), `SCRUM-62`(전체 리허설).
+- 주의: 이 스파이크는 Keras 추론 경로 검증용이다. 5/29 기준 발표용 YOLO/OpenCV 큰 범위 클래스(로봇/사람/중요품/불)는 유지한다.
 
 ### S1 W1 잔여 (Day-2 이후)
 

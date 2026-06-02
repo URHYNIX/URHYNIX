@@ -1,6 +1,24 @@
 # Project Status
 
-Last updated: 2026-06-01 evening + Robot2 RealSense D435 ROS2 smoke PASS
+Last updated: 2026-06-02 밤 — **Unity ControlRoom Phase 진행 전략 = 옵션 D (UI Polish First) + Phase 2.5 신설** — SSOT cross-check 결과 View 14개 중 ✅4/⚠️3/❌7 + Map/Robot/Features/Sensors/Ros 5폴더 통째 0%. 옵션 4개(A 순차/B Map우선/C 하이브리드/D UI먼저) 비교 후 D 채택: UI를 contract로 먼저 100% 잠그고 Phase 3~8은 UXML/USS/View 0줄 수정. fake interaction = 알람 popup만. Phase 2.5 산출물 = 9 View 클래스 + UXML/USS 보강 + 5단계(3~4일). 맵뷰 USS 패치(flex-grow 3 + min-height 380, 좌260/우280)로 맵 압도적 + 좌/우 패널 확장 완료. 이전: Play UI 미표시 해결 + Scene PanelSettings GUID 직접 패치(Unity 6.3 UIDocument 직렬화 버그 우회). 이전: unityctl 10/10 PASS 풀 자동화 + vendor/unityctl-plugin 영구화 + SceneSetup DefaultGameObjects + Editor focus 학습.
+
+## 2026-06-02 Addendum
+
+- **14:30 회의 Jira 최신 반영 완료**. 젠지=Pi Camera+센서, 티원=비전 카메라로 표기 통일했고 `ROS_DOMAIN_ID=230`, Unity 듀얼 카메라 동시송출 검증, Google Teachable Machine + TensorFlow/Keras 객체 분류 스파이크(빈공간/박스/마우스 검정·흰색/손)를 Jira `SCRUM-44`, `SCRUM-51`, `SCRUM-54`, `SCRUM-56`, `SCRUM-61`, `SCRUM-62`, `SCRUM-64`에 반영했다.
+- **Jira 관리자용 7개 스크럼 재구성 완료**. 이전 열린 SCRUM 카드와 이전 주차 에픽은 완료 처리했고, 새 관리자 에픽 `SCRUM-39`~`SCRUM-45`와 하위 작업 `SCRUM-46`~`SCRUM-66`으로 재생성했다. 스크럼 1/2와 해당 하위 작업 6개는 완료, 스크럼 3~7 에픽 5개 + 하위 작업 15개는 해야 할 일. JQL 검증: `project = SCRUM AND statusCategory != Done ORDER BY key ASC` 결과 20건.
+- **Jira 카드 가독성 정리 완료**. `SCRUM-39`~`SCRUM-72`의 제목과 설명을 `스크럼 1`~`스크럼 7` 순서의 쉬운 한글 문장으로 바꿨다. 예: `[스크럼 3] 로봇 주행과 센서 연결`, `[스크럼 5] 데이터 저장과 출동 흐름 연결`. 실제 Jira Sprint 객체 이름 변경은 현재 도구로는 불가하므로 Jira Backlog 화면에서 해당 Sprint의 `Edit sprint`로 직접 수정한다.
+- **기술별 ref 라우팅 추가** (`docs/ref/TECH-INDEX.md`, `docs/ref/tech/*.md`). Unity/ROS2/Arduino/DB/카메라/하네스 작업 시 전체 ref를 넓게 읽기 전에 해당 기술 ref 1개로 빠르게 진입하도록 `AGENTS.md`, `CLAUDE.md`, `.claude/skills/README.md`, `task-intake-router`를 동기화했다. Unity 작업 기본 경로는 `docs/ref/tech/UNITY.md` → `unity/ControlRoom/README.md` → `docs/ref/UNITY-CONTROLROOM-CONVERSION-PLAN.md`.
+- **Unity ControlRoom 신규 프로젝트 scaffold 완료** (`unity/ControlRoom/`). Unity 6.3 LTS (6000.3.16f1) 채택, 2027-12까지 LTS 지원.
+- 폴더: `Assets/{Scenes,Scripts,UI,Art/IconsPng,Resources,Robots/{UrdfSource,ImportedPrefabs},Editor}` + `Packages/manifest.json` + `ProjectSettings/` (unity-smoke 베이스 복사) + `.gitignore` (Unity 표준 + Supabase 키 차단).
+- PNG 26개 이관 (`Assets/Art/IconsPng/`: Common/Robot/Sensor/Target/Generated/GeneratedRaw 6 카테고리).
+- **폴더 트리 + CLAUDE.md 28개 박음** (`Assets/Scripts/` 11개 하위 + `UI/Parts/` + `IconsPng/` 6 카테고리 + `Tests/{EditMode,PlayMode}/` 등). 각 CLAUDE.md = 그 폴더가 무엇을 담는지 + 명명 규칙 + 주의사항.
+- **신규 파일/폴더 룰 영구 메모리 박음**: 폴더는 CLAUDE.md, 파일은 최상단 1~5줄 헤더 주석. 앞으로 모든 신규 파일 생성에 자동 적용.
+- Supabase URL **확정**: `https://ueupkrxwybuuqxflstvg.supabase.co`. write path = 로봇 PC anon+RLS 주 쓰기 / Unity read+dispatch만 / service_role 키 미반입.
+- **`pose_logs` 테이블 Supabase 적용 완료** (2026-06-02 밤, CLI `db query --linked`). 컬럼 9개 + 인덱스 3개 + RLS 정책 2개 검증 PASS, count=0. 이로써 SCRUM-23 Planned Extension 중 첫 테이블이 Current Applied로 이전됨. 자세히: `docs/status/DECISION-LOG.md` 2026-06-02 최상단.
+- **로봇 좌표 저장 부품 박음**: `pose_logs`의 Unity/Python/SQL 3측 진입점 작성. `unity/ControlRoom/Assets/Scripts/Data/RobotPoseEntry.cs` + `Database/PoseLogRepository.cs` + `scripts/pose_logger.py` + `scripts/sql/pose_logs.sql` + `scripts/sql/CLAUDE.md`. 다음 진입: 로봇 PC에 env 박고 `pose_logger.py`를 systemd로 띄우기.
+- **Unity 6000.3.16f1 첫 batch import PASS**: `Library/` 12개 하위 생성, `Assets/**/.meta` 83개 자동 생성 (CLAUDE.md.meta 24 + PNG.meta 26 + 그 외), 어셈블리 에러 0건, `Exiting batchmode successfully` + exit 0. Unity Hub에서 Add Project 불필요 — 이미 등록 상태, `unity/ControlRoom` Open 하면 즉시 열림.
+- 다음 진입: Unity Hub에서 `unity/ControlRoom` Open → URDF Importer Unity 6 호환성 smoke → UI Toolkit skeleton (UXML/USS/Binder) 시작.
+- 자세히: `docs/status/DECISION-LOG.md` 2026-06-02 최상단 2건.
 
 ## 2026-06-01 Addendum
 
@@ -39,8 +57,11 @@ Last updated: 2026-06-01 evening + Robot2 RealSense D435 ROS2 smoke PASS
 ## 현재 Jira 기준
 
 - 에픽: `SCRUM-7` (박물관/미술관 액자 보호형 디지털트윈경비로봇으로 본문 갱신 완료)
-- 다음 진행 카드: `SCRUM-8` MVP 범위·역할 매트릭스·SSOT 합의
-- 18개 카드 매핑 표는 `docs/ref/JIRA-MAP.md` 참조
+- 관리자 스크럼 에픽: `SCRUM-39`~`SCRUM-45` (`스크럼 1`~`스크럼 7`). 스크럼 1/2는 완료, 스크럼 3~7은 해야 할 일.
+- 스크럼 1/2 완료 하위 카드: `SCRUM-46`~`SCRUM-51` (팀명 정하기, 사용자 요구사항 정리하기, 프로젝트 주제 정하기, 기능 요구사항 정리하기, Unity 화면 초안 만들기, 비전 자료 조사하기)
+- 실제 Sprint 1/2 수동 이동용 새 카드: `SCRUM-67`~`SCRUM-72` (Backlog에서 사용자가 만든 Sprint 1/2로 드래그한 뒤 완료 처리)
+- 스크럼 3~7 실행 하위 카드: `SCRUM-52`~`SCRUM-66` (로봇 주행과 센서 연결, Unity 관리자 화면, 데이터 저장과 출동 흐름, AI 비전 리허설, 최종 발표 준비)
+- 실행 상세 카드: `SCRUM-8`~`SCRUM-25`. 전체 매핑 표는 `docs/ref/JIRA-MAP.md` 참조
 
 ## 외부 SSOT 인덱스 (모든 진입점 한곳에)
 
@@ -164,7 +185,7 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | 센서 연결 방식 상태 | ✅ | Arduino Uno R3 → Raspberry Pi USB serial, OpenCR 5V 전원 분기로 확정 |
 | dev-plan*.html 파싱 OK | ✅ | `python3 html.parser`로 8개 HTML 통과 — 브라우저 로드는 사용자가 최종 확인 |
 | dev-plan-bundle.html 브라우저 로드 | ⚠️ | Codex Browser의 `file://` URL 정책 차단으로 미실행. 파서 검증으로 대체 |
-| Jira 티켓 제목·담당자 갱신 | ⚠️ | 이전 SCRUM-8~25 갱신은 완료 기록 유지. 이번 M4 박태진 추가분은 로컬 JIRA-MAP만 반영했고 실제 Jira 실물은 미검증 |
+| Jira 관리자용 7개 스프린트 에픽 + 하위 작업 | ✅ | 2026-06-02 저녁 이전 열린 SCRUM 카드 완료 처리 후 새 구조 생성. 에픽 `SCRUM-39`~`SCRUM-45`, 하위 작업 `SCRUM-46`~`SCRUM-66`. Sprint 1/2 완료 전환 확인. JQL `project = SCRUM AND statusCategory != Done ORDER BY key ASC` 검증: 20건(Sprint 3~7 에픽 5 + 하위 작업 15) |
 | TurtleBot3 live ROS2 bringup | ✅ | `192.168.0.138` / MAC `2c:cf:67:47:38:03` 검증. `/dev/ttyACM0`, `/scan`, `/odom`, `/battery_state`, `/tf` 확인. `/scan` 약 10Hz |
 | RViz visual route | ✅ | Robot `DISPLAY=:2`, TigerVNC `5902`, RViz 실행 확인. Mac Screen Sharing 경로는 `vnc://192.168.0.138:5902` |
 | ROS-TCP → Unity smoke | ✅ | ROS-TCP-Endpoint `main-ros2` 빌드, `10000` listen, Unity mini project subscriber 등록 확인 (`/scan`, `/odom`, `/battery_state`, `/tf`) |
@@ -186,7 +207,7 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | 경기장 SLAM v1 (회전만 5바퀴) | 🟡 | 2026-05-29 18:14 경기장 중앙에서 회전만 5~6바퀴 매핑 → `arena_v1` 산출. 158×151 @ 0.05m/px = **7.90×7.55m**, origin [-3.767,-3.939]. robot `~/maps/` + 로컬 `docs/evidence/maps/arena_v1/` + Unity `Assets/Maps/` 3곳 저장 OK. 픽셀: occupied 1.9% / free 98.1% / unknown 0.0%. 가벽이 LiDAR 반경 3.5m 일부 외 → 발표용 임팩트 약, `arena_v2` 하이브리드 재매핑 후보. eval.md 참조. |
 | DHCP IP 변경 대응 (.138 → .33) | 🟡 | 2026-05-29 경기장 Wi-Fi에서 robot DHCP `.33` 할당. Unity `SampleScene.unity:151` + `RosSmokeDashboard.cs:10` rosIP 일시 patch (.138→.33). known_hosts에서 .138 제거. tb3-ip는 MAC sweep으로 자동 발견하므로 helper 코드는 미변경. 다음 세션 출발 시 IP 재검증 + 같은 패치 반복 필요 가능. |
 | 매핑 실패 진단 정정 (회의록 5/29 기반) | 🟥 | 2026-05-29 Confluence 회의록 page `3932161` 김주영 발언으로 확인: arena_v1 가벽 매핑 실패의 **진짜 원인은 "라이다 높이 > 가벽 높이" (수직 차원)**, 회전 한계가 아님. 하이브리드 매핑 권장 폐기. DECISION-LOG/eval.md/HANDOFF/map-quality-eval 스킬 정정 완료. **다음 매핑 전 가벽 실측 높이 측정 + 192mm 이상 보강 또는 vision/마커 fallback 결정 필요**. |
-| Pi 카메라 + YOLO 환경 + MVP 4 클래스 잠금 (회의록 5/29 기반) | ✅ | 2026-05-29 임현찬 진척: Pi 카메라 토픽 3종 30Hz 정상 + MP4/rosbag 동시 녹화 스크립트 + 노트북 YOLO/OpenCV 실시간 인식 통과. **MVP 학습 클래스 4종 잠금: 로봇·사람·중요품·불**. 자체 데이터셋 + 커스텀 YOLO 학습은 W2 후반. PRD/ARCHITECTURE/CONTRACT/JIRA-MAP 반영 잔여. |
+| Pi 카메라 + YOLO 환경 + MVP 4 클래스 잠금 (회의록 5/29 기반) | ✅ | 2026-05-29 임현찬 진척: Pi 카메라 토픽 3종 30Hz 정상 + MP4/rosbag 동시 녹화 스크립트 + 노트북 YOLO/OpenCV 실시간 인식 통과. **MVP 학습 클래스 4종 잠금: 로봇·사람·중요품·불**. 2026-06-02 Teachable Machine 스파이크와 별도 범위로 유지. |
 | 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 부트스트랩 | ✅ | 2026-06-01 SD 16GB→128GB 교체 후 cloud-init 사전설정으로 부팅 → ros-jazzy-turtlebot3 메타(2.3.6) + cartographer + nav2 + dynamixel + hls-lfcd + ld08_driver(jazzy) + ros_tcp_endpoint(0.7.0) 한 세션 셋업. udev `/dev/tb3_arduino` + `/dev/tb3_opencr` + `/dev/tb3_lidar` 추가. `/etc/urhynix.env` 템플릿 작성 (SUPABASE_KEY 빈 상태). evidence: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md`. |
 | 학원 Wi-Fi(codelab_5G) 영구 연결 + mDNS + IP-drift zero-touch | ✅ | 2026-06-01 netplan `60-wifi.yaml`로 wlan0=192.168.0.82(Mac과 같은 망) 영구 자동 연결. 랜선 분리 + 재기동 검증 PASS. avahi-daemon → `urhynix-robot.local` mDNS 작동. **B+C 작업: Unity Scene/Script rosIP=`urhynix-robot.local` + `scripts/tb3.sh`에 TB3_HOSTNAME + tb3-ip mDNS 우선 추가**. Mac `~/.ssh/config` 별칭 `Host urhynix-robot`. 이후 DHCP IP 변경 시 ssh/helper/Unity 모두 자동 follow (zero-touch). `ip-drift-resync` 스킬은 안전망으로만 남음. |
 | Arduino UNO + OpenCR + LDS-03 USB 12+ 단계 검증 | ✅ | 2026-06-01 lsusb: Arduino UNO `2341:0043` + OpenCR `0483:5740` + CP2102(LDS-03) `10c4:ea60` 모두 정상. udev 심볼링크 3종 작동. Arduino 시리얼 캡처: "=== PIR + LDR Test === / Warming up.........". 스케치 살아있음 확인. (재플래시는 D2 핀 정렬용으로 별도 잔여.) |
@@ -196,4 +217,7 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | Pi Camera user-space 도구 (rpicam-apps/libcamera Pi fork) | ✅ | 2026-06-01 16:36 빌드 PASS. libcamera Pi fork `v0.7.1+rpt20260429` + rpicam-apps `v1.12.0` 6분만에 빌드 (capabilities: egl:1 qt:1 drm:1 libav:0). 함정 3건 잡음: ① Ubuntu 24.04 ports repo 미제공(소스 빌드) ② libepoxy-dev 누락(추가) ③ libav API mismatch(`-Denable_libav=disabled`). evidence: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md`. 재사용 스크립트: `scripts/build-picamera.sh`. |
 | Pi Camera 캡처 검증 (rpicam-still + rpicam-vid) | ✅ | 2026-06-01 16:38 `rpicam-still -n -t 2000 --width 1920 --height 1080` 1920×1080 JPG 283KB 캡처 + `rpicam-vid --framerate 30 -t 5000` 1280×720@30Hz × 5초 H.264 2.9MB 캡처 PASS. Mac 미리보기에서 시각 검증. 산출물: `docs/evidence/pi_cam_test_2026-06-01.{jpg,h264}`. **모드 노출**: 3280×2464@21fps, 1920×1080@47fps, 1280×720@30~60fps, 640×480@103fps. |
 | 박물관 시연 듀얼 카메라 Unity 라이브 (젠지 + 티원) | ✅ | 2026-06-02 오후 사용자 확인 "둘다 잘나옴". 젠지 `/tb3_2/camera/image_raw/compressed` 30Hz @ 640×480 (지연 1~2초 → 실시간) + 티원 `/tb3_1/camera/color/image_raw/compressed` 32.985Hz @ 640×480. 잡은 함정 4건: ssh-copy-id 1회 자동화, `compressed_image_transport` 별도 설치, `camera_namespace:=tb3_1` 토픽 구조, robot reboot 시 IP변경 → mDNS 자동 follow. evidence: `docs/evidence/2026-06-02-camera-ros2-topic-unity-batch-setup.md` Phase 8. |
+| Teachable Machine / Keras 객체 분류 스파이크 기준 | 🟡 | 2026-06-02 14:30 회의 기준. 학습 도구 Google Teachable Machine, 모델 형식 TensorFlow/Keras, 클래스 `빈공간`·`박스`·`마우스(검정/흰색)`·`손`. 목적은 로봇 카메라 영상 객체 분류 테스트. Jira `SCRUM-44/61` 반영 완료, 실제 모델 파일/추론 로그 검증은 다음 단계. |
+| 2026-06-02 Jira 최신 업데이트 | ✅ | `SCRUM-44`, `SCRUM-51`, `SCRUM-54`, `SCRUM-56`, `SCRUM-61`, `SCRUM-62`, `SCRUM-64` 설명에 14:30 회의 내용 반영 완료. 검증: Atlassian `_editjiraissue` 응답으로 각 issue description 갱신 확인. |
 | 2026-06-01 회의록(로봇 역할 분리 + UI 요구사항) SSOT 반영 | ✅ | Confluence page `5111810`의 “tb3_1=비전(D435) / tb3_2=센서+Arduino+PiCam(IMX219)” 및 UI 버튼/상호작용 정의를 **문서로만** 반영. 구현/장착/토픽 검증은 별도 evidence 필요. 반영 위치: `docs/status/DECISION-LOG.md`, `docs/ref/PROJECT-PLAN.md`. |
+| 기술별 ref 라우팅 | ✅ | 2026-06-02 `docs/ref/TECH-INDEX.md` + `docs/ref/tech/{UNITY,ROS2-ROBOT,ARDUINO-SENSORS,DATABASE-SUPABASE,VISION-CAMERA,OPS-HARNESS}.md` 추가. 루트 진입 문서와 `.claude/skills/README.md`, `task-intake-router`에서 discoverable. 검증: `rg -n "docs/ref/TECH-INDEX|docs/ref/tech/UNITY" AGENTS.md AGENT.md CLAUDE.md ai-context/START-HERE.md .claude/skills docs/ref docs/status`. |

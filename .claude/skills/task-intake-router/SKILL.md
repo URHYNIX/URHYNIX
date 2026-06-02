@@ -16,6 +16,7 @@ description: Use when a new request first lands and you need to classify it into
 - user request
 - `docs/ref/PROJECT-PLAN.md`
 - `docs/status/PROJECT-STATUS.md`
+- `docs/ref/TECH-INDEX.md`
 - `.claude/skills/README.md`
 
 ## Steps
@@ -28,15 +29,17 @@ description: Use when a new request first lands and you need to classify it into
    - `impact-map`
    - `subagent-needed`
 2. 현재 phase와 요청의 urgency를 같이 본다.
-3. 다음에 읽을 문서와 next skill 1~2개를 고른다.
-4. 병렬 조사, 로그 triage, 넓은 영향 범위 탐색이 필요하면 `sub-agent needed: yes`로 적는다.
-5. 결과를 `PROJECT-PLAN.md`의 `## Intake Verdict`에 남긴다.
+3. 요청 기술이 명확하면 `docs/ref/TECH-INDEX.md`에서 기술 ref 1개를 고른다.
+4. 다음에 읽을 문서와 next skill 1~2개를 고른다.
+5. 병렬 조사, 로그 triage, 넓은 영향 범위 탐색이 필요하면 `sub-agent needed: yes`로 적는다.
+6. 결과를 `PROJECT-PLAN.md`의 `## Intake Verdict`에 남긴다.
 
 ## Outputs
 
 - intake verdict
 - chosen skill
 - next skill
+- tech ref
 - sub-agent needed 여부
 - 짧은 reasoning
 
@@ -44,6 +47,7 @@ description: Use when a new request first lands and you need to classify it into
 
 - verdict가 현재 phase와 충돌하지 않는다.
 - `chosen skill`과 `next skill`은 실제 `.claude/skills/`에 존재한다.
+- `tech ref`가 있으면 `docs/ref/TECH-INDEX.md`에 등록되어 있다.
 - `sub-agent needed: yes`이면 `Sub-Agent Opportunities` 또는 status 쪽 packet 후보가 같이 남아 있다.
 
 ## Failure / Fallback

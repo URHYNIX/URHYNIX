@@ -9,9 +9,10 @@
 2. `CLAUDE.md`
 3. `ai-context/START-HERE.md`
 4. `docs/status/PROJECT-STATUS.md`
-5. `docs/ref/PROJECT-PLAN.md`
-6. `docs/ref/STACK-PROFILES.md`
-7. 필요 시 `docs/ref/PRD.md`, `docs/ref/ARCHITECTURE.md`
+5. `docs/ref/TECH-INDEX.md`
+6. `docs/ref/PROJECT-PLAN.md`
+7. `docs/ref/STACK-PROFILES.md`
+8. 필요 시 `docs/ref/tech/*.md`, `docs/ref/PRD.md`, `docs/ref/ARCHITECTURE.md`
 
 ## Rules
 

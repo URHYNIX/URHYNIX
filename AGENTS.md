@@ -7,11 +7,12 @@
 3. `CLAUDE.md`
 4. `ai-context/START-HERE.md`
 5. `docs/status/PROJECT-STATUS.md`
-6. `docs/ref/PROJECT-PLAN.md`
-7. `docs/ref/STACK-PROFILES.md`
-8. `docs/ref/ARCHITECTURE.md`
-9. `.claude/skills/README.md`
-10. 필요 시 `docs/ref/PRD.md`, `docs/ref/SCHEMA.md`
+6. `docs/ref/TECH-INDEX.md`
+7. `docs/ref/PROJECT-PLAN.md`
+8. `docs/ref/STACK-PROFILES.md`
+9. `docs/ref/ARCHITECTURE.md`
+10. `.claude/skills/README.md`
+11. 필요 시 `docs/ref/tech/*.md`, `docs/ref/PRD.md`, `docs/ref/SCHEMA.md`
 
 ## Rules
 

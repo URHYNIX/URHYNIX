@@ -6,8 +6,20 @@
 
 1. 현재 작업의 성격을 먼저 분류한다.
 2. 아래 표에서 가장 가까운 스킬 1~2개를 고른다.
-3. 스킬을 읽고 실제 파일/명령/산출물에 맞게 적용한다.
-4. 긴 스킬은 `references/`가 있으면 본문 다음에 필요한 참고만 읽는다.
+3. 기술이 명확하면 `docs/ref/TECH-INDEX.md`에서 기술 ref 1개를 고른다.
+4. 스킬을 읽고 실제 파일/명령/산출물에 맞게 적용한다.
+5. 긴 스킬은 `references/`가 있으면 본문 다음에 필요한 참고만 읽는다.
+
+## Technology Ref Routing
+
+| Work type | Fast ref | Typical skills |
+|---|---|---|
+| Unity ControlRoom / UI / ROS-TCP panel | `docs/ref/tech/UNITY.md` | `unity-camera-panel`, `doc-sync`, `evidence-review` |
+| ROS2 / TurtleBot / SLAM / Nav2 | `docs/ref/tech/ROS2-ROBOT.md` | `slam-nav2-arena-survey`, `map-quality-eval`, `ip-drift-resync` |
+| Arduino / PIR / LDR / sensor serial | `docs/ref/tech/ARDUINO-SENSORS.md` | `arduino-flash`, `api-contract-guard`, `doc-sync` |
+| Supabase / schema / DB writer | `docs/ref/tech/DATABASE-SUPABASE.md` | `api-contract-guard`, `doc-sync`, `evidence-review` |
+| Pi Camera / RealSense / compressed image / YOLO | `docs/ref/tech/VISION-CAMERA.md` | `robot-camera-bringup`, `unity-camera-panel` |
+| Claude/Codex skill harness / intake / evidence | `docs/ref/tech/OPS-HARNESS.md` | `task-intake-router`, `doc-sync`, `evidence-review` |
 
 ## Core Skills
 
@@ -40,6 +52,7 @@
 | `migration-manifest` | 마이그레이션/대규모 리팩터링 시 | parity ID, wave plan, progress tracking |
 | `parallel-qa` | E2E 회귀를 빨리 넓게 돌리고 싶을 때 | grouped QA scenarios, pass/fail report |
 | `code-review-graph-ops` | docs-heavy / cross-cutting repo에서 영향 범위를 좁혀야 할 때 | graph-first impact analysis |
+| `ssot-trio-update` | 작업 1건 PASS/FAIL 직후 `docs/status/` 3종(DECISION-LOG + PROJECT-STATUS + HANDOFF)을 1회 갱신할 때. HTML/Jira 손 안 댐. | DECISION-LOG 최상단 entry + PROJECT-STATUS Last updated + HANDOFF 캡슐 chain |
 | `ssot-board-sync` | SSOT(docs/ref/*, docs/status/*) 변경을 dev-plan HTML 7페이지 + 단일 번들에 동기화할 때 | 매핑 표 기반 양쪽 갱신 + 번들 재빌드 + 검증 grep |
 | `decision-broadcast` | 한 건의 결정을 DECISION-LOG → SSOT → HTML → Jira → Slack 5채널에 한 번에 동기화할 때 | 5채널 매핑 + Slack 템플릿 + Jira 갱신 절차 (ssot-board-sync 위임) |
 
@@ -80,6 +93,8 @@
 - "검증을 한 번에 넓게 돌리고 싶다" -> `parallel-qa`
 - "Arduino에 스케치 굽고 시리얼 확인해야 한다" -> `arduino-flash`
 - "새 경기장에서 SLAM 맵 산출 + Unity 임포트 + Nav2 베이스라인" -> `slam-nav2-arena-survey`
+- "작업 끝났으니 SSOT 3종에 박고 마무리" -> `ssot-trio-update`
+- "Unity 작업에 필요한 ref만 빨리 보고 싶다" -> `docs/ref/tech/UNITY.md`
 
 ## Writing Rules
 

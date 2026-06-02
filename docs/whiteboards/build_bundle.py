@@ -22,9 +22,24 @@ def b64(path: Path) -> str:
     return base64.b64encode(path.read_bytes()).decode("ascii")
 
 
-MATRIX_B64 = b64(WB / "role_matrix.png")
-GRAPH_B64 = b64(WB / "role_graph.png")
-MOCKUP_B64 = b64(WB / "unity_ui_mockup.png")
+def b64_optional(path: Path) -> str:
+    if not path.exists():
+        return ""
+    return b64(path)
+
+
+MATRIX_B64 = b64_optional(WB / "role_matrix.png")
+GRAPH_B64 = b64_optional(WB / "role_graph.png")
+MOCKUP_B64 = b64_optional(WB / "unity_ui_mockup.png")
+
+MOCKUP_IMG_HTML = (
+    '<img src="data:image/png;base64,%%MOCKUP_B64%%" '
+    'alt="Unity 관제 UI 예시 (A.R.O.C. SYSTEM HQ COMMAND)" '
+    'style="width: 100%; max-width: 960px; border-radius: 8px; '
+    'border: 1px solid var(--border); display: block; margin: 12px 0;" />'
+    if MOCKUP_B64
+    else '<div class="hint">참고: <code>docs/whiteboards/unity_ui_mockup.png</code>가 없어 UI 목업 이미지는 번들에 포함되지 않았습니다.</div>'
+)
 
 
 HTML = r"""<!doctype html>
@@ -567,7 +582,7 @@ HTML = r"""<!doctype html>
     <div class="owners"><span class="owner-chip" data-owner="김선일">김선일</span><span class="owner-chip" data-owner="박태진">박태진</span></div>
     <details open style="margin: 12px 0;"><summary style="font-weight: 700; color: var(--accent-dark);">🖥️ Unity 관제 UI 레이아웃 예시 (참고 디자인)</summary><div class="body">
       <p style="margin: 8px 0;">A.R.O.C. SYSTEM 스타일의 다크 톤 관제 UI 예시. URHYNIX UR-04(실시간 위치)·UR-13(이벤트 마커)·UR-14(색상 구분)·UR-15(타임스탬프)·UR-16(듀얼 로봇)·UR-19(출동 시각화)·UR-20(카메라)·UR-28(운영 대시보드)을 한 씬에 모은 형태.</p>
-      <img src="data:image/png;base64,%%MOCKUP_B64%%" alt="Unity 관제 UI 예시 (A.R.O.C. SYSTEM HQ COMMAND)" style="width: 100%; max-width: 960px; border-radius: 8px; border: 1px solid var(--border); display: block; margin: 12px 0;" />
+      %%MOCKUP_IMG%%
       <h3 style="margin-top: 16px;">레이아웃 4 분할</h3>
       <ul>
         <li><strong>좌측 사이드바</strong>: 시스템 명 (HQ COMMAND) + 활성 섹터 + 메뉴 (Fleet Overview / Map Tracking / Vision Analytics) + 하단 배터리/속도/상태/EMERGENCY STOP</li>
@@ -1100,7 +1115,8 @@ def main() -> None:
     out = (HTML
            .replace("%%MATRIX_B64%%", MATRIX_B64)
            .replace("%%GRAPH_B64%%", GRAPH_B64)
-           .replace("%%MOCKUP_B64%%", MOCKUP_B64))
+           .replace("%%MOCKUP_B64%%", MOCKUP_B64)
+           .replace("%%MOCKUP_IMG%%", MOCKUP_IMG_HTML))
     target = DOCS / "dev-plan-bundle.html"
     target.write_text(out, encoding="utf-8")
     size_kb = target.stat().st_size / 1024

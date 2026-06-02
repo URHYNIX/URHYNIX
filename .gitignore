@@ -4,6 +4,10 @@
 .vscode/
 *.swp
 
+# Supabase CLI cache (link 명령이 생성)
+supabase/.temp/
+supabase/.branches/
+
 # Node / Python / Cache
 .pytest_cache/
 .venv/
