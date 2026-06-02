@@ -2,6 +2,26 @@
 
 ## 2026-06-02
 
+### Unity ControlRoom Phase 2.5 단계 1~4 완료 + 자기리뷰 PASS — 16 View 100% 활성
+
+- **결정/PASS**: Phase 2.5 (UI Visual Completion) 5단계 중 1~4 완료. 컴파일 PASS, Unity Editor 시각 검증 PASS, 자기리뷰(Opus) PASS. SSOT §3의 14 View + 보너스 2(RobotTabView/PowerButtonView) = **16 View 100% 활성**. fake interaction 깊이 = "알람 popup만" 결정 일관 유지.
+- **단계 1 (좌측 4 View, 0.5d PASS)**: MovePanelView / ModePanelView / FeatureToggleListView / WaypointListView 신설 + ScenarioPanelView SRP 리팩토링(Move/Mode 책임 제거) + LeftControlPanel.uxml 더미 5 waypoint + USS `.btn-action.active` 녹색 + `.btn-waypoint*` 스타일.
+- **단계 2 (상단바·우측 4 View, 0.5d PASS)**: RobotTabView / PowerButtonView / HardwarePanelView / SensorCardListView 신설 + TopBarView/TelemetryPanelView SRP 리팩토링 + RightStatusPanel.uxml PIR/화재 sensor-row 추가 (총 5종) + USS `.sensor-value.sensor-{ok,warn,danger}` 색상.
+- **단계 3 (맵 placeholder 시각 완성, 1d PASS)**: MapPanel.uxml 격자 6선 + waypoint 5(번호) + 보호대상 2(액자A/B) + 로봇 dot 2(티원/젠지) + "박물관 1층" 라벨 + USS 마커 스타일. **함정 학습 2건**: ① UI Toolkit `linear-gradient` 미지원 → 단색 교체 ② 🖼/📍 emoji 폰트 누락 → 컬러 박스/텍스트 교체.
+- **단계 4 (카메라/로그 polish + 빈 공간 채움, 0.5d→2d PASS)**: ProtectedTargetView 신설(SSOT 우측 §3 누락분, 보호대상 3개) + 카메라 패널 crosshair + LIVE dot + camera-header. **빈 공간 채움 시행착오 5회** 끝에 **FR5UNITY PendantV3 성공 패턴 발견** (`/Users/family/jason/FR5UNITY/robotapp/Assets/UI/PendantV3/pendant-v3.uss`).
+- **FR5UNITY 성공 패턴 이식 — UI Toolkit ScrollView 함정 해소**:
+  - ScrollView 부모/자식 모두 `min-height: 0; min-width: 0` 명시 (UI Toolkit flex 함정의 진짜 원인)
+  - `.unity-scroll-view__content-container` + `__content-viewport` 내부 element 직접 패치
+  - `.unity-scroller--horizontal` 명시 `display: none`
+  - 카드 `flex-shrink: 0; min-width: 0; max-width: 100%; overflow: hidden`
+  - PanelSettings `m_ScaleMode: 2 → 1` (ConstantPhysicalSize → ScaleWithScreenSize) — letterbox 제거
+  - 마지막 카드 `.card-fill { flex-grow: 1 }` + contentContainer `min-height: 100%`로 3단 정렬
+- **자기리뷰(Opus) PASS + FIX 1 적용**: alertCount가 로봇 탭 전환 시 reset 안 되는 minor bug → `TopBarView.cs:31` OnRobotChanged 구독 추가 + reset. FIX 2(보호대상 4 시나리오 비대칭) + FIX 3(linear-gradient)는 의도적으로 deferred.
+- **placeholder 5건 (Phase 3+ swap 필요)**: 맵 격자/marker, 카메라 RGB feed, 센서 dummy 값, 로그 5초 주기, 배터리 dummy 값.
+- **commit**: 17be8ea(단계 1~4 + FR5 패턴) → 다음 commit(FIX 1 + SSOT 3종 갱신).
+- **부수 산출물**: `vendor/unityctl-plugin/` 4.3MB 영구화, `.claude/skills/ssot-trio-update/`, `docs/evidence/ui-layout/` 26 PNG.
+- **다음 진입**: 단계 5(시나리오 알람 polish — severity별 색상/auto-dismiss/메시지) 또는 Phase 3 직진(데이터 모델 + config 4종 JSON + Registry 자동 UI 생성). Phase 3 진입 시 UI Contract Lock 원칙 (UXML/USS/View 0줄 수정).
+
 ### Unity ControlRoom Phase 진행 전략 — 옵션 D (UI Polish First) + Phase 2.5 신설
 
 - **결정**: Phase 3(데이터 모델/Registry) 진입 전에 **Phase 2.5 UI Visual Completion**을 신설해 UI를 contract로 먼저 100% 잠근다. 그 뒤 Phase 3~8은 UXML/USS/View 코드 0줄 수정 원칙으로 안만 채운다. fake interaction 깊이 = **알람 popup만** (시나리오 버튼 클릭 시 알람만 띄움, 센서 spike/로봇 dot animation 등은 안 함, Phase 3 이후 실 데이터로 자연 동작).

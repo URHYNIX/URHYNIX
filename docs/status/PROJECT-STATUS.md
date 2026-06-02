@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-06-02 밤 — **Unity ControlRoom Phase 진행 전략 = 옵션 D (UI Polish First) + Phase 2.5 신설** — SSOT cross-check 결과 View 14개 중 ✅4/⚠️3/❌7 + Map/Robot/Features/Sensors/Ros 5폴더 통째 0%. 옵션 4개(A 순차/B Map우선/C 하이브리드/D UI먼저) 비교 후 D 채택: UI를 contract로 먼저 100% 잠그고 Phase 3~8은 UXML/USS/View 0줄 수정. fake interaction = 알람 popup만. Phase 2.5 산출물 = 9 View 클래스 + UXML/USS 보강 + 5단계(3~4일). 맵뷰 USS 패치(flex-grow 3 + min-height 380, 좌260/우280)로 맵 압도적 + 좌/우 패널 확장 완료. 이전: Play UI 미표시 해결 + Scene PanelSettings GUID 직접 패치(Unity 6.3 UIDocument 직렬화 버그 우회). 이전: unityctl 10/10 PASS 풀 자동화 + vendor/unityctl-plugin 영구화 + SceneSetup DefaultGameObjects + Editor focus 학습.
+Last updated: 2026-06-02 밤 — **Unity ControlRoom Phase 2.5 단계 1~4 완료 + 자기리뷰 PASS** — 16 View 100% 활성(SSOT §3 14 + 보너스 RobotTab/PowerButton 2). 좌측 4 카드(시나리오/운영/특수모드/순회지점) + 상단바 RobotTab/PowerButton + 우측 4 카드(배터리/센서5/하드웨어/보호대상) + 맵 placeholder(격자 6선+waypoint 5+보호대상 2+로봇 dot 2+박물관 1층 라벨) + 카메라 crosshair+LIVE dot + 로그 4줄 자동 push. **FR5UNITY PendantV3 성공 패턴 이식** — ScrollView 잘림 해소(min-height 0 + unity-scroll-view__content-container 직접 패치 + ScaleMode 2→1). 자기리뷰(Opus) PASS + FIX 1만 적용(TopBarView alertCount reset on RobotChanged). commit 17be8ea push 완료. fake interaction 깊이 = 알람 popup만 일관. placeholder 5건(맵/카메라/센서/로그/배터리)는 Phase 3+에서 실 데이터 swap. 이전: Phase 진행 전략 = 옵션 D (UI Polish First) + Phase 2.5 신설. 이전: Play UI 미표시 해결 + Scene PanelSettings GUID 직접 패치.
 
 ## 2026-06-02 Addendum
 
