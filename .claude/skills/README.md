@@ -58,6 +58,8 @@
 | `slam-nav2-arena-survey` | TurtleBot3 + LDS-03으로 새 경기장/실내 공간에 처음 진입해 SLAM 매핑 + Nav2 베이스라인 + Unity 임포트 한 흐름이 필요할 때 | 6 Phase (연결→매핑→저장→평가→Unity→Nav2), Robot/Mac/Ubuntu 결정 트리, ROS 모드 통일 표, 트러블슈팅 매트릭스, 좌표축 변환 표 (2026-05-29 책상 매핑 통과 검증) |
 | `map-quality-eval` | `tb3-slam-save → tb3-fetch-map` 직후 매핑 quality를 정량 평가하고 다음 액션(재매핑/Nav2 진입)을 정해야 할 때 | 픽셀 통계(occupied/free/unknown), use case go/no-go, 표준 `eval.md` 자동 생성 + 백업 (2026-05-29 arena_v1 dry-run 검증) |
 | `ip-drift-resync` | DHCP로 robot IP가 변경됐고 Unity Scene/Script/known_hosts를 일괄 동기화해야 할 때 (매 세션 첫 5분) | Unity Editor 종료 → sed patch → known_hosts purge 자동화. Unity 자동 save back 함정 회피 (2026-05-29 발견) |
+| `robot-camera-bringup` | 매 세션 첫 5분 — 두 로봇 카메라 트랙(camera_ros Pi Camera + realsense2_camera D435 + ros_tcp_endpoint)을 한 번에 살릴 때 | LD_LIBRARY_PATH 우회 + ssh ControlMaster=no + nohup/disown + 토픽 hz 30Hz 검증 한 줄. 함정 8건 매트릭스 (ABI 충돌/sudo stdin/연결 끊김/launch 파일 이름 등). 2026-06-02 젠지 30.095Hz 검증 통과 |
+| `unity-camera-panel` | Unity 관제 UI에 ROS2 카메라 라이브 RGB 패널을 코드 손 안 대고 추가할 때. 새 카메라 추가 시 AddCameraPanel 한 줄로 확장 | `CameraStreamPanel.cs` 컴포넌트(topic Inspector 입력) + `CameraPanelSetup.cs` Editor script(batch mode) + Unity batch CLI 한 줄. 함정 7건 매트릭스. 2026-06-02 GenjiCameraPanel + T1CameraPanel 자동 추가 통과 |
 
 ## Selection Rule Of Thumb
 
