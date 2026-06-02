@@ -25,7 +25,7 @@
 | `ros-jazzy-rmw-cyclonedds-cpp` | ✅ |
 | src 빌드: `ld08_driver` (LDS-03, jazzy 브랜치) | ✅ 47.0s |
 | src 빌드: `ros_tcp_endpoint` (Unity 통신, main-ros2 0.7.0) | ✅ 7.2s (setuptools deprecation 경고 1건, 빌드 성공) |
-| `~/.bashrc` 환경 source (ros-jazzy + ws + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT + ROS_DOMAIN_ID=30) | ✅ |
+| `~/.bashrc` 환경 source (ros-jazzy + ws + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT + ROS_DOMAIN_ID=230) | ✅ | 초기 30 → 2026-06-02에 230으로 통일(티원과 일치) |
 | udev rules `/dev/tb3_arduino` (Arduino UNO 2341:0043, 2a03:0043) + `/dev/tb3_opencr` (STM 0483:5740) | ✅ |
 | `/etc/urhynix.env` 템플릿 (`640 root:kim`) | ✅ — **단 SUPABASE_KEY=PASTE_... 채워야 함** |
 | Mac `~/.ssh/config` `Host urhynix-robot` 별칭 | ✅ `ssh urhynix-robot` 한 단어 진입 |

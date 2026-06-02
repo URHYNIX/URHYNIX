@@ -2,6 +2,27 @@
 
 ## 2026-06-02
 
+### ROS_DOMAIN_ID 230 통일 (티원 기준에 젠지 맞춤)
+
+- **결정**: 두 로봇의 `ROS_DOMAIN_ID`를 **230**으로 통일한다.
+- **배경**: 티원(`t1@192.168.0.250`)이 이미 230으로 작동 중. 젠지(`urhynix-robot`)는 신규 SD 부트스트랩 시 30으로 초기화돼있어 같은 도메인이 아니면 두 로봇 토픽이 서로 안 보임 → 박물관 시연 시 dispatcher/협업 불가.
+- **드리프트 발견**: SSOT에서 56(정본 설계 CONTRACT.md), 30(신규 SD HANDOFF/evidence), 230(티원 실제) 3개 값이 섞여있었음. 230으로 일괄 통일.
+- **변경 작업**:
+  - 젠지 `~/.bashrc`: `export ROS_DOMAIN_ID=30` → `export ROS_DOMAIN_ID=230` (`sed` 1줄)
+  - 검증: `ssh urhynix-robot 'source ~/.bashrc && echo $ROS_DOMAIN_ID'` → `230` ✅
+  - 백업 파일: `~/.bashrc.bak-YYYYMMDD-HHMMSS` 자동 생성
+- **SSOT 정정 (5파일)**:
+  - `docs/ref/CONTRACT.md` 정본 설계 (56 → 230) + 2026-06-02 정정 사유 박음
+  - `docs/status/HANDOFF.md` 환경 자동 source 라인 (30 → 230)
+  - `docs/status/DECISION-LOG.md` 신규 SD 부트스트랩 결정 본문 (30 → 230)
+  - `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md` 부트스트랩 표 (30 → 230)
+  - `docs/instructor-report/index.html` 발표 자료 (56 → 230)
+- **건드리지 않음**: 이전 evidence (`2026-05-27-live-turtlebot...`, `2026-05-29-mac-docker-slam...`, `maps/desk_static_v1/eval.md`) — 16GB SD 시점 역사 기록. `MAC-DOCKER-ROS2-PLAYBOOK.md` 5곳 — Mac Docker 트랙은 5/29에 부적합 결론났으므로 deprecated, 별도 정리 시 일괄 변경.
+- **230 안전 범위 caveat**: ROS2 공식 0~232 안에 있지만 Linux 권장 0~101 (multicast port 7400 + 250*domain_id가 system reserved 영역과 가까움). 동료가 이미 230으로 작동 검증했고 codelab_5G WiFi에서 충돌 없으니 박물관 시연 한정으로 사용. 후속 프로젝트는 0~101 권장.
+- **다음 검증** (다음 세션 또는 두 로봇 동시 켤 때):
+  - 양쪽 `ros2 topic list`에서 `/tb3_1/...` + `/tb3_2/...` 모두 보이는지
+  - Unity ROS-TCP-Endpoint도 같은 도메인 환경 확인 (TCP 자체는 도메인 무관이지만 robot 내부 ros_tcp_endpoint 노드는 도메인 영향 받음)
+
 ### 로봇 작명 + 호스트 매핑 확정 (티원 / 젠지)
 
 - **결정**: 두 로봇에 e스포츠 팀 별명을 부여한다. ROS namespace는 `tb3_1`/`tb3_2` 그대로 유지하고, 사람 문서/UI/회의록에서 별명을 사용한다 (dual naming).
@@ -475,7 +496,7 @@
   - 네트워크: 유선 eth0 DHCP. 학원이 `192.168.0.x` ↔ `192.168.10.x` 라우팅을 해줘서 robot이 `192.168.10.59`에 있어도 Mac에서 직접 SSH/ping 가능. 단 mDNS multicast는 라우터 못 건너 `.local` 미작동 → Mac `~/.ssh/config` 별칭 `urhynix-robot` 으로 우회.
   - ROS2 Jazzy + `ros-jazzy-turtlebot3` 메타(2.3.6) + cartographer + nav2-bringup + hls-lfcd-lds-driver + dynamixel-sdk + rmw-cyclonedds-cpp 모두 apt
   - src 빌드: `ld08_driver` (jazzy 브랜치, LDS-03 LiDAR) + `ros_tcp_endpoint` (main-ros2 0.7.0, Unity 통신)
-  - `~/.bashrc`에 ros-jazzy setup + ws setup + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + ROS_DOMAIN_ID=30 자동 source
+  - `~/.bashrc`에 ros-jazzy setup + ws setup + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + ROS_DOMAIN_ID=230 자동 source (초기 30 → 2026-06-02에 230으로 통일, 티원과 일치)
   - udev rules `/dev/tb3_arduino` (Arduino UNO 2341:0043, 2a03:0043) + `/dev/tb3_opencr` (STM 0483:5740) 안정 심볼링크
   - `/etc/urhynix.env` 템플릿 (640 root:kim, SUPABASE_KEY 자리는 `PASTE_SERVICE_ROLE_JWT_HERE` 로 비워둠 — 발표 직전 주인님이 채움)
 - 잔여:

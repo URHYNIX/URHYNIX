@@ -86,7 +86,7 @@ ssh urhynix-robot   # ~/.ssh/config 별칭 (HostName=192.168.10.59, User=kim, Id
 # 또는: ssh kim@192.168.10.59
 ```
 
-robot 안에서 `~/.bashrc`가 ROS2 환경(ros-jazzy + ~/turtlebot3_ws + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + ROS_DOMAIN_ID=30)을 자동 source 하므로 즉시 `ros2 launch ...` 가능.
+robot 안에서 `~/.bashrc`가 ROS2 환경(ros-jazzy + ~/turtlebot3_ws + TURTLEBOT3_MODEL=burger + LDS_MODEL=LDS-03 + OPENCR_PORT=/dev/ttyACM0 + **ROS_DOMAIN_ID=230**)을 자동 source 하므로 즉시 `ros2 launch ...` 가능. (2026-06-02 30→230 통일, 티원과 일치)
 
 ### 잔여 액션 6건 (주인님 손이 꼭 필요)
 

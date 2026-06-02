@@ -23,7 +23,7 @@
 | `/tb3_1/odom` | `nav_msgs/Odometry` | `urhynix_bringup_1` (turtlebot3_node) | cartographer, nav2, unity_bridge | 30 | OpenCR 휠 엔코더 기반. |
 | `/tb3_1/battery_state` | `sensor_msgs/BatteryState` | `urhynix_bringup_1` | unity_bridge | 1 | LiPo 전압 모니터링. |
 
-> **ROS2 환경변수 모드 통일 (필수)**: 모든 노드는 같은 도메인(`ROS_DOMAIN_ID=56`) + 같은 RMW(`rmw_fastrtps_cpp`) + 같은 발견 모드를 사용해야 통신 가능. 본 프로젝트 기본은 **multicast (`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`)** 단일 모드. Discovery Server(`ROS_DISCOVERY_SERVER`) 혼용 금지 — 한쪽이라도 다르면 같은 도메인이라도 발견 실패. 검증: `cat /proc/$(pgrep -f turtlebot3_node)/environ \| tr '\0' '\n' \| grep ROS_`.
+> **ROS2 환경변수 모드 통일 (필수)**: 모든 노드는 같은 도메인(`ROS_DOMAIN_ID=230`) + 같은 RMW(`rmw_fastrtps_cpp`) + 같은 발견 모드를 사용해야 통신 가능. 본 프로젝트 기본은 **multicast (`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`)** 단일 모드. Discovery Server(`ROS_DISCOVERY_SERVER`) 혼용 금지 — 한쪽이라도 다르면 같은 도메인이라도 발견 실패. **2026-06-02 정정**: 티원이 230으로 작동 중이라 젠지도 230으로 통일(이전 56/30 표기는 16GB SD 시점/신규 SD 초기값 — DECISION-LOG 2026-06-02 참조). 검증: `cat /proc/$(pgrep -f turtlebot3_node)/environ \| tr '\0' '\n' \| grep ROS_`.
 
 ### 1.2 보안 이벤트 토픽 (공통 네임스페이스, robot_id 포함)
 
