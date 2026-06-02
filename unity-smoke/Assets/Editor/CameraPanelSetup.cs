@@ -74,7 +74,7 @@ public static class CameraPanelSetup
         AddCameraPanel(
             canvas: canvas,
             name: "T1CameraPanel",
-            topic: "/tb3_1/camera/camera/color/image_raw/compressed",
+            topic: "/tb3_1/camera/color/image_raw/compressed",
             label: "티원 (D435)",
             anchorMin: new Vector2(1, 1),
             anchorMax: new Vector2(1, 1),

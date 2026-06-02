@@ -106,6 +106,12 @@ ssh t1@192.168.0.250 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=2
 | ROS_DOMAIN_ID drift (양쪽 다름) | `ros2 topic list`에 상대 토픽 안 보임 | `~/.bashrc`에서 `export ROS_DOMAIN_ID=230` 통일 |
 | ros_tcp_endpoint launch 파일 이름 | `default_server_endpoint.launch.py was not found` | `ros2 run ros_tcp_endpoint default_server_endpoint` 직접 run (launch 아님) |
 | `realsense2_camera` 권한 | `/dev/video* Permission denied` (non-root) | `sudo usermod -aG video,plugdev <user>` 후 재로그인 |
+| `pkill -f realsense`가 ssh 자기 자신 죽임 | ssh exit 255 + 명령 누락 | `kill <PID>` 직접 또는 `pgrep -af "ros2 launch r"` 정확한 패턴으로 |
+| `camera_namespace:=tb3_1`가 만드는 토픽 구조 — `/tb3_1/camera/color/...` (camera 한 번, 중복 아님) | Unity가 `/tb3_1/camera/camera/...` subscribe하면 publisher 0 | `ros2 topic list \| grep tb3_1`로 실제 발행되는 정확한 이름 확인 후 Unity topic 매칭 |
+| `realsense2_camera`에 `compressed` plugin 자동 안 들어옴 | `/...image_raw/compressed` 토픽 발행 안 됨 (raw만) | `sudo apt install -y ros-jazzy-compressed-image-transport` 별도. 설치 후 realsense2_camera 재시작 |
+| 티원 측 ssh 비번이 젠지와 다름 → 우리 자동화 불가 | `Permission denied (publickey,password)` | 1회 `ssh-copy-id -o StrictHostKeyChecking=accept-new t1@192.168.0.250` (비번 1회) → 영구 자동 |
+| Pi Camera 1280×720@30Hz로 Unity 지연 1~2초 | Wi-Fi/buffer 누적 백로그 | camera_node 해상도 **640×480@30Hz** (frame 크기 1/4) → 지연 0.1~0.3초 실시간 |
+| `urhynix-robot` IP 변경 (reboot 후 .82 → .150) | ssh urhynix-robot은 OK지만 .82 IP는 ping 안 됨 | mDNS `urhynix-robot.local` 사용 (자동 follow) + Unity rosIP도 mDNS 박아둠 |
 
 ## 다음 세션 진입 한 줄 (젠지 풀 launch)
 

@@ -618,7 +618,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a93f182c6c4e456c8a4574bd08c4a7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topicName: /tb3_1/camera/camera/color/image_raw/compressed
+  topicName: /tb3_1/camera/color/image_raw/compressed
   displayLabel: "\uD2F0\uC6D0 (D435)"
   targetImage: {fileID: 1058968807}
   labelText: {fileID: 127081015}

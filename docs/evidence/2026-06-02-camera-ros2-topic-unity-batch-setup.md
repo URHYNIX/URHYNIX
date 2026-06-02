@@ -196,6 +196,97 @@ grep -E "GenjiCameraPanel|T1CameraPanel|topicName" unity-smoke/Assets/Scenes/Sam
 | `.claude/skills/README.md` | 변경 | +2 rows (스킬 인덱스) |
 | 이 evidence | 신규 | 본 파일 |
 
+## Phase 8 — 박물관 듀얼 카메라 라이브 PASS (오후 보강)
+
+오전 작업 후 발견된 잔여 이슈 4건을 모두 해결.
+
+### 8-1. 젠지 reboot + IP 변경 → mDNS 자동 follow
+
+- Wi-Fi 일시 끊김 + apt kernel 권장으로 robot 재부팅
+- IP: `192.168.0.82` → **`192.168.0.150`**
+- Unity ROSConnection rosIP = `urhynix-robot.local` (mDNS) 라서 자동 follow → Unity 측 변경 0건
+
+### 8-2. 젠지 해상도 1280×720 → 640×480 (지연 1~2초 → 실시간)
+
+```bash
+# camera_node 재시작 with 낮은 해상도
+ros2 run camera_ros camera_node --ros-args -r __ns:=/tb3_2 \
+  -p width:=640 -p height:=480
+```
+
+결과:
+- `/tb3_2/camera/image_raw` **30.025 Hz** 유지
+- compressed bw 3.73 MB/s (~30 Mbps)
+- **frame 크기 1/4 → Unity LoadImage 빨라짐 → 지연 1~2초 → 0.1~0.3초 실시간**
+- 사용자 시각 검증: "반응도 좋고 실시간으로 표시됨" (주인님)
+
+### 8-3. 티원 D435 진단 + 해결 (Publisher count 0 → 30 Hz)
+
+**진단 (3가지 문제 동시)**:
+1. 티원 측 노드가 ROS network에 안 보임 (`ros2 node list` 비어있음)
+2. compressed plugin 미설치 (`dpkg -l | grep compressed_image_transport` 빈값)
+3. `camera_namespace:=tb3_1`이 만드는 토픽 구조가 우리 가정과 다름:
+   - 가정: `/tb3_1/camera/camera/color/image_raw/compressed` (`camera/camera` 중복)
+   - 실제: `/tb3_1/camera/color/image_raw/compressed` (한 번만)
+
+**해결**:
+```bash
+# 1) ssh key 등록 (주인님 1회 비번)
+ssh-copy-id -o StrictHostKeyChecking=accept-new t1@192.168.0.250
+# → 이후 우리 Mac에서 영구 자동 ssh
+
+# 2) compressed_image_transport 설치
+ssh t1@.250 'echo 123 | sudo -S apt install -y ros-jazzy-compressed-image-transport'
+# → 4.0.6 설치
+
+# 3) realsense2_camera 재시작 with namespace
+ssh t1@.250 'source /opt/ros/jazzy/setup.bash; export ROS_DOMAIN_ID=230; \
+  nohup ros2 launch realsense2_camera rs_launch.py \
+    align_depth.enable:=true pointcloud.enable:=true \
+    camera_namespace:=tb3_1 > ~/rs.log 2>&1 < /dev/null & disown'
+```
+
+**검증**:
+- `/tb3_1/camera/color/image_raw/compressed` **32.985 Hz** ✅
+- `/tb3_1/camera/aligned_depth_to_color/image_raw/compressed` ✅
+- `/tb3_1/camera/depth/image_rect_raw/compressed` ✅
+- 젠지에서 `ros2 topic info ... -v` → Publisher count: 1 ✅
+- 젠지 `ros2 node list`에 `/tb3_1/camera` 보임 ✅
+
+### 8-4. Unity batch로 T1 topic name 자동 수정
+
+Scene 파일 직접 편집 위험 → CameraPanelSetup.cs 한 줄 수정 + Unity batch mode 재실행:
+
+```csharp
+// 변경: /tb3_1/camera/camera/color/image_raw/compressed → /tb3_1/camera/color/image_raw/compressed
+```
+
+Unity batch 90초 실행 → Scene 파일 자동 갱신:
+```
+- topicName: /tb3_1/camera/camera/color/image_raw/compressed
++ topicName: /tb3_1/camera/color/image_raw/compressed
+```
+
+→ Unity Editor 재시작 후 자동 Play 진입 + **두 카메라 모두 라이브 PASS** (사용자 확인: "둘다 잘나옴")
+
+## 📊 최종 결과 — 박물관 시연 카메라 라이브 풀 완성
+
+| 패널 | 카메라 | 토픽 | hz | 상태 |
+|---|---|---|---|---|
+| GenjiCameraPanel (우상단) | Pi Camera v2 IMX219 | `/tb3_2/camera/image_raw/compressed` | 30 | ✅ 라이브 실시간 |
+| T1CameraPanel (우중간) | RealSense D435 | `/tb3_1/camera/color/image_raw/compressed` | 30 | ✅ 라이브 실시간 |
+
+→ Unity 화면에 **두 카메라 동시 라이브** = 박물관 시연 발표 결정타 셋샷 완성.
+
+## 추가 잡은 함정 (skill 보강)
+
+| # | 함정 | 우회 |
+|---|---|---|
+| 9 | `pkill -f realsense`가 ssh 명령 자체 죽임 ("realsense" 단어 매칭) | `kill <PID>` 직접 또는 `pgrep -af "ros2 launch r"` 정확한 패턴 |
+| 10 | `camera_namespace:=tb3_1`의 토픽 구조 — `/tb3_1/camera/color/...` (camera 한 번) | Unity topic 가정 시 `ros2 topic list`로 실제 발행되는 정확한 이름 확인 |
+| 11 | realsense2_camera에 compressed plugin 자동 안 들어옴 | `sudo apt install -y ros-jazzy-compressed-image-transport` 별도 |
+| 12 | ssh-copy-id 안 하면 우리가 티원 자동화 불가 (비번 다름) | 첫 1회 `ssh-copy-id` → 영구 자동 |
+
 ## 한줄정리
 
-`camera_ros` + `LD_LIBRARY_PATH` 우회로 Pi Camera → **/tb3_2/camera/image_raw/compressed 30.095Hz** 발행 + `ros_tcp_endpoint` 0.0.0.0:10000 listening. Unity batch mode로 `CameraStreamPanel.cs` + `CameraPanelSetup.cs` 자동 실행 → SampleScene에 GenjiCameraPanel + T1CameraPanel 2종 자동 추가(`MissingComponent` 함정 잡음). 패턴 2종을 `robot-camera-bringup` + `unity-camera-panel` 스킬로 영구 자산화. 다음 세션 진입 한 줄로 카메라 트랙 ready.
+`camera_ros` + `LD_LIBRARY_PATH` 우회로 Pi Camera → **/tb3_2/camera/image_raw/compressed 30Hz** 발행, 티원 D435는 `camera_namespace:=tb3_1` + `compressed_image_transport` 설치로 **/tb3_1/camera/color/image_raw/compressed 32.985Hz** 발행. Unity batch mode로 `CameraPanelSetup.cs` 자동 실행 → **두 카메라 라이브 동시 표시 PASS** (박물관 시연 발표 셋샷 완성). 함정 12건 매트릭스를 `robot-camera-bringup` + `unity-camera-panel` 스킬에 영구 자산화.
