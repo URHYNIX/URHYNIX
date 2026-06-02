@@ -88,21 +88,26 @@
 
 ## 듀얼 로봇 역할
 
-### tb3_1 — 순찰/감지 (Patrol)
+### tb3_1 (별명 **티원**) — 순찰/감지 (Patrol) · **비전 중심**
 
+- **탑재 카메라**: Intel RealSense D435 (RGB-D + IR, IMU 없음) — 3층 정면 부착
+- **호스트**: `t1@192.168.0.250` (hostname `rb`) — 동료 작업 머신, 사용자명 `t1` = 티원
 - 사전 정의된 waypoint를 SLAM 맵 위에서 순찰
-- LiDAR/odom으로 위치 파악
-- 센서 인터페이스(Arduino 보드/Raspberry Pi USB serial/OpenCR 후보)의 PIR/조도/소리/불꽃을 감시
-- 박물관/미술관 구역의 액자형 사진 타깃을 `protected_asset`으로 보고, 순찰 중 카메라 인식 또는 수동 라벨 결과를 DB에 남김
-- 이벤트 발생 시 `(robot_id, event_type, pose, severity, timestamp)`를 `/security/event` 발행
-- 조도 센서가 어두움(`dark`)으로 진입하면 저속 순찰/추가 LiDAR sweep/pose log 저장 빈도를 높여 외부자 판단 근거를 보강
+- LiDAR/odom + D435 RGB-D로 위치/장애물 파악
+- 박물관/미술관 구역의 액자형 사진 타깃을 `protected_asset`으로 보고, 순찰 중 D435 RGB + YOLO 인식 결과를 DB에 남김
+- 이벤트 발생 시 `(robot_id="tb3_1", event_type, pose, severity, timestamp)`를 `/security/event` 발행
+- D435 Depth는 가벽 매핑 보완(LDS-03 192mm 평면이 못 잡는 낮은 가벽 detect) + 액자 3D 위치 식별에 사용
 - 발행 후에도 순찰 지속 또는 대기 상태로 전환
 
-### tb3_2 — 출동/확인 (Responder)
+### tb3_2 (별명 **젠지**) — 출동/확인 (Responder) · **센서 중심**
 
-- 평상시 대기 위치 또는 별도 구역 순찰
+- **탑재 카메라**: Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464)
+- **탑재 센서**: Arduino UNO + PIR/조도(LDR)/소리/불꽃 4종 (PIR=D2, LDR=A0, 소리=D3, 불꽃=D4)
+- **호스트**: `urhynix-robot` (kim@192.168.0.82) — 우리 작업 머신
+- 평상시 대기 위치 또는 별도 구역 순찰. Arduino 센서 4종 감시 — PIR/조도/소리/불꽃 임계값 → `/security/event` 발행
 - `/security/event` 구독 → `/security/dispatch` 발행 → Nav2 goal로 감지 좌표 근처 waypoint 이동
 - 도착 후 Pi Camera 캡처/스트림을 `/security/camera_confirm`으로 발행
+- 조도 센서가 어두움(`dark`)으로 진입하면 저속 순찰/추가 LiDAR sweep/pose log 저장 빈도를 높여 외부자 판단 근거를 보강
 - 출동 소요 시간, 확인 결과, 사진/영상/사운드 저장 경로를 DB에 기록
 
 ## 박물관/미술관 보호 컨셉
@@ -170,8 +175,8 @@
 | Supabase Storage 또는 로컬 media 폴더 | 예정: 사진 / 짧은 영상 / 사운드 원본 저장, DB에는 path와 메타데이터 저장 |
 | ROS-TCP-Endpoint (Unity 측) | Unity ↔ ROS2 양방향 통신 (TCP 10000, NAT 통과 OK) |
 | Arduino IDE / serial | Uno R3 펌웨어 빌드 + `pyserial`로 RPi에서 수신 |
-| Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464) | tb3_* 위 일반 RGB 카메라 노드. Ubuntu 24.04에서는 libcamera Pi fork + rpicam-apps 소스 빌드 필수 (DECISION-LOG 2026-06-01 참조) |
-| Intel RealSense D435 (USB 3.2, Depth+RGB+IR, IMU 없음) | tb3_* 위 3D 깊이 카메라. RGB-D SLAM(RTAB-Map) + 가벽 detection + 액자 3D 위치 식별 |
+| Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464) | **tb3_2 (젠지) 위** 일반 RGB 카메라 노드. 호스트 `urhynix-robot`(kim@192.168.0.82). Ubuntu 24.04에서는 libcamera Pi fork + rpicam-apps 소스 빌드 필수 (DECISION-LOG 2026-06-01 참조) |
+| Intel RealSense D435 (USB 3.2, Depth+RGB+IR, IMU 없음) | **tb3_1 (티원) 위** 3D 깊이 카메라. 호스트 `t1@192.168.0.250`(hostname `rb`). RGB-D SLAM(RTAB-Map) + 가벽 detection + 액자 3D 위치 식별 + YOLO 4 클래스 인식 |
 
 ## SLAM/Nav2 처리 위치 (2026-05-29 확정)
 

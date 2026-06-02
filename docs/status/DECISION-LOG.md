@@ -1,5 +1,26 @@
 # Decision Log
 
+## 2026-06-02
+
+### 로봇 작명 + 호스트 매핑 확정 (티원 / 젠지)
+
+- **결정**: 두 로봇에 e스포츠 팀 별명을 부여한다. ROS namespace는 `tb3_1`/`tb3_2` 그대로 유지하고, 사람 문서/UI/회의록에서 별명을 사용한다 (dual naming).
+- **매핑**:
+  - **tb3_1 = 티원** (비전 중심) — 카메라: **Intel RealSense D435** (3층 정면 부착) — 호스트: **`t1@192.168.0.250`** (hostname `rb`) — 사용자명 `t1` = 티원 일치
+  - **tb3_2 = 젠지** (센서 중심) — 카메라: **Raspberry Pi Camera Module v2 (Sony IMX219, 8MP)** + Arduino 4종 (PIR/LDR/소리/불꽃) — 호스트: **`urhynix-robot`** (kim@192.168.0.82)
+- **근거**: 2026-06-01 회의(Confluence 5111810)에서 "로봇1=비전, 로봇2=센서" 분담 결정. 회의 결정 + 사용자명 + 작업 영역 매핑이 모두 일치(D435는 t1@.250에서, IMX219는 urhynix-robot에서 검증됨).
+- **dual naming 원칙**:
+  - ROS topic: `/tb3_1/...`, `/tb3_2/...` 영문 + 표준 (한글 unicode 토픽 미사용)
+  - DB `robot_id`: `tb3_1`, `tb3_2`
+  - 사람 문서/Unity UI/회의록/PR 제목: **티원** / **젠지** 별명 사용 권장
+  - 양쪽 표기 모두 SSOT에 명시
+- **SSOT 반영 위치**: `docs/ref/ARCHITECTURE.md` (듀얼 로봇 역할 + 외부 시스템 표), `docs/ref/PROJECT-PLAN.md` (2대 로봇 역할 분리), `docs/status/PROJECT-STATUS.md` (한 줄 상태), `docs/status/HANDOFF.md` (Last updated).
+- **잔여 액션**:
+  - JIRA-MAP의 SCRUM-19/25 본문에 카메라 매핑 정확화 (`/tb3_1/camera/*` D435 vs `/tb3_2/camera/*` IMX219)
+  - Unity 패널의 로봇 전환 토글 라벨을 "티원/젠지"로
+  - 다음 회의에서 카메라 부착 이전 일정 확정 (D435가 어제 임시 검증 머신 = t1@.250 그대로 영구라면 이전 불필요. 다른 머신이면 이전 일정 잡기)
+- **영향 없음**: ROS namespace `tb3_1`/`tb3_2`는 그대로라 코드/Unity/DB 변경 없음. 사람 표기만 별명 추가.
+
 ## 2026-06-01
 
 ### RealSense D435 Windows streaming PASS (pyrealsense2) 추가 확인
@@ -13,6 +34,7 @@
 
 ### Pi Camera 모델 확정 (Module v2 / Sony IMX219) + Ubuntu 24.04 ports repo 미제공 → 소스 빌드 결정
 
+- 변경 목적: 2026-06-01 SCRUM 회의록(Confluence page `5111810`)의 역할 분담/부착 계획을 SSOT에 명시한다.
 - **모델 확정**: 신규 128GB SD 부트스트랩 후 첫 진단에서 Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464 최대 해상도) 확정. 근거: `lsmod`에 `imx219` 로드, `i2c-10` address `0x10` 응답, `/dev/video0` = `unicam-image` (CSI MMIO `fe801000.csi`).
 - **하드웨어 상태**: 100% 정상 (CSI controller + `bcm2835_unicam` + `bcm2835_isp` + `bcm2835_codec` 전부 로드). 케이블/sensor 응답 정상.
 - **차단 원인**: Ubuntu 24.04 LTS for Raspberry Pi ports repo는 `rpicam-apps`/`libcamera-apps` **미제공**. `apt install` 시 "패키지를 찾을 수 없습니다". Ubuntu는 upstream libcamera만 포함하고 Pi ISP/IPA는 Raspberry Pi fork에만 존재.
@@ -27,6 +49,25 @@
 - **잡은 함정 3건** (Ubuntu 24.04 특이): ① ports repo에 rpicam-apps 없음 → 소스 빌드. ② `libepoxy-dev` deps 누락 (preview/meson.build:32) → apt 추가. ③ libavcodec 60.31.x가 rpicam-apps master 요구 API보다 오래됨 → `-Denable_libav=disabled` 우회 (mp4 인코딩은 별도 ffmpeg).
 - **재사용 가능 스크립트**: `scripts/build-picamera.sh` — sudo keeper 50s + setsid + 함정 3건 모두 반영. 다음 SD 또는 협업자 머신에서 한 줄(`nohup bash build-picamera.sh > picam-build.log 2>&1 &`)로 30~60분 안에 동일 빌드 가능.
 - **근거 evidence**: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md` (산출물: JPG 283KB + H.264 2.8MB 동봉)
+
+### 로봇 1/2 역할 분리 + 카메라/센서 부착 계획 (회의록 기반, 계획/진행 중)
+
+- 변경 목적: 2026-06-01 회의록에서 합의된 2대 로봇 역할 분리를 SSOT에 고정한다.
+- **운영 모델(초안)**:
+  - `tb3_1`(로봇 1) = **비전 중심**: RealSense `D435`를 전면(3층 정면) 부착해 RGB-D 기반 인식/매핑을 담당.
+  - `tb3_2`(로봇 2) = **센서/확인 중심**: Arduino 센서 스택 + Pi Camera(IMX219) 부착로 이벤트/확인(영상) 담당.
+- **상태**: 부착은 “예정/진행 중”. 실제 장착 완료/ROS 토픽 레벨 검증은 evidence로 별도 업데이트 필요.
+
+### Unity 관제 UI v1 상호작용/버튼 요구사항 (회의록 기반, 계획/정의 중)
+
+- 변경 목적: 2026-06-01 회의록의 UI 기능 정의를 “현재 구현”이 아니라 “정의/계획”으로 분리 기록한다.
+- **결정/정의(요약)**:
+  - 맵 클릭 상호작용: 우클릭=좌표 생성/삭제, 좌클릭=화면 스크롤(좌우).
+  - 좌표 상태/속성: 충전 위치/특정 좌표/이름 지정, 순회 번호 및 경로·방향 편집(모달에서 드래그앤드랍 순서 조정).
+  - 차단 지역: 자유 변형 가능한 영역 스케치.
+  - 모드: 수동(teleop) / 자동(순회 시작, 확인 팝업), 스캔 모드(좌표마다 360° 1회전), 가속 모드(속도 프리셋).
+  - 로봇 상태 패널: 배터리 + (가스/소리/화재/조도 등) 센서 수치 표시.
+  - UI 정리: “화재 발생 이미지 매칭 UI”는 삭제하고 “조도 센서 상태”를 우선 추가, 위험 상태 시 알람 팝업.
 
 ### RealSense 카메라 모델 D435 확정 (D435i 아님) + Mac SDK streaming 차단 → Pi4 이전 결정
 

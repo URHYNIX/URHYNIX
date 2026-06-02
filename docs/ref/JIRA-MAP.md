@@ -31,13 +31,13 @@
 | SCRUM-16 | 실내 트랙 + 박물관/미술관 경비 구역 + 야간 모드 환경 세팅 | 박태진 · 임현찬 | 공통 | S1 |
 | SCRUM-17 | 추가 센서(소리·불꽃 모의) 회로 + 임계값 캘리브레이션 | 김주영 · 임현찬 · 박태진 | M4 | S3 |
 | SCRUM-18 | 최종 시연 환경 — 2대 동시 구동 + 백업 부품 + 광량 준비 | 박태진 · 임현찬 | 공통 | S4 |
-| SCRUM-19 | Pi Camera 설치 + `/tb3_*/camera/image_raw` 스트림 발행 | 박태진 · 임현찬 | M3 / M5 | S2 |
-| SCRUM-20 | tb3_1 pose ↔ 센서 이벤트 timestamp 동기화 | 임현찬 · 김선일 | M5 | S2 |
-| SCRUM-21 | 라벨링 + AI 오탐/실탐 분류 보조 모델 + 액자형 중요물품 인식 | 김주영 · 김선일 | M1 | S3 |
+| SCRUM-19 | 카메라 설치 + 토픽 발행: 티원(tb3_1) D435 `/camera/camera/{color,depth,...}` + 젠지(tb3_2) Pi Camera `/camera/image_raw` | 박태진 · 임현찬 | M3 / M5 | S2 |
+| SCRUM-20 | 티원(tb3_1) pose ↔ 젠지(tb3_2) 센서 이벤트 timestamp 동기화 | 임현찬 · 김선일 | M5 | S2 |
+| SCRUM-21 | 라벨링 + AI 오탐/실탐 분류 보조 모델 + 액자형 중요물품 인식 (티원 D435 RGB + YOLO 4 클래스) | 김주영 · 김선일 | M1 | S3 |
 | SCRUM-22 | 야간 모드 / 이벤트 패널 / 운영 대시보드 UI | 김선일 · 박태진 | M3 | S2 |
 | SCRUM-23 | 이벤트·좌표·사진·영상·사운드·보호대상 저장 구조 확장(camera_captures + pose_logs + media_artifacts + protected_assets) | 김선일 · 김주영 | M1 | S3 |
 | SCRUM-24 | 발표용 화면/영상/시나리오 컷 캡처 | 박태진 · 김선일 | M3 | S4 |
-| SCRUM-25 | Pi Camera 라이브 스트리밍 → Unity 패널 | 김선일 · 박태진 | M3 | S3 |
+| SCRUM-25 | 카메라 라이브 스트리밍 → Unity 패널 (티원 `/tb3_1/camera/*` D435 + 젠지 `/tb3_2/camera/*` IMX219 두 종 동시) | 김선일 · 박태진 | M3 | S3 |
 
 ## 정리/검토 후보
 
