@@ -73,6 +73,7 @@
 | `ip-drift-resync` | DHCP로 robot IP가 변경됐고 Unity Scene/Script/known_hosts를 일괄 동기화해야 할 때 (매 세션 첫 5분) | Unity Editor 종료 → sed patch → known_hosts purge 자동화. Unity 자동 save back 함정 회피 (2026-05-29 발견) |
 | `robot-camera-bringup` | 매 세션 첫 5분 — 두 로봇 카메라 트랙(camera_ros Pi Camera + realsense2_camera D435 + ros_tcp_endpoint)을 한 번에 살릴 때 | LD_LIBRARY_PATH 우회 + ssh ControlMaster=no + nohup/disown + 토픽 hz 30Hz 검증 한 줄. 함정 8건 매트릭스 (ABI 충돌/sudo stdin/연결 끊김/launch 파일 이름 등). 2026-06-02 젠지 30.095Hz 검증 통과 |
 | `unity-camera-panel` | Unity 관제 UI에 ROS2 카메라 라이브 RGB 패널을 코드 손 안 대고 추가할 때. 새 카메라 추가 시 AddCameraPanel 한 줄로 확장 | `CameraStreamPanel.cs` 컴포넌트(topic Inspector 입력) + `CameraPanelSetup.cs` Editor script(batch mode) + Unity batch CLI 한 줄. 함정 7건 매트릭스. 2026-06-02 GenjiCameraPanel + T1CameraPanel 자동 추가 통과 |
+| `unity-ui-interaction-audit` | UI Toolkit View 레이어 완료 후 UI Contract Lock 잠그기 전 모든 버튼/토글의 핸들러+이벤트+구독자+시각 피드백 정합성 검증 | Phase A Opus 정적 매트릭스 (25개 요소, 결함 6분류) + Phase B unityctl 동적 한계 5종 우회 표. 함정 7건 (script validate 가짜 PASS / exec 사용자 어셈블리 unreachable / Button.clicked event invoke 불가 등). 2026-06-04 URHYNIX Phase 2.5 검증 통과 |
 
 ## Selection Rule Of Thumb
 
@@ -95,6 +96,7 @@
 - "새 경기장에서 SLAM 맵 산출 + Unity 임포트 + Nav2 베이스라인" -> `slam-nav2-arena-survey`
 - "작업 끝났으니 SSOT 3종에 박고 마무리" -> `ssot-trio-update`
 - "Unity 작업에 필요한 ref만 빨리 보고 싶다" -> `docs/ref/tech/UNITY.md`
+- "UI 버튼/토글 다 잘 위치하고 클릭에 반응하나 검증" -> `unity-ui-interaction-audit`
 
 ## Writing Rules
 

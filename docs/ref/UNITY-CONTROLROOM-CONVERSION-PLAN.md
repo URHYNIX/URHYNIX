@@ -27,7 +27,7 @@
 
 | HTML 영역 | Unity 담당 | 설명 |
 |---|---|---|
-| Top Header | `TopBarView` | 로고, 로봇 탭, 시스템 상태, 시계, 경보, 전원 버튼 |
+| Top Header | `TopBarView` + `RobotTabView` + `PowerButtonView` | 로고, 로봇 탭, 시스템 상태, 시계, 경보, 전원 버튼 |
 | 위험상황 테스트 제어 | `ScenarioPanelView` | 화재, 침입, 소리, 도난 데모 트리거 |
 | 동작 제어 | `MovePanelView` | 수동 조작, 순회 시작/정지 |
 | 모드 설정 | `ModePanelView` | 자동/수동 전환 |
@@ -37,8 +37,9 @@
 | 3D 맵 | `Map3DView` | Unity scene object와 imported TurtleBot prefab 표시 |
 | 카메라 피드 | `CameraPanelView` | ROS compressed image topic 표시 |
 | 이벤트 로그 | `LogPanelView` | 이벤트/명령/DB 저장 로그 |
-| 원격 상태 계측 | `TelemetryPanelView` | 배터리, 가스, 소리, 조도, 화재 센서 |
+| 원격 상태 계측 | `TelemetryPanelView` + `SensorCardListView` | 배터리(Telemetry) + 가스/소리/조도/PIR/화재 센서 5종(SensorCardList) |
 | 하드웨어 사양 | `HardwarePanelView` | 모델, IP, firmware, role |
+| 보호대상 목록 | `ProtectedTargetView` | 액자/작품/중요품 목록 + 상태 배지 (safe/check/missing). Phase 2.5 신설. 상세 구조는 §10 참고 |
 | 관제 옵션 토글 | `FeatureToggleListView` | 기능 목록을 config 기반 자동 생성 |
 | 경보 팝업 | `AlertPopupView` | 위험 이벤트 발생 시 modal alert |
 
