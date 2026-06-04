@@ -49,9 +49,11 @@ namespace URHYNIX.ControlRoom.Editor
             serDoc.ApplyModifiedPropertiesWithoutUndo();
             uiGO.AddComponent<ControlRoomBinder>();
 
-            // 2) EventSystem (InputSystem 1.17.0 대응 — 자동 모듈 추가)
+            // 2) EventSystem + InputSystemUIInputModule (필수 — InputModule 빠지면 UI Toolkit 클릭 0 반응).
+            // 2026-06-04 발견: 주석에 "자동 추가" 가정했으나 실제로는 수동 명시 필요. Phase 2.5 Scene이 이 버그로 0 반응.
             new GameObject("EventSystem",
-                typeof(UnityEngine.EventSystems.EventSystem));
+                typeof(UnityEngine.EventSystems.EventSystem),
+                typeof(UnityEngine.InputSystem.UI.InputSystemUIInputModule));
 
             // 3) App root
             var appGO = new GameObject("ControlRoomAppRoot");
