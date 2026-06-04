@@ -7,7 +7,7 @@
 | 파일 | 역할 |
 |---|---|
 | `ISensorModule.cs` | 센서 추가용 공통 인터페이스 |
-| `SensorRegistry.cs` | 센서 등록소 (`default_sensors.json`에서 로드) |
+| `SensorRegistry.cs` ✅ | 센서 등록소 (`SensorConfig/default_sensors.json` 로드 + ID/로봇별 조회) |
 | `BatterySensor.cs` | 배터리 (`/battery_state`) |
 | `GasSensor.cs` | 가스 |
 | `SoundSensor.cs` | 소리 |

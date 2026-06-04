@@ -8,10 +8,22 @@
 |---|---|
 | `SupabaseConfig.template.asset` | Supabase URL + anon key **빈 값** 템플릿 (커밋 OK) |
 | `SupabaseConfig.local.asset` | 실제 anon key 박힘 — **`.gitignore` 차단** |
-| `default_robots.json` ✅ | 로봇 목록 (`tb3_1` 티원 / `tb3_2` 젠지, hostAddress + cameraTopic + poseTopic 포함) |
-| `default_features.json` | 기능 목록 + UI 표시 규칙 |
-| `default_sensors.json` | 센서 목록 + 토픽/단위/임계값 |
-| `office_base_map.json` | 맵/웨이포인트/차단구역/보호대상 위치 |
+| `RobotConfig/default_robots.json` ✅ | 로봇 목록 (`tb3_1` 티원 / `tb3_2` 젠지, hostAddress + cameraTopic + poseTopic 포함) |
+| `FeatureConfig/default_features.json` ✅ | 기능 목록 (`scan_360` / `boost` / `slam`, RobotFeatureInfo 1:1 매핑) |
+| `SensorConfig/default_sensors.json` ✅ | 센서 5종 (`gas` / `noise` / `lux` / `pir` / `fire`, SensorInfo 1:1) |
+| `MapConfig/office_base_map.json` ✅ | MapConfigData 1개 (MapMeta `museum_floor1` + waypoint 5개 + 보호대상 2개) |
+
+## 폴더 구조 (Phase 3 결정)
+
+```
+Resources/
+├── RobotConfig/   default_robots.json
+├── FeatureConfig/ default_features.json
+├── SensorConfig/  default_sensors.json
+└── MapConfig/     office_base_map.json
+```
+
+각 카테고리별 폴더 분리. `Resources.Load<TextAsset>("RobotConfig/default_robots")` 패턴.
 
 ## 보안 규칙
 

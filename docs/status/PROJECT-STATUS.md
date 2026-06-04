@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-06-02 밤 — **Unity ControlRoom Phase 2.5 단계 1~4 완료 + 자기리뷰 PASS** — 16 View 100% 활성(SSOT §3 14 + 보너스 RobotTab/PowerButton 2). 좌측 4 카드(시나리오/운영/특수모드/순회지점) + 상단바 RobotTab/PowerButton + 우측 4 카드(배터리/센서5/하드웨어/보호대상) + 맵 placeholder(격자 6선+waypoint 5+보호대상 2+로봇 dot 2+박물관 1층 라벨) + 카메라 crosshair+LIVE dot + 로그 4줄 자동 push. **FR5UNITY PendantV3 성공 패턴 이식** — ScrollView 잘림 해소(min-height 0 + unity-scroll-view__content-container 직접 패치 + ScaleMode 2→1). 자기리뷰(Opus) PASS + FIX 1만 적용(TopBarView alertCount reset on RobotChanged). commit 17be8ea push 완료. fake interaction 깊이 = 알람 popup만 일관. placeholder 5건(맵/카메라/센서/로그/배터리)는 Phase 3+에서 실 데이터 swap. 이전: Phase 진행 전략 = 옵션 D (UI Polish First) + Phase 2.5 신설. 이전: Play UI 미표시 해결 + Scene PanelSettings GUID 직접 패치.
+Last updated: 2026-06-04 — **Unity ControlRoom Phase 2.5 진짜 완료 — EventSystem InputModule 누락 root cause 해결** — `ControlRoomSceneSetup.cs:53`이 EventSystem GameObject만 생성하고 `InputSystemUIInputModule` 누락 → 모든 UI 클릭 0 반응. unityctl `component add`로 Scene 패치 + SceneSetup.cs 2-인자 수정 → 사용자 "잘눌리고있음". Phase A 정적 감사(Opus, 25/25 PASS) + 자기리뷰 PASS + 스킬화(`unity-ui-interaction-audit` Phase A/B 한계 + 함정 10건). **다음 진입 = Phase 3 데이터 모델/Registry** (POCO 4 + Registry 2 + JSON 4 + loader), UI Contract Lock 원칙(UXML/USS/View 0줄). 실 ROS 연결은 Phase 5. 이전: Phase 2.5 단계 1~4 완료 + 16 View 100% 활성 + FR5 PendantV3 ScrollView 성공 패턴 이식. 이전: 옵션 D(UI Polish First) + Phase 2.5 신설.
 
 ## 2026-06-02 Addendum
 

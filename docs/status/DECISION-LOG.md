@@ -1,5 +1,28 @@
 # Decision Log
 
+## 2026-06-04
+
+### Unity ControlRoom Phase 2.5 진짜 완료 — EventSystem InputModule 누락 root cause 발견 + UI 상호작용 감사 스킬화
+
+- **증상**: 사용자 "현재 플레이모드이고 눌리는게 아예없음" — Phase 2.5 단계 1~4 시각은 완벽이지만 모든 버튼/토글이 클릭에 0 반응.
+- **원인 (root cause)**: `Assets/Editor/ControlRoomSceneSetup.cs:53` EventSystem GameObject 생성 시 `InputSystemUIInputModule` 컴포넌트 누락. 주석에 "자동 모듈 추가" 가정했으나 Unity 6.3 + new InputSystem 1.17.0은 **수동 명시 필수**. InputModule 없으면 UI Toolkit이 마우스 이벤트를 단 1건도 수신 못 함 (시각만 그려지고 클릭 dead).
+- **해결 절차** (재현 가능):
+  1. `unityctl component add` 로 현재 Scene EventSystem에 `UnityEngine.InputSystem.UI.InputSystemUIInputModule` 추가.
+  2. `ControlRoomSceneSetup.cs:54-56` 수정 — `new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule))` 2-인자 패턴.
+  3. Scene 저장 + Editor Play 재시작 → 사용자 확인 "잘눌리고있음".
+- **부수 작업 — UI 상호작용 감사 자동화 시도** (Phase A 정적 PASS / Phase B 동적 실패):
+  - Phase A (Opus 정적): 25개 UI 요소 매트릭스(버튼/토글/탭/카드/팝업) 6 결함 분류(A~F) → **25/25 PASS**, 0 발견사항. `docs/evidence/2026-06-04-ui-interaction-audit.md` 500줄.
+  - Phase B (unityctl exec 동적): 5가지 한계 발견 후 포기 — ① `script validate` "Compilation succeeded" 거짓 PASS(실제 CS0079) ② exec --code는 시스템 어셈블리만 검색(Assembly-CSharp 도달 불가) ③ `Button.clicked` 는 event Action → 외부 invoke 컴파일 차단 ④ `Assets/Editor/` 폴더 Play 모드 AppDomain 미로딩 ⑤ `[RuntimeInitializeOnLoadMethod]` 등록 전 컴파일 실패로 미실행.
+- **핵심 학습 2건**:
+  - Phase A 정적 감사는 Scene config 결함(EventSystem InputModule 누락 등 GameObject 레벨)을 절대 못 잡는다 → 시각 시연 후 사용자가 직접 클릭으로 sanity 1회 필수.
+  - Unity 6 + new InputSystem 1.17.0 환경에선 EventSystem에 `InputSystemUIInputModule` 명시 = 비협상 사항. 주석에 "자동" 가정 금지.
+- **스킬화**: `.claude/skills/unity-ui-interaction-audit/SKILL.md` 신설(300+줄). Phase A 정적 매트릭스 패턴 + Phase B 한계 5종 + 함정 10건(`script validate` 거짓 PASS / event Action invoke 불가 / Editor 폴더 unreachable / **EventSystem InputModule 누락 0 반응** 등). `.claude/skills/README.md` 인덱스 추가.
+- **자기리뷰(Opus) PASS**: 6 검증 항목(SKILL.md 정합성/PLAN.md 갱신/EventSystem fix/Phase A 보고서/스킬 함정표/UI Contract Lock) 전부 PASS, 발견사항 0건, 박물관 시연 GO 판정 유지. `docs/evidence/2026-06-04-self-review.md`.
+- **SSOT 패치**: `docs/ref/UNITY-CONTROLROOM-CONVERSION-PLAN.md` §3 표 — TopBar=`TopBarView+RobotTabView+PowerButtonView`, 원격 상태 계측=`TelemetryPanelView+SensorCardListView`, 신규 row=`ProtectedTargetView` 보호대상.
+- **부수 산출물**: `.claude/skills/unity-ui-interaction-audit/SKILL.md`, `docs/evidence/2026-06-04-{ssot-ui-audit,ui-interaction-audit,self-review}.md`, `unity/ControlRoom/Assets/Editor/ControlRoomSceneSetup.cs` patch, `unity/ControlRoom/Assets/Scenes/ControlRoomMain.unity` (EventSystem 컴포넌트 추가).
+- **commit**: bcae8a9(skill+reports) → a213692(EventSystem fix) → 자기리뷰 evidence push 완료.
+- **다음 진입**: **Phase 3 데이터 모델/Registry** (POCO 4 `RobotInfo/SensorInfo/RobotFeatureInfo/ProtectedTargetInfo` + Registry 2 `FeatureRegistry/SensorRegistry` + JSON 4 `default_robots/sensors/features.json + office_base_map.json` + loader). **UI Contract Lock 원칙**: UXML/USS/View 0줄 수정. 실 로봇 ROS 연결은 **Phase 5**, 본 Phase 3은 fake지만 config-driven으로 전환.
+
 ## 2026-06-02
 
 ### Unity ControlRoom Phase 2.5 단계 1~4 완료 + 자기리뷰 PASS — 16 View 100% 활성

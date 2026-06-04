@@ -1,0 +1,54 @@
+{
+  "sensors": [
+    {
+      "sensorId": "gas",
+      "displayName": "가스",
+      "sensorType": "analog",
+      "unit": "ppm",
+      "topicName": "/tb3_2/sensor/gas",
+      "warningThreshold": 1.5,
+      "iconName": "sensor_badge",
+      "robotId": "tb3_2"
+    },
+    {
+      "sensorId": "noise",
+      "displayName": "소음",
+      "sensorType": "analog",
+      "unit": "dB",
+      "topicName": "/tb3_2/sensor/noise",
+      "warningThreshold": 70.0,
+      "iconName": "sensor_badge",
+      "robotId": "tb3_2"
+    },
+    {
+      "sensorId": "lux",
+      "displayName": "조도",
+      "sensorType": "analog",
+      "unit": "lux",
+      "topicName": "/tb3_2/sensor/lux",
+      "warningThreshold": 50.0,
+      "iconName": "sensor_badge",
+      "robotId": "tb3_2"
+    },
+    {
+      "sensorId": "pir",
+      "displayName": "PIR",
+      "sensorType": "boolean",
+      "unit": "",
+      "topicName": "/tb3_2/sensor/pir",
+      "warningThreshold": 1.0,
+      "iconName": "sensor_badge",
+      "robotId": "tb3_2"
+    },
+    {
+      "sensorId": "fire",
+      "displayName": "화재",
+      "sensorType": "boolean",
+      "unit": "",
+      "topicName": "/tb3_2/sensor/fire",
+      "warningThreshold": 1.0,
+      "iconName": "fire_alert",
+      "robotId": "tb3_2"
+    }
+  ]
+}

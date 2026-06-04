@@ -7,7 +7,7 @@
 | 파일 | 역할 |
 |---|---|
 | `IRobotFeature.cs` | 기능 추가용 공통 인터페이스 |
-| `FeatureRegistry.cs` | 기능 등록소 (`default_features.json`에서 로드) |
+| `FeatureRegistry.cs` ✅ | 기능 등록소 (`FeatureConfig/default_features.json` 로드 + ID/로봇별 조회) |
 | `AutoDriveFeature.cs` | 자율주행 |
 | `SlamFeature.cs` | SLAM |
 | `ScanFeature.cs` | 360도 스캔 |
