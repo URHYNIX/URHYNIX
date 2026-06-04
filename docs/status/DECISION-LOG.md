@@ -2,6 +2,33 @@
 
 ## 2026-06-04
 
+### Unity ControlRoom Phase 2.7 — 젠지 Pi Camera 라이브 결선 PASS + 4종 함정 영구 자산화
+
+- **결과**: ControlRoom 신 프로젝트(Unity 6.3 LTS)에 젠지 `/tb3_2/camera/image_raw/compressed` **30Hz 라이브 RGB 결선 완료**. 사용자 확인 "카메라 화면 잘나옴". 로그 패널에 `🟢 Pi Camera 연결됨` + `⚪ Gemma 4 12B 대기 중` 2줄 표시.
+- **산출물**:
+  - 🆕 `unity/ControlRoom/Assets/Scripts/Ros/CameraStreamSubscriber.cs` (76줄, namespace `URHYNIX.ControlRoom.Ros`, static event `OnFrameUpdated`)
+  - 🆕 `unity/ControlRoom/Assets/Editor/CameraStreamSetup.cs` (60줄, idempotent Scene GameObject 자동 배치)
+  - ✏️ `Assets/UI/Parts/CameraAndLogPanel.uxml` 1줄 (`<ui:VisualElement>` → `<ui:Image>`, 시각 변화 0)
+  - ✏️ `Assets/Scripts/UI/CameraPanelView.cs` 30→43줄 (기존 라인 0줄 수정, Image 타입 + frame 핸들러 추가만)
+  - ✏️ `Assets/Scripts/App/ControlRoomApp.cs` `ConfigureRos()` + Gemma 대기 로그
+  - ✏️ `ProjectSettings/ProjectSettings.asset` `scriptingDefineSymbols: Standalone: ROS2`
+  - ✏️ robot `~/turtlebot3_ws/build/ros_tcp_endpoint/ros_tcp_endpoint/server.py:125` 패치
+  - ✏️ robot `sudo loginctl enable-linger kim` 영구 활성화
+- **잡은 함정 4종 (스킬화)**:
+  1. **#13** Ubuntu 24.04 `KillUserProcesses=yes` → ssh 끊김 시 백그라운드 노드 죽음 → `sudo loginctl enable-linger <user>` 1회
+  2. **#14** Unity 6.3 + ROS-TCP-Connector v0.7.x syscommand JSON `[:-1]`이 valid 끝 char까지 cut → `server.py:125` `.rstrip("\x00").strip()` 패치
+  3. **#15** macOS Unity 시동 `setsid+nohup` 즉시 죽음 → **`open -a`** 명령 사용
+  4. **#16 ★** Unity 기본 ROS1 모드 → ROS2 endpoint와 CompressedImageMsg binary format 비대칭으로 `OverflowException` → **`ProjectSettings.asset` `scriptingDefineSymbols: Standalone: ROS2`** (또는 GUI: `Edit → Project Settings → Player → Other Settings → Scripting Define Symbols`에 `ROS2` 추가)
+- **UI Contract Lock 침해 검사**: UXML 1줄(태그명만 시각 변화 0), USS 0줄, 기존 View C# 라인 0줄 수정. ControlRoomEvents 0줄(Subscriber static event로 우회). → **사실상 침해 없음**.
+- **검증 PASS**: 컴파일 31 assemblies + Console 0 errors + robot `RegisterSubscriber OK` + `/tb3_2/camera/image_raw/compressed` 29.9~30.0 Hz + 사용자 시각 검증.
+- **데이터 흐름**: Pi Camera → camera_ros (tmux) → /tb3_2/.../compressed → ros_tcp_endpoint (server.py patched) → port 10000 → Unity ROS-TCP-Connector (`#if ROS2` 컴파일 분기) → CameraStreamSubscriber → static event → CameraPanelView → ui:Image.
+- **다음 단계**:
+  1. `server.py:125` 패치를 `~/turtlebot3_ws/src/`에도 박고 colcon build (현재 build/만 패치, 재빌드 시 덮어쓰일 위험)
+  2. 티원(t1) D435 같은 패턴으로 결선 (`loginctl enable-linger t1` + ros_tcp_endpoint)
+  3. Phase 2.8 — Gemma 4 12B 통합 (로그 회색 ⚪ → 녹색 🟢 토글)
+- **자세히**: `docs/evidence/2026-06-04-controlroom-camera-live-pass.md`
+- **스킬 보강**: `.claude/skills/robot-camera-bringup/SKILL.md` 함정 #13~16 + `.claude/skills/unity-camera-panel/SKILL.md` (ROS2 define + UI Toolkit Image element + macOS open -a)
+
 ### Unity ControlRoom Phase 2.5 진짜 완료 — EventSystem InputModule 누락 root cause 발견 + UI 상호작용 감사 스킬화
 
 - **증상**: 사용자 "현재 플레이모드이고 눌리는게 아예없음" — Phase 2.5 단계 1~4 시각은 완벽이지만 모든 버튼/토글이 클릭에 0 반응.

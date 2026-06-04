@@ -8,11 +8,11 @@
                 <ui:Label text="카메라 (선택 로봇)" class="camera-label" />
                 <ui:VisualElement class="camera-live-dot" />
             </ui:VisualElement>
-            <ui:VisualElement name="camera-image" class="camera-image-placeholder">
+            <ui:Image name="camera-image" class="camera-image-placeholder">
                 <ui:VisualElement class="camera-crosshair-v" />
                 <ui:VisualElement class="camera-crosshair-h" />
-                <ui:Label text="RGB feed — Phase 5 ROS 연결 대기" class="camera-placeholder-text" />
-            </ui:VisualElement>
+                <ui:Label name="camera-placeholder-text" text="RGB feed — Phase 2.7 ROS 연결 대기" class="camera-placeholder-text" />
+            </ui:Image>
             <ui:Label name="camera-hz" text="-- Hz" class="camera-hz" />
         </ui:VisualElement>
         <ui:ScrollView name="log-panel" class="log-panel">

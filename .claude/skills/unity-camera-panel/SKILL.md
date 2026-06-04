@@ -77,6 +77,9 @@ grep "topicName" unity-smoke/Assets/Scenes/SampleScene.unity
 | 한글 디스플레이 라벨 폰트 깨짐 | □□ 또는 안 보임 | `Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")` 사용 또는 한글 폰트 별도 import |
 | 컴파일 에러로 batch 실패 | `Aborting batchmode due to failure: executeMethod method ... threw exception` | log 파일 grep으로 line 번호 확인 후 수정 |
 | Unity license 활성화 | `Access token is unavailable` 경고 | 무시 가능 (Personal License로 batch 작동) |
+| **★ Unity 기본은 ROS1 모드. ROS2 endpoint 사용 시 `Define Symbol ROS2` 필수** (2026-06-04 발견) | Console: `Incompatible protocol: ROS-TCP-Endpoint is using ROS2, but Unity is in ROS1 mode`. 그 뒤 `OverflowException` + `ArgumentException` deserialize 실패 반복. frame 0장 | **신 Unity 프로젝트 첫 진입 시 무조건**: `Edit → Project Settings → Player → Other Settings → Scripting Define Symbols → "ROS2" 추가 → Apply`. 또는 `ProjectSettings.asset`에 `scriptingDefineSymbols:\n  Standalone: ROS2`. 자세히: `docs/evidence/2026-06-04-controlroom-camera-live-pass.md` 함정 #16 |
+| **UI Toolkit `VisualElement`에는 Texture2D 동적 주입 불가** (ControlRoom Phase 2.7) | 카메라 placeholder에 영상 안 흐름 (런타임 background-image asset 변경 안 됨) | UXML에서 `<ui:VisualElement>` → **`<ui:Image>`** (1줄). View에서 `root.Q<Image>("camera-image").image = streamTexture` |
+| **macOS Unity 시동 시 `setsid+nohup`은 빨리 죽음** | log 28~41줄에서 종료, ps에 프로세스 0건 | `open -a "/Applications/Unity/Hub/Editor/<ver>/Unity.app" --args -projectPath ... -logFile ...` |
 
 ## 새 카메라 추가 (확장성 패턴)
 

@@ -112,6 +112,10 @@ ssh t1@192.168.0.250 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=2
 | 티원 측 ssh 비번이 젠지와 다름 → 우리 자동화 불가 | `Permission denied (publickey,password)` | 1회 `ssh-copy-id -o StrictHostKeyChecking=accept-new t1@192.168.0.250` (비번 1회) → 영구 자동 |
 | Pi Camera 1280×720@30Hz로 Unity 지연 1~2초 | Wi-Fi/buffer 누적 백로그 | camera_node 해상도 **640×480@30Hz** (frame 크기 1/4) → 지연 0.1~0.3초 실시간 |
 | `urhynix-robot` IP 변경 (reboot 후 .82 → .150) | ssh urhynix-robot은 OK지만 .82 IP는 ping 안 됨 | mDNS `urhynix-robot.local` 사용 (자동 follow) + Unity rosIP도 mDNS 박아둠 |
+| **13. Ubuntu 24.04 `KillUserProcesses=yes`로 nohup+disown까지 ssh 끊김 시 죽음** (2026-06-04 발견) | 백그라운드 ROS 노드 즉시 사라짐, `pgrep camera_node` 0건 | **1회 영구**: `sudo loginctl enable-linger kim` → `Linger=yes` 확인. 이후 tmux 세션 + 자식 프로세스 살아남 |
+| **14. Unity 6.3 + ROS-TCP-Connector v0.7.x syscommand JSON `[:-1]` 호환 안 됨** (2026-06-04 발견) | robot `json.JSONDecodeError: Expecting ',' delimiter: line 1 column 91`. Unity socket shut down 반복 | **server.py:125 패치**: `data.decode("utf-8")[:-1]` → `data.decode("utf-8").rstrip("\x00").strip()`. src/ + build/ 둘 다 박고 colcon build 권장 |
+| **15. macOS `setsid+nohup` Unity 시동이 LaunchServices attach 실패로 빨리 죽음** (2026-06-04 발견) | Unity 프로세스 28~41줄 log에서 즉시 종료. `ps -ef` 0건 | **`open -a` 사용**: `open -a "/Applications/Unity/Hub/Editor/6000.3.16f1/Unity.app" --args -projectPath ... -logFile ...` + `sleep 5` + `osascript -e 'tell application "Unity" to activate'` |
+| **16. ★ Unity는 기본 ROS1 모드. ROS2 endpoint와 binary format 비대칭으로 OverflowException** (2026-06-04 발견) | RegisterSubscriber는 OK지만 frame deserialize 시 `OverflowException` + `ArgumentException: Offset and length were out of bounds`. Unity Console: `Incompatible protocol: ROS-TCP-Endpoint is using ROS2, but Unity is in ROS1 mode` | **GUI**: `Edit → Project Settings → Player → Other Settings → Scripting Define Symbols → "ROS2" 추가`. **직접 편집** (Editor 죽음 시 비상): `ProjectSettings.asset`의 `scriptingDefineSymbols:` 아래 `Standalone: ROS2` 박기. **신 Unity 프로젝트 첫 진입 시 무조건 첫 액션** |
 
 ## 다음 세션 진입 한 줄 (젠지 풀 launch)
 
