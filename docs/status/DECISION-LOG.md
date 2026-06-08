@@ -1,5 +1,70 @@
 # Decision Log
 
+## 2026-06-05
+
+### Unity ControlRoom Phase 2.7-dual — 듀얼 카메라 분기 PASS (모델 B, 0ms 즉시 전환) + 함정 #17/#18 영구 자산화
+
+- **결과**: 상단 로봇 탭(티원/젠지) 클릭 시 카메라 패널이 **지연 0ms로 즉시 전환**. 사용자 직접 확인 "딜레이없이 전환잘됨 실시간표시됨". UI Contract Lock 침해 0줄 (UXML/USS 0줄).
+- **결정 — 모델 B 채택** (구현 전 측정 기반):
+
+  | 모델 | 전환 지연 | 스피너 | 비용 |
+  |---|---|---|---|
+  | A 토글 구독 (Subscribe/Unsubscribe) | 80~500ms (Wi-Fi 변동) | 필요 | Pi 1토픽 forward |
+  | **B 동시 구독 + display 토글** | **0~33ms (다음 frame)** | 불필요 | Pi 2토픽 (+5~10% CPU), Wi-Fi 6% |
+
+  근거: 학원 Wi-Fi 100Mbps+, Pi 부하 여유 충분, 시연 흐름 끊김 0의 B 압도적. 사용자 결정.
+
+- **산출물 (코드)**:
+  - 🆕 `unity/ControlRoom/Assets/Scripts/Ros/TopicRegistry.cs` (16줄, 토픽 SSOT, `Ros/CLAUDE.md` 규칙 준수)
+  - ✏️ `Scripts/Ros/CameraStreamSubscriber.cs` 76→81줄 (`robotId` 필드 + 정적 event 시그니처 `(string robotId, Texture2D, float)`, `topicName` 비우면 TopicRegistry lookup)
+  - ✏️ `Scripts/UI/CameraPanelView.cs` 43→46줄 (`activeRobotId` 필터링, `OnRobotChanged` 시 hz 초기화)
+  - ✏️ `Editor/CameraStreamSetup.cs` 60→80줄 (`SubSpec[]` 배열로 두 GameObject `_Genji`/`_T1` idempotent 생성, 메뉴 `(Dual)`)
+  - 변경 0줄: `RobotTabView.cs` (이미 `Button.clicked → SelectRobot → OnRobotChanged + active 토글` 완성) / `ControlRoomState.cs` (이미 `SelectRobot → RaiseRobotChanged` 완성) / `TopBar.uxml` (이미 `tab-tb3_1`/`tab-tb3_2` Button 존재)
+
+- **신규 함정 2종 (스킬화 영구)**:
+  1. **#17** Write/외부 에디터로 만든 신규 `.cs`는 Unity `.meta` 미생성 → Asset Pipeline이 무시 → 어셈블리에 새 심볼 누락 → 다른 파일에서 `error CS0103: The name '<Class>' does not exist`. **우회**: `unityctl asset import --project <proj> --path Assets/Scripts/.../<file>.cs --json` (guid 발급 = 정상 import).
+  2. **#18** Play 모드 중에는 도메인 리로드 차단 → `unityctl asset refresh` + `RequestScriptCompilation` 호출해도 어셈블리 mtime 옛값. `unityctl exec` 시 옛 코드 실행. **우회 5단계**: `play stop` → settled `Ready` 대기 → `exec RequestScriptCompilation()` → assembly mtime 갱신 확인 → `exec <Method>()` → `play start`.
+  3. **공식 통합 — unityctl 자동화 표준 5단계**: 함정 #17 + #18 모두 한 번에 우회. 매 Unity 코드 변경 직후 사용. (자세히 `unity-camera-panel` SKILL 신설 섹션)
+
+- **검증 PASS**:
+  - 컴파일 error CS 0건, `Assembly-CSharp.dll`/`Assembly-CSharp-Editor.dll` mtime 11:04:47 갱신
+  - 양 토픽 hz cross-host visibility: 젠지에서 `/tb3_2` 30.0Hz + `/tb3_1` 31.0Hz 동시 발행 (티원 endpoint 불필요, 젠지 endpoint 1개로 양쪽 forward)
+  - robot port 10000 ESTAB + Send-Q 77KB (영상 흐름 정상)
+  - Scene에 두 GameObject(`CameraStreamSubscriber_Genji`/`_T1`) idempotent 박힘
+  - Setup batch 로그 "2개 Subscriber 활성 (Dual)"
+  - 사용자 시각 확인 — 탭 클릭으로 패널 즉시 전환
+
+- **데이터 흐름 (최종)**:
+  ```
+  [젠지 Pi Camera 30Hz] → camera_ros → /tb3_2/.../compressed ┐
+  [티원 RealSense 30Hz] → realsense2_camera → /tb3_1/.../compressed ┤  ROS_DOMAIN_ID=230
+                                                                   ↓
+                                            젠지 ros_tcp_endpoint (port 10000, 단일)
+                                                                   ↓ TCP Wi-Fi
+                                            Unity ROS-TCP-Connector (단일 연결)
+                                                                   ↓
+                                  ┌──────────────────────────┴──────────────────────────┐
+                                  ↓                                                       ↓
+                  CameraStreamSubscriber_Genji (robotId="tb3_2")    CameraStreamSubscriber_T1 (robotId="tb3_1")
+                                  └──────────────── static event ─────────────────────────┘
+                                                                   ↓
+                                  CameraPanelView (activeRobotId 필터링, 0ms 토글)
+                                                                   ↑
+                                  RobotTabView Button.clicked → SelectRobot → OnRobotChanged
+  ```
+
+- **스킬 영구 자산화**:
+  - `.claude/skills/unity-camera-panel/SKILL.md`: "듀얼 카메라 분기 — 모델 B" 섹션 + "unityctl 자동화 표준 5단계" 섹션 + 함정 #17/#18 + 박물관 시연 매핑 표 T1 토픽 정정 (`/tb3_1/camera/color/...` camera 1번)
+  - `.claude/skills/robot-camera-bringup/SKILL.md`: 함정표에 #17 (.meta 미생성) + #18 (Play 중 reload 차단) 추가
+
+- **다음 진입**:
+  1. 티원 `sudo loginctl enable-linger t1` 영구화 (현재 `Linger=no` — ssh 끊김 시 realsense2_camera 죽음, 함정 #13 미적용 상태)
+  2. Phase 2.8 — Gemma 4 12B 통합 (로그 패널 회색 ⚪ → 녹색 🟢 토글)
+  3. (선택) 듀얼 PiP/스플릿 화면 — 백엔드 이미 양쪽 받고 있어 코드 거의 변경 없음
+  4. (백로그) `server.py:125` 패치 src/ 영구화 (현재 build/만, colcon build 시 회귀 위험)
+
+- **자세히**: `docs/evidence/2026-06-05-controlroom-dual-camera-toggle.md`
+
 ## 2026-06-04
 
 ### Unity ControlRoom Phase 2.7 — 젠지 Pi Camera 라이브 결선 PASS + 4종 함정 영구 자산화
