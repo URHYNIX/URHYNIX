@@ -37,6 +37,31 @@ unity-src/*.unityproj
 unity-src/*.suo
 unity-src/*.user
 
+# Unity ControlRoom (실 위치)
+unity/ControlRoom/Library/
+unity/ControlRoom/Temp/
+unity/ControlRoom/Obj/
+unity/ControlRoom/Build/
+unity/ControlRoom/Builds/
+unity/ControlRoom/Logs/
+unity/ControlRoom/UserSettings/
+unity/ControlRoom/MemoryCaptures/
+unity/ControlRoom/Assets/_Recovery/
+unity/ControlRoom/*.csproj
+unity/ControlRoom/*.sln
+
+# Unity 산출물이 루트에 잘못 생성된 경우 방지 (2026-06-08 incident)
+/Library/
+/Logs/
+/Packages/
+/ProjectSettings/
+/UserSettings/
+/Temp/
+/Obj/
+
+# Claude Code 런타임 락
+.claude/scheduled_tasks.lock
+
 # ROS / Python builds
 __pycache__/
 *.py[cod]
