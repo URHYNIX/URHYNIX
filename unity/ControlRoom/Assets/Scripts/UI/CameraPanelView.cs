@@ -1,6 +1,6 @@
-// CameraPanelView.cs — 카메라 패널 View. CameraStreamSubscriber로부터 라이브 Texture 받아 ui:Image에 표시.
-// UXML element 잡기 + frame 이벤트 구독만. ROS msg 타입은 직접 다루지 않음 (Ros/ 폴더 책임).
-// Phase 2.7 — 젠지 (/tb3_2/camera/image_raw/compressed @ 30Hz) 라이브 연결.
+// CameraPanelView.cs — 카메라 패널 View. 활성 robotId(상단 탭 선택)의 frame만 ui:Image에 표시.
+// 모델 B (동시 구독 + display 토글): 두 Subscriber가 항상 frame을 쏘고, View가 robotId로 필터링.
+// 전환 지연 0~33ms (다음 frame 즉시). 로딩 스피너 불필요.
 using UnityEngine;
 using UnityEngine.UIElements;
 using URHYNIX.ControlRoom.App;
@@ -13,6 +13,7 @@ namespace URHYNIX.ControlRoom.UI
         readonly Image cameraImage;
         readonly Label hzLabel;
         readonly Label placeholderText;
+        string activeRobotId;
 
         public CameraPanelView(VisualElement root)
         {
@@ -22,12 +23,15 @@ namespace URHYNIX.ControlRoom.UI
 
             if (hzLabel != null) hzLabel.text = "-- Hz";
 
+            activeRobotId = ControlRoomState.Instance.SelectedRobotId;
+
             CameraStreamSubscriber.OnFrameUpdated += OnFrameUpdated;
             ControlRoomEvents.OnRobotChanged      += OnRobotChanged;
         }
 
-        void OnFrameUpdated(Texture2D tex, float hz)
+        void OnFrameUpdated(string robotId, Texture2D tex, float hz)
         {
+            if (robotId != activeRobotId) return;
             if (cameraImage != null && tex != null)
             {
                 cameraImage.image = tex;
@@ -39,7 +43,9 @@ namespace URHYNIX.ControlRoom.UI
 
         void OnRobotChanged(string robotId)
         {
-            ControlRoomEvents.RaiseLogAdded("camera", "INFO", $"카메라 토픽 전환 요청 → {robotId} (Phase 5 정식 결선)");
+            activeRobotId = robotId;
+            if (hzLabel != null) hzLabel.text = "-- Hz";
+            ControlRoomEvents.RaiseLogAdded("camera", "INFO", $"카메라 전환 → {robotId}");
         }
     }
 }
