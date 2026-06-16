@@ -16,10 +16,11 @@
    |  Sensor HW    |        |   ROS2  Domain      |        |  Pi Camera    |
    |  (MCU/RPi/    +-------->  /security/event    <--------+  (이미지 토픽) |
    |   OpenCR 후보)|        |                       |        |               |
-   |  PIR · 조도 · |        |  /security/dispatch |        |  /tb3_*/      |
-   |  소리 · 불꽃  |        |  /security/camera_  |        |   camera/     |
-   +---------------+        |   confirm           |        |   image_raw   |
-                            +----+-----------+----+        +---------------+
+   |  PIR · 온도 · |        |  /security/dispatch |        |  /tb3_*/      |
+   |  소리 · 레이저 |        |  /security/camera_  |        |   camera/     |
+   |  + 워터펌프   |        |   confirm           |        |   image_raw   |
+   +---------------+        +----+-----------+----+        +---------------+
+   [정본 v18: LDR/불꽃 제거]
                                  |           |
                        +---------+           +---------+
                        |                               |
@@ -79,10 +80,10 @@
 | 센서 | 출력 형태 | Arduino 핀 | 회로 비고 |
 |---|---|---|---|
 | PIR (HC-SR501) | 디지털 HIGH/LOW | **D2** | 모듈 자체 풀업, 신호 3.3V (Uno OK) |
-| 조도 (LDR) | 아날로그 | **A0** | `5V─[LDR]─A0─[10kΩ]─GND` 분압 |
+| 온도 (온도 센서 모듈) | 아날로그 | **A0** | [제안 핀 매핑 — 정본 v18엔 핀 미명시, 구 LDR 슬롯 재사용 추정] |
 | 소리 (KY-038) | 디지털 D-out | **D3** | A-out 대체 가능 시 A1 |
-| 불꽃 (Flame) | 디지털 D-out | **D4** | A-out 대체 가능 시 A2 |
-| 모의 입력 버튼 (화재) | 디지털 | **D5** | `INPUT_PULLUP` 사용 |
+| 레이저 송신 | 디지털 D-out | **D4** | [제안 핀 매핑 — 정본 v18엔 핀 미명시, 구 Flame 슬롯 재사용 추정] |
+| 릴레이 (워터 펌프 제어) | 디지털 | **D5** | [제안 핀 매핑 — 정본 v18엔 핀 미명시, 새 액추에이터] |
 
 **브레드보드 권장 크기**: TurtleBot3 Burger는 하프사이즈(83×55mm), Waffle Pi는 풀사이즈(165×55mm) 가능.
 
@@ -102,12 +103,12 @@
 ### tb3_2 (별명 **젠지**) — 출동/확인 (Responder) · **센서 중심**
 
 - **탑재 카메라**: Raspberry Pi Camera Module v2 (Sony IMX219, 8MP, 3280×2464)
-- **탑재 센서**: Arduino UNO + PIR/조도(LDR)/소리/불꽃 4종 (PIR=D2, LDR=A0, 소리=D3, 불꽃=D4)
+- **탑재 센서**: Arduino Nano/Uno + PIR/온도/소리/레이저+워터펌프 4종 [정본 v18 변경: LDR/불꽃 제거→온도/레이저/워터펌프 추가]. 핀 매핑: PIR=D2, 온도=A0, 소리=D3, 레이저=D4, 릴레이(워터펌프)=D5 [제안: 정본 v18엔 핀 미명시, 구 슬롯 재사용 추정]
 - **호스트**: `urhynix-robot` (kim@192.168.0.82) — 우리 작업 머신
-- 평상시 대기 위치 또는 별도 구역 순찰. Arduino 센서 4종 감시 — PIR/조도/소리/불꽃 임계값 → `/security/event` 발행
+- 평상시 대기 위치 또는 별도 구역 순찰. Arduino 센서 4종 감시 — PIR/온도/소리/레이저 임계값 → `/security/event` 발행
 - `/security/event` 구독 → `/security/dispatch` 발행 → Nav2 goal로 감지 좌표 근처 waypoint 이동
 - 도착 후 Pi Camera 캡처/스트림을 `/security/camera_confirm`으로 발행
-- 조도 센서가 어두움(`dark`)으로 진입하면 저속 순찰/추가 LiDAR sweep/pose log 저장 빈도를 높여 외부자 판단 근거를 보강
+- 화재 대응 시나리오: 온도 상승 + 레이저 거리 감지 → `/security/confirm_fire` → **워터 펌프 분사** (릴레이 D5 제어)
 - 출동 소요 시간, 확인 결과, 사진/영상/사운드 저장 경로를 DB에 기록
 
 ## 박물관/미술관 보호 컨셉
@@ -159,7 +160,7 @@
 
 - 실제 주행 안전 판단은 ROS/Nav2(터틀봇 노드) 기준. Unity는 시각화·관제 중심.
 - 모든 메시지는 `robot_id`를 포함 — 한 토픽이 두 로봇 모두를 다룬다 (`/security/event` 등).
-- ROS2 도메인 기준은 `ROS_DOMAIN_ID=230`으로 통일한다. 젠지/티원/ROS-TCP-Endpoint 내부 ROS 노드는 같은 도메인에서 토픽을 확인한다.
+- ROS2 도메인 기준은 `ROS_DOMAIN_ID=210`으로 통일한다. 젠지/티원/ROS-TCP-Endpoint 내부 ROS 노드는 같은 도메인에서 토픽을 확인한다. (2026-06-15 210으로 통일, cross-discovery PASS)
 - 카메라 인식은 보호 대상 확인과 출동 확인을 위한 보조 데이터. 실시간 사람 추적은 범위 밖.
 - Google Teachable Machine + TensorFlow/Keras 스파이크 클래스(빈공간/박스/마우스 검정·흰색/손)는 카메라 객체 분류 경로 검증용이다. 발표용 큰 범위 인식 기준은 YOLO/OpenCV의 로봇/사람/중요품/불 흐름을 유지한다.
 - 외부자 판단은 PIR 단독 판정 금지. PIR + LiDAR 변화 + pose log를 함께 남겨 사람이 해석할 수 있게 한다.

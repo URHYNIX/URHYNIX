@@ -10,8 +10,8 @@
 export TB3_MAC_PATTERN='2c:cf:67:47:38:0?3'   # robot Wi-Fi MAC (leading-zero tolerant)
 export TB3_USER='kim'
 export TB3_HOSTNAME='urhynix-robot'             # mDNS hostname (avahi publishes <hostname>.local)
-export TB3_ROBOT_IP_HINT='192.168.0.138'       # last known (fallback only)
-export TB3_LAN_CIDR='192.168.0'                # /24 to sweep (fallback only)
+export TB3_ROBOT_IP_HINT='192.168.10.87'       # last known (fallback only)
+export TB3_LAN_CIDR='192.168.10'                # /24 to sweep (fallback only)
 
 # Passwords live OUTSIDE the repo. Put them in ~/.tb3rc (see scripts/tb3rc.example):
 #   export TB3_PASSWORD='your-ssh-password'
@@ -154,7 +154,7 @@ expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
   expect <<EXP
 set timeout 15
-spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t arduino_bridge 2>/dev/null; tmux new-session -d -s arduino_bridge 'bash -lc \"source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && python3 /tmp/arduino_bridge.py 2>&1 | tee /tmp/arduino_bridge.log\"'; sleep 1; tmux ls"}
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t arduino_bridge 2>/dev/null; tmux new-session -d -s arduino_bridge 'bash -lc \"source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && python3 /tmp/arduino_bridge.py 2>&1 | tee /tmp/arduino_bridge.log\"'; sleep 1; tmux ls"}
 expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
 }
@@ -197,7 +197,7 @@ tb3-slam() {
   local ip; ip=$(tb3-ip) || return 1
   expect <<EXP
 set timeout 18
-spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t slam 2>/dev/null; tmux new-session -d -s slam 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=False 2>&1 | tee /tmp/slam.log\"'; sleep 2; tmux ls"}
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t slam 2>/dev/null; tmux new-session -d -s slam 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_cartographer cartographer.launch.py use_sim_time:=False 2>&1 | tee /tmp/slam.log\"'; sleep 2; tmux ls"}
 expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
   echo "→ /map 토픽 송출까지 5-10s 대기 권장. 검증: ssh kim@$ip 'ros2 topic hz /map'"
@@ -209,7 +209,7 @@ tb3-slam-save() {
   local ip; ip=$(tb3-ip) || return 1
   expect <<EXP
 set timeout 25
-spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && mkdir -p \$HOME/maps && cd \$HOME/maps && ros2 run nav2_map_server map_saver_cli -f $name --ros-args -p save_map_timeout:=20.0 && ls -la $name.*"}
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && mkdir -p \$HOME/maps && cd \$HOME/maps && ros2 run nav2_map_server map_saver_cli -f $name --ros-args -p save_map_timeout:=20.0 && ls -la $name.*"}
 expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
   echo "→ 로컬로 가져오기: tb3-fetch-map $name"
@@ -276,7 +276,7 @@ tb3-teleop() {
   # 수동 운전. SSH 인터랙티브 — 키보드 입력으로 로봇 움직임.
   # i=전진 j=좌회전 l=우회전 , =후진 k=정지 q/z=속도조절
   local ip; ip=$(tb3-ip) || return 1
-  ssh -t "$TB3_USER@$ip" 'bash -lc "source /opt/ros/jazzy/setup.bash && source $HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 run turtlebot3_teleop teleop_keyboard"'
+  ssh -t "$TB3_USER@$ip" 'bash -lc "source /opt/ros/jazzy/setup.bash && source $HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 run turtlebot3_teleop teleop_keyboard"'
 }
 
 tb3-rviz() {
@@ -284,7 +284,7 @@ tb3-rviz() {
   local ip; ip=$(tb3-ip) || return 1
   expect <<EXP
 set timeout 12
-spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t rviz 2>/dev/null; tmux new-session -d -s rviz 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export DISPLAY=:2 ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp && rviz2 -d \$HOME/turtlebot3_ws/src/turtlebot3/turtlebot3_cartographer/rviz/tb3_cartographer.rviz 2>&1 | tee /tmp/rviz.log\"'; sleep 1; tmux ls"}
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t rviz 2>/dev/null; tmux new-session -d -s rviz 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export DISPLAY=:2 ROS_DOMAIN_ID=210 TURTLEBOT3_MODEL=burger RMW_IMPLEMENTATION=rmw_fastrtps_cpp && rviz2 -d \$HOME/turtlebot3_ws/src/turtlebot3/turtlebot3_cartographer/rviz/tb3_cartographer.rviz 2>&1 | tee /tmp/rviz.log\"'; sleep 1; tmux ls"}
 expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
   echo "→ tb3-vnc 로 화면 확인 (:2)"
@@ -296,7 +296,7 @@ tb3-nav2() {
   local ip; ip=$(tb3-ip) || return 1
   expect <<EXP
 set timeout 18
-spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t nav2 2>/dev/null; tmux new-session -d -s nav2 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=False map:=\$HOME/maps/$map.yaml 2>&1 | tee /tmp/nav2.log\"'; sleep 2; tmux ls"}
+spawn ssh -o StrictHostKeyChecking=accept-new $TB3_USER@$ip {bash -lc "tmux kill-session -t nav2 2>/dev/null; tmux new-session -d -s nav2 'bash -lc \"source /opt/ros/jazzy/setup.bash && source \$HOME/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 TURTLEBOT3_MODEL=burger LDS_MODEL=LDS-03 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET && ros2 launch turtlebot3_navigation2 navigation2.launch.py use_sim_time:=False map:=\$HOME/maps/$map.yaml 2>&1 | tee /tmp/nav2.log\"'; sleep 2; tmux ls"}
 expect { "password:" { send "$TB3_PASSWORD\r"; exp_continue } eof }
 EXP
   echo "→ RViz에서 2D Pose Estimate(초기 위치) + Nav2 Goal(목표) 클릭. 검증: ros2 topic echo /amcl_pose --once"
@@ -349,7 +349,7 @@ tb3-docker-pull() {
 _tb3_docker_env() {
   # 공통 env 인자 출력.
   local robot_ip; robot_ip=$(tb3-ip 2>/dev/null) || robot_ip="$TB3_ROBOT_IP_HINT"
-  printf -- '-e ROS_DOMAIN_ID=56 -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp -e ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET -e ROS_STATIC_PEERS=%s -e TURTLEBOT3_MODEL=burger' "$robot_ip"
+  printf -- '-e ROS_DOMAIN_ID=210 -e RMW_IMPLEMENTATION=rmw_fastrtps_cpp -e ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET -e ROS_STATIC_PEERS=%s -e TURTLEBOT3_MODEL=burger' "$robot_ip"
 }
 
 tb3-docker-shell() {

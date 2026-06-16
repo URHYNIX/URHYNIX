@@ -118,6 +118,107 @@ ssh t1@192.168.0.250 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=2
 | **16. ★ Unity는 기본 ROS1 모드. ROS2 endpoint와 binary format 비대칭으로 OverflowException** (2026-06-04 발견) | RegisterSubscriber는 OK지만 frame deserialize 시 `OverflowException` + `ArgumentException: Offset and length were out of bounds`. Unity Console: `Incompatible protocol: ROS-TCP-Endpoint is using ROS2, but Unity is in ROS1 mode` | **GUI**: `Edit → Project Settings → Player → Other Settings → Scripting Define Symbols → "ROS2" 추가`. **직접 편집** (Editor 죽음 시 비상): `ProjectSettings.asset`의 `scriptingDefineSymbols:` 아래 `Standalone: ROS2` 박기. **신 Unity 프로젝트 첫 진입 시 무조건 첫 액션** |
 | **17. Write/외부 에디터로 만든 신규 `.cs`는 `.meta` 미생성 → 어셈블리 누락** (2026-06-05 발견) | 같은 namespace의 다른 파일에서 `error CS0103: The name '<Class>' does not exist in the current context`. `Library/ScriptAssemblies/*.dll` mtime이 갱신 안 됨 | **unityctl**: `unityctl asset import --project <proj> --path Assets/Scripts/.../<file>.cs --json` → `.meta` 생성 + Asset Pipeline 등록 한 번에. **GUI**: Project 창 우클릭 → Refresh (`Cmd+R`). 자세히: `docs/evidence/2026-06-05-controlroom-dual-camera-toggle.md` 함정 #17 |
 | **18. Play 모드 중에는 도메인 리로드 차단 → 새 코드 미적용** (2026-06-05 발견) | `unityctl asset refresh` + `RequestScriptCompilation` 호출해도 `Library/ScriptAssemblies/Assembly-CSharp*.dll` mtime 옛값 유지. `unityctl exec`로 메서드 호출 시 옛 코드 실행 | **5단계 표준**: `unityctl play stop` → settled 대기(`unityctl status` `Ready`) → `unityctl exec --code 'UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation()'` → assembly mtime 갱신 확인 → `unityctl exec --code '<Method>()'` → `unityctl play start`. 자세히: `docs/evidence/2026-06-05-controlroom-dual-camera-toggle.md` 함정 #18 |
+| **19. `nohup ... & disown` heredoc 안에서 detach 실패** (2026-06-10 발견) | `ssh t1@... 'bash -lc " ... nohup ros2 launch ... > ~/x.log 2>&1 < /dev/null & disown "'` 형태로 띄우면 SSH session 종료 시 launch도 같이 죽음. **로그 파일조차 생성 안 됨**. nohup이 SIGHUP 차단해도 SSH가 child process group을 닫는 케이스 | **`ssh -fn` 패턴으로 교체** (아래 §C 참고). ssh가 본명령 start 직후 자체 detach + stdin=/dev/null. 본 세션에서 realsense+foxglove+bringup 3개 다 ssh -fn로 깔끔히 detach 성공 |
+
+## §C — ssh -fn 표준 detach 패턴 (2026-06-10 추가)
+
+기존 `nohup ... & disown` 패턴이 SSH session 종료 시 child 같이 죽는 케이스(함정 #19) 회피. **3종 동시 launch에서 검증됨**: realsense2_camera + foxglove_bridge + turtlebot3_bringup.
+
+```bash
+# 패턴: ssh -fn <host> "bash -c 'source ... && exec <ros2 cmd>' > /tmp/x.log 2>&1"
+#  -f: 본명령 start 직후 ssh 자체 background
+#  -n: stdin /dev/null (background 모드 필수)
+#  exec: bash 한 단계 줄여 PID 단순화
+
+# RealSense D435 (티원)
+ssh -fn t1@<T1_IP> "bash -c 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=230 && exec ros2 launch realsense2_camera rs_launch.py enable_color:=true enable_depth:=true rgb_camera.color_profile:=640,480,30 depth_module.depth_profile:=640,480,30' > /tmp/local-rs.log 2>&1"
+
+# foxglove_bridge (Mac/Unity 시각화 다리, port 8765)
+ssh -fn t1@<T1_IP> "bash -c 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=230 && exec ros2 run foxglove_bridge foxglove_bridge --ros-args -p port:=8765 -p address:=0.0.0.0' > /tmp/local-fx.log 2>&1"
+
+# turtlebot3_bringup (namespace=tb3_1)
+ssh -fn t1@<T1_IP> "bash -c 'source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=230 && export TURTLEBOT3_MODEL=burger && export LDS_MODEL=LDS-03 && export OPENCR_PORT=/dev/ttyACM0 && exec ros2 launch turtlebot3_bringup robot.launch.py namespace:=tb3_1' > /tmp/tb3_bringup.log 2>&1"
+```
+
+각 ssh 명령 즉시 exit 0 반환 후 백그라운드에서 살아 있음. 검증: `ssh t1@... 'pgrep -af "realsense|foxglove|turtlebot3"'`
+
+## §D — foxglove_bridge 통합 (2026-06-10 추가)
+
+ROS-TCP-Endpoint(Unity용)에 더해서 **WebSocket 기반 Foxglove Studio 다리** 동시 운용 가능. 서로 다른 포트라 충돌 없음.
+
+| 다리 | 포트 | 클라이언트 | 용도 |
+|---|---|---|---|
+| `ros_tcp_endpoint` | 10000 | Unity ControlRoom | 박물관 시연 본선 |
+| `foxglove_bridge` | 8765 | Foxglove Studio (.dmg) | 카메라 끊김 진단, 디버그 화면 |
+
+설치:
+```bash
+ssh t1@<T1_IP> 'echo "<sudo_pw>" | sudo -S apt-get install -y ros-jazzy-foxglove-bridge'
+```
+
+Mac:
+```bash
+brew install --cask foxglove-studio
+open -a Foxglove
+# 앱에서 File → Open connection → Foxglove WebSocket → ws://<T1_IP>:8765
+```
+
+## §E — compressed 우선 정책 (2026-06-10 추가)
+
+Wi-Fi 65 Mbps 환경에서 RealSense color 640x480@30 raw = 14.24 MB/s = 114 Mbps → **무조건 끊김**. 항상 `/camera/.../image_raw/compressed` (2.17 MB/s) 토픽을 외부 다리에 노출.
+
+| 토픽 | 외부 노출 | 비고 |
+|---|---|---|
+| `/camera/camera/color/image_raw` | ❌ (라즈베리 내부만) | image_transport zero-copy |
+| `/camera/camera/color/image_raw/compressed` | ✅ Foxglove/Unity/Mac | JPEG, 30Hz 유지 |
+| `/camera/camera/depth/image_rect_raw` | depth 필요 시만 | 압축 손실 큼, 저해상도/저FPS 권장 |
+
+자세한 진단 절차는 `robot-camera-stream-diag` 스킬 참고.
+
+## §F — cross-host STATIC_PEERS 우회 (2026-06-15, 와이파이 multicast 차단 대응)
+
+일부 와이파이(팀 전용 ipTIME 등)가 **DDS multicast discovery를 차단**해 단일 endpoint가 cross-host 로봇 토픽(카메라/센서)을 못 받을 때. `ROS_STATIC_PEERS`로 상대 IP를 직접 지정해 **unicast discovery**로 우회한다.
+
+**증상 (이 우회가 필요한지 판별)**:
+- `ros2 topic list`엔 상대 로봇 토픽이 부분적으로 뜸 (discovery 일부만 통과)
+- `ros2 topic echo /상대토픽 --once` → `does not appear to be published yet` + `Could not determine the type`
+- `ping 224.0.0.1`(multicast)은 응답 오는데 DDS group(`239.255.x`)은 차단
+- Unity: endpoint `RegisterSubscriber` OK인데 frame("Pi Camera 연결됨") 0장
+
+**해결 — 양쪽에 상대 IP 박기** (IP는 매번 바뀜 — mDNS/ARP로 현재값 확인 후 대입):
+```bash
+GZ=<젠지 현재 IP>; T1=<티원 현재 IP>
+
+# 젠지 카메라 노드 (peer=티원)
+ssh -fn kim@$GZ "bash -c 'source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 && export ROS_STATIC_PEERS=$T1 && export LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu:\$LD_LIBRARY_PATH && export LIBCAMERA_IPA_MODULE_PATH=/usr/local/lib/aarch64-linux-gnu/libcamera && exec ros2 run camera_ros camera_node --ros-args -r __ns:=/tb3_2 -p width:=640 -p height:=480' > /tmp/cam.log 2>&1"
+
+# 티원 endpoint (peer=젠지) — endpoint가 cross-host로 젠지 카메라+센서 받아 Unity로 forward
+ssh -fn t1@$T1 "bash -c 'source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 && export ROS_STATIC_PEERS=$GZ && exec ros2 run ros_tcp_endpoint default_server_endpoint --ros-args -p ROS_IP:=0.0.0.0 -p ROS_TCP_PORT:=10000' > /tmp/ros_tcp.log 2>&1"
+```
+
+**검증 (3단계)**:
+```bash
+# 1) 데이터 실측 — talker/listener (작은 메시지로 cross-host 확정). topic list만 보지 말 것!
+ssh -fn t1@$T1 "bash -c 'source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=210 && export ROS_STATIC_PEERS=$GZ && exec ros2 run demo_nodes_cpp talker' >/tmp/talker.log 2>&1"
+ssh kim@$GZ "source /opt/ros/jazzy/setup.bash; export ROS_DOMAIN_ID=210; export ROS_STATIC_PEERS=$T1; timeout 12 ros2 topic echo /chatter --once"
+#   기대: data: 'Hello World: N'  ← cross-host 데이터 통함
+
+# 2) 카메라 cross-host (endpoint 호스트 티원에서 젠지 토픽)
+ssh t1@$T1 "source /opt/ros/jazzy/setup.bash; export ROS_DOMAIN_ID=210; export ROS_STATIC_PEERS=$GZ; timeout 8 ros2 topic echo /tb3_2/camera/camera_info --once"
+
+# 3) 센서 cross-host (젠지 아두이노 /sensors/*)
+ssh t1@$T1 "source /opt/ros/jazzy/setup.bash; export ROS_DOMAIN_ID=210; export ROS_STATIC_PEERS=$GZ; timeout 8 ros2 topic echo /sensors/ldr --once"
+```
+
+**원리**: multicast discovery가 막혀도 `ROS_STATIC_PEERS`가 participant를 unicast로 발견 + 데이터 unicast UDP는 통과(SSH-TCP 되는 망이면 대개 UDP unicast OK). 단일 endpoint(티원)가 `STATIC_PEERS=젠지`면 젠지 카메라(`/tb3_2`)+센서(`/sensors/*`)를 다 받아 Unity로 forward → **양 로봇 동시 표시 + 0ms 즉시 전환**(모델 B, `unity-camera-panel`).
+
+| 함정 | 우회 |
+|---|---|
+| **20. ★ 와이파이 multicast 차단 → cross-host 토픽 데이터/타입 안 옴** (2026-06-15) | 양 노드+endpoint에 `ROS_STATIC_PEERS=<상대IP>` |
+| endpoint에 STATIC_PEERS 안 박음 | endpoint가 cross-host 로봇 토픽 수신 못 함 → **endpoint에도 필수** |
+| `.bashrc`에 엉뚱한 `ROS_STATIC_PEERS` 잔재 (2026-06-15 젠지 `.bashrc`에 `192.168.10.70` 발견) | 제거/교정. ssh 비대화형 launch는 `.bashrc` 미source라 영향 없지만 대화형/노드 source 시 오염 |
+
+> **§F가 불필요한 경우**: 와이파이가 multicast 허용하면(`ros2 topic echo` cross-host 바로 됨) STATIC_PEERS 없이 §C 그대로. 새 와이파이 진입 시 위 "증상"으로 먼저 판별.
 
 ## 다음 세션 진입 한 줄 (젠지 풀 launch)
 

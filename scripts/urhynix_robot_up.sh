@@ -14,7 +14,7 @@ cat > /tmp/_tb3_bringup.sh <<EOF
 #!/bin/bash
 source /opt/ros/jazzy/setup.bash
 source \$HOME/turtlebot3_ws/install/setup.bash
-export ROS_DOMAIN_ID=56
+export ROS_DOMAIN_ID=210
 export TURTLEBOT3_MODEL=burger
 export LDS_MODEL=LDS-03
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
@@ -31,7 +31,7 @@ cat > /tmp/_tb3_ros_tcp.sh <<'EOF'
 source /opt/ros/jazzy/setup.bash
 source $HOME/turtlebot3_ws/install/setup.bash
 source $HOME/unity_ros_ws/install/setup.bash
-export ROS_DOMAIN_ID=56
+export ROS_DOMAIN_ID=210
 export TURTLEBOT3_MODEL=burger
 export LDS_MODEL=LDS-03
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp

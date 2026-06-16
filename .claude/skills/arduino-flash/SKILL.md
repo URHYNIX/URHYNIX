@@ -1,10 +1,10 @@
 ---
 name: arduino-flash
-description: Arduino 스케치를 GUI IDE 없이 arduino-cli로 컴파일·업로드·시리얼 검증까지 한 번에 돌리는 자동화 스킬. URHYNIX 센서 4종(PIR/조도/소리/불꽃) 반복 플래시 파이프라인. v2에서 LDR 분압회로 배선 패턴 + 시리얼 라벨 표준 추가.
+description: Arduino 스케치를 GUI IDE 없이 arduino-cli로 컴파일·업로드·시리얼 검증까지 한 번에 돌리는 자동화 스킬. URHYNIX 센서/액추에이터 결선 플래시 파이프라인. v3에서 레이저 송신 모듈(D8, PIR 연동) 추가 + D13/SCK 업로드 함정 및 해결 기록.
 user_invocable: true
 tags: [arduino, embedded, sensor, automation, urhynix-m2-m4]
 trigger: "Arduino UNO에 스케치를 빠르게 굽고 시리얼로 동작 확인해야 할 때"
-version: 2
+version: 3
 ---
 
 # Arduino Flash
@@ -25,11 +25,12 @@ URHYNIX의 Day-1 (PIR) 작업에서 검증된 흐름이며, 남은 센서 3종(�
 
 | 핀 | 용도 | 신호 |
 |---|---|---|
-| D2 | PIR (인체) | 디지털 |
+| D2 | LED (PIR 연동) | 디지털 |
 | D3 | 소리 (KY-038 D-out) | 디지털 |
 | D4 | 불꽃 D-out | 디지털 |
 | D5 | 모의 입력 버튼 (화재) | 디지털 |
-| A0 | 조도 (LDR + 10kΩ 분압) | 아날로그 |
+| D8 | 레이저 송신 모듈 (PIR 연동) | 디지털 |
+| ~~A0~~ | ~~조도 (LDR + 10kΩ 분압)~~ | 제거됨 (정본 v18, 2026-06-16) |
 
 > ⚠️ LED·부저 등 액추에이터는 위 핀을 피해서 배치한다. (예: D6, D8, D11)
 > 시리얼 포맷: `EVT,<type>,<severity>,<unix_ts>\n` (예: `EVT,pir,3,1716800000\n`)
@@ -38,7 +39,7 @@ URHYNIX의 Day-1 (PIR) 작업에서 검증된 흐름이며, 남은 센서 3종(�
 > - LDR: `[LDR] A0=<0-1023>  (dark|dim|bright|very bright)` — 2초 주기
 > - 소리/불꽃: `[SOUND] D3=<H|L>` / `[FLAME] D4=<H|L>` (검증용, 본 운영은 `EVT,...`로 전환)
 
-## LDR 분압회로 배선 (검증 완료)
+## LDR 분압회로 배선 (과거 참조용 — ⚠️ 정본 v18에서 조도 제거)
 
 ```
 +5V 레일 ──┬── PIR.VCC
@@ -143,18 +144,18 @@ arduino-cli monitor -p <port> -c baudrate=9600
 워밍업 후 다음 패턴이 보이면 PASS:
 
 ```
-=== <Sensor> Test ===
+=== PIR + LASER Test ===
 Warming up sensor.....................
 Ready. ...
-[MOTION] detected -> LED ON   ← 또는 EVT,<type>,...
-[CLEAR ] no motion -> LED OFF
+[MOTION] detected -> LED+LASER ON   ← 또는 EVT,<type>,...
+[CLEAR ] no motion -> LED+LASER OFF
 ```
 
 ## One-Liner (수정 → 재업로드)
 
 ```bash
-SKETCH=~/jason/URHYNIX/sketches/pir_led
-PORT=/dev/cu.usbmodem1101
+SKETCH=~/jason/URHYNIX/sketches/pir_laser
+PORT=/dev/cu.usbmodem11101
 arduino-cli compile --fqbn arduino:avr:uno $SKETCH \
   && arduino-cli upload -p $PORT --fqbn arduino:avr:uno $SKETCH
 ```
@@ -172,7 +173,7 @@ arduino-cli compile --fqbn arduino:avr:uno $SKETCH \
 - [ ] 업로드 후 `Verifying ... done` 또는 무에러 종료
 - [ ] 시리얼 30초 캡처에 표준 검증 출력이 1회 이상 보이는가
 - [ ] 핀 매핑이 URHYNIX SSOT(DECISION-LOG)와 일치하는가
-- [ ] (LDR 사용 시) A0 값이 손으로 가렸을 때 100 이하, 일반 실내에서 150~250 진동하는가 — 0 또는 1023 고정이면 분압회로 점검
+- [ ] (레이저 사용 시) 시리얼 로그에 `LED+LASER ON/OFF` 동시 표시가 보이는가
 
 ## Failure / Fallback
 
@@ -186,16 +187,18 @@ arduino-cli compile --fqbn arduino:avr:uno $SKETCH \
 | 워밍업 중 LED 멋대로 깜빡 | PIR 정상 행동 (20~60초) | `WARMUP_MS` 상수 충분히 (≥20000) |
 | LDR 값이 0 또는 1023 고정 | 10kΩ 누락 / 한 다리 떠 있음 | 분압회로 점검: `5V — LDR — A0 노드 — 10kΩ — GND` |
 | LDR 값이 어두울 때 더 큼 (반전) | LDR과 10kΩ 위치 바뀜 | 회로 위·아래 스왑 또는 코드 라벨 임계값 반전 |
+| 업로드 `not in sync: resp=0x00` / `programmer not responding` | 액추에이터(레이저 등)를 D13(SCK)에 연결 → 부트로더 동기화 방해 | 데이터핀 D13→D8 이동(또는 업로드 중 분리), 자동리셋 안 되면 USB 재꽂기/RESET 버튼 |
 
 ## Promotion Path
 
-- 이 스킬은 URHYNIX의 4개 센서 (PIR/조도/소리/불꽃)에 동일하게 적용된다.
-- 진척 (2026-05-28 기준):
+- 이 스킬은 URHYNIX의 센서/액추에이터 스택 변경에 따라 갱신된다.
+- 진척 (2026-06-16 기준):
   - ✅ PIR (HW-740): 디지털 엣지 트리거, MOTION/CLEAR 로그
-  - ✅ LDR (조도): A0 + 10kΩ 분압, 2초 주기 보고, dark/dim/bright/very bright 라벨
+  - ~~❌ LDR (조도): A0 + 10kΩ 분압~~ → 제거됨 (정본 v18, 2026-06-16)
+  - ✅ 레이저 송신 모듈 (D8, PIR 연동 LED+레이저 동시 점등): as-built 2026-06-16 검증 PASS
   - ⏳ 소리 (KY-038): D3 디지털, 트리거 임계값 점검 예정
-  - ⏳ 불꽃 (적외선): D4 디지털, KY-026 또는 등가
-- 4번 모두 통과하면 → `docs/evidence/`에 한 번에 모은 표 작성 → `docs/ref/CONTRACT.md §4` 시리얼 배선 표 갱신.
+  - ⏳ 불꽃 (적외선): D4 디지털, KY-026 또는 등가 — 정본 v18에서 레이저로 대체 검토
+- 다음 스택(온도/워터펌프 등)이 추가되면 → `docs/evidence/`에 한 번에 모은 표 작성 → `docs/ref/CONTRACT.md §4` 시리얼 배선 표 갱신.
 - ESP32/Nano 등으로 보드가 바뀌면 FQBN(`arduino:avr:uno` 부분)만 교체하면 됨.
 
 ## Scope Boundary (RPi 측 작업과의 경계)

@@ -41,5 +41,10 @@ namespace URHYNIX.ControlRoom.App
         // 맵 뷰 모드 변경 ("2d" / "3d")
         public static event Action<string> OnMapViewModeChanged;
         public static void RaiseMapViewModeChanged(string mode) => OnMapViewModeChanged?.Invoke(mode);
+
+        // 좌표 출동 요청 (robotId, worldX, worldY, reason). 맵 우클릭 액션 → Robot/Ros가 소비.
+        public static event Action<string, float, float, string> OnDispatchRequested;
+        public static void RaiseDispatchRequested(string robotId, float x, float y, string reason) =>
+            OnDispatchRequested?.Invoke(robotId, x, y, reason);
     }
 }

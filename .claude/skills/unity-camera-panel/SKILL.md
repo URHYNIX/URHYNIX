@@ -177,14 +177,16 @@ void OnRobotChanged(string robotId)
 
 ### Cross-host visibility 검증 (Endpoint는 1개만)
 
-`ROS_DOMAIN_ID` 통일이면 **endpoint 1개**가 양쪽 토픽 모두 forward 가능. 추가 endpoint 불필요.
+`ROS_DOMAIN_ID` 통일 + **cross-host DDS가 통하면** endpoint 1개가 양쪽 토픽 모두 forward 가능. 추가 endpoint 불필요.
 
 ```bash
-# 젠지에서 티원 토픽 보이나? (cross-host)
-ssh urhynix-robot 'ros2 topic list | grep tb3_1'
-ssh urhynix-robot 'timeout 5 ros2 topic hz /tb3_1/camera/color/image_raw/compressed'
-# 기대: ~30Hz
+# endpoint 호스트에서 상대 로봇 토픽 데이터가 실제 오나? (topic list 말고 echo!)
+ssh <endpoint호스트> 'ros2 topic echo /tb3_2/camera/camera_info --once'   # header 오면 OK
 ```
+
+> ⚠️ **`topic list`만 보고 cross-host 됐다고 판단 금물** (2026-06-15). discovery 일부가 통과해 topic list엔 떠도 실제 데이터는 0인 경우가 있다 — 반드시 `echo --once`로 실데이터 확인.
+>
+> ⚠️ **와이파이가 DDS multicast를 차단하면**(팀 전용 와이파이 등) `echo`가 `does not appear to be published` + `Could not determine the type`로 실패하고, Unity는 `RegisterSubscriber` OK인데 **frame 0장**이 된다. 이때 **`ROS_STATIC_PEERS=<상대IP>`로 unicast discovery 우회** 필수 — 카메라/센서 노드 + `ros_tcp_endpoint` **양쪽 모두**에 박아야 endpoint가 cross-host 토픽을 받는다. 전체 절차: `robot-camera-bringup` §F. 2026-06-15 PASS(젠지 카메라+센서 → 티원 endpoint → Unity 양 로봇 즉시 전환).
 
 ### 검증 흐름
 

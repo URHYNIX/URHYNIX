@@ -1,5 +1,297 @@
 # Decision Log
 
+> **📌 최신 5건은 DECISION-CURRENT.md 참조. 이 파일은 전체 역사 기록입니다.**
+
+## 2026-06-16 — Gen.G 센서 스택 교체 + 자동 충전독 제외 확정 + 시나리오 5종 확정
+
+### 변경 1 — Gen.G(젠지/tb3_2) 센서 스택 교체
+
+- **제거**: LDR(조도 센서), 불꽃(flame) 센서
+- **추가**: 온도 센서 모듈, 레이저 송신 모듈, 워터 펌프(릴레이 모듈 + Adafruit 3V 수중 펌프, 화재 대응 모의 분사용 액추에이터)
+- **유지**: PIR(인체감지), 소형 사운드 모듈, Pi Camera v2 (IMX219), Arduino Nano/Uno USB 시리얼 센서 보드
+- **Gen.G ROS2 연결**: RaspberryPi4 →(USB Serial)→ Arduino Nano/Uno → [PIR · 사운드 · 온도 · 레이저] + 릴레이 → 워터 펌프
+- **T1(티원/tb3_1) 유지**: RealSense D435, LDS-03 LiDAR, RaspberryPi4, TurtleBot3 Burger (변경 없음)
+
+### 변경 2 — 자동 충전독 완전 제외 확정
+
+- 완전 자동 충전독(포고핀·무선충전 하드웨어 회로)은 검토 결과 난이도 높아 현 단계 제외 확정
+- **대체**: 배터리 잔량 모니터링 + **ArUco 마커 기반 정밀 주차** 후 **수동 충전 연결 요청**(Unity 화면에 요청 표시)
+- 정밀 주차 실패 시 "긴급 수동 충전 요청" 표시
+
+### 변경 3 — 발표용 시나리오 5종 확정
+
+**위험등급 5단계: SAFE / WATCH / CHECK / DANGER / EVACUATE**
+
+1. **폐관 후 침입자 감지** — PIR+LiDAR → WATCH → Gen.G 출동 → PIR·카메라 재확인 → DANGER 시 112 신고·차단벽 요청
+2. **중요 전시품 분실·이동** — T1 YOLO 기준이미지·Depth 불일치 → WATCH → 재촬영(최대 2회) → CHECK → Gen.G 다각도 확인 → DANGER
+3. **화재 의심 즉시 대응** — T1 YOLO 화재 감지 → 즉시 DANGER → Gen.G 출동 → **온도·레이저 센서값 + Pi Camera 재확인** → EVACUATE 시 **워터 펌프 분사** + 119 신고·차단벽 요청
+4. **개장 중 전시품 접촉** — T1 YOLO 손 감지 → WATCH → 음성 안내 → CHECK → Gen.G 출동·2차 경고 → DANGER 시 관리자 확인 요청
+5. **배터리 부족·임무 인계** — T1 배터리 기준 이하 → Gen.G에 남은 waypoint 인계 → T1 충전소 이동 → **ArUco 정밀 주차 → 수동 충전 연결 요청**(자동 충전독 미구현)
+
+**주의**:
+- 신고·차단벽 폐쇄는 실제 자동제어가 아니라 Unity 화면에 "요청 상태"로 표시
+- YOLO 인식 MVP 클래스 4종: 로봇·사람·중요품·불
+
+### 근거 및 출처
+
+- Confluence SCRUM 스페이스, 2026-06-16 갱신 정본
+  - 기획안(UR HYNIX) v18 /pages/327681
+  - 하드웨어 아키텍처 v4 /pages/7536649
+  - 소프트웨어 아키텍처 v4 /pages/13729806
+  - 디지털 트윈 동작 검증 시나리오 /pages/13860874
+
+### 현재 코드/스킬 드리프트 주의
+
+- **코드 상태**: `unity/` + `scripts/`의 현재 코드는 이전 LDR(조도) 기반으로 작성됨 (LuxSubscriber, arduino_bridge 등)
+- **스킬 상태**: `.claude/skills/urhynix-sensor-bringup/` 등은 구 LDR 기준 문서화
+- **정합 필요**: 후속 세션에서 센서 하드웨어 교체 후 코드/스킬 토픽명·핀 매핑 갱신 필요
+
+### 변경 4 — 레이저 센서 결선 + PIR 연동 (조도 제거) — Arduino as-built
+
+- **확정 사실 (2026-06-16 검증 PASS)**:
+  - **대상**: Mac USB 연결 Arduino UNO (FQBN `arduino:avr:uno`, 포트 `/dev/cu.usbmodem11101`). 향후 Gen.G(tb3_2) 탑재 예정.
+  - **변경**: 조도(LDR/A0) **물리 제거**. PIR(D2 OUT) + LED(D2, +220Ω→GND) 유지.
+  - **신규**: 레이저 송신 모듈 추가, 데이터핀 **D8**, 5V=브레드보드 레일, GND=공통 그라운드.
+  - **동작**: PIR 감지(HIGH) → LED(D2) + 레이저(D8) **동시 ON**, 해제 → 동시 OFF.
+  - **새 스케치**: `sketches/pir_laser/pir_laser.ino` (기존 `sketches/pir_led/pir_led.ino`는 참조용 보존).
+  - **컴파일**: 7% flash / 9% RAM. arduino-cli 업로드 무에러.
+  - **시리얼 검증 PASS**: 9600 배너 `=== PIR + LASER Test ===` → `Ready.` 수신 확인. 로그 포맷: `[MOTION] detected -> LED+LASER ON` / `[CLEAR ] no motion -> LED+LASER OFF`.
+- **함정 & 해결**:
+  - 레이저를 처음 **D13에 연결**했더니 업로드 `not in sync: resp=0x00 / programmer is not responding` 반복 실패.
+  - **원인**: D13은 **SCK 라인** (부트로더 동기화), 액추에이터 부하가 동기화 방해.
+  - **해결**: 데이터핀 **D13→D8로 이동** (또는 업로드 중에만 D13 분리). 자동리셋 안 되면 USB 재꽂기/RESET 버튼.
+- **산출물**: `.claude/skills/arduino-flash/SKILL.md` v2→v3 갱신 (레이저 D8 + D13/SCK 함정 추가), `docs/ref/CONTRACT.md` §4.1 핀 표 갱신.
+
+---
+
+## 2026-06-15 (후반) — codelab_robot_team_2_5G 무선 통일 + 양 로봇 카메라/센서 cross-host PASS + 망 불안정 경고
+
+### 결정
+- **무선 네트워크 최종 통일 SSID: `codelab_robot_team_2_5G`** (5200MHz). 이전 시도: `codelab_5G` → 로봇 범위 밖(신호 0), fallback. 최종 선택: 로봇 기존 연결 SSID로 Mac도 통일. IP: Mac `192.168.10.101`, 젠지 `192.168.10.87`, 티원 `192.168.10.250` (전부 DHCP drift, 다음 세션 mDNS 재확인 필수).
+- **`codelab_robot_team_2_5G`는 multicast 정상** — talker/listener 양방향 검증 PASS. 이전 팀 와이파이와 달라(multicast 차단), STATIC_PEERS 우회법 불필요. robot-camera-bringup §F의 우회법은 multicast 차단 망 대비용으로 보존.
+
+### 검증 (PASS)
+- **cross-host DDS multicast**: 젠지 talker → 티원 listener "Hello World" 수신 확인 PASS.
+- **양 카메라 + 센서 cross-host 결선**:
+  - 티원 RealSense D435 `/tb3_1/camera/color/image_raw/compressed` (30Hz, 로컬)
+  - 젠지 Pi Camera v2 `/tb3_2/camera/image_raw/compressed` (30Hz, cross-host multicast)
+  - 젠지 센서 `/sensors/ldr` (Int32), `/sensors/pir` (Bool) — arduino_bridge.py cross-host 수신 확인
+  - 단일 endpoint(티원 port 10000)이 양 로봇 토픽 모두 수집 → Unity forward 완료. RegisterSubscriber 전부 OK.
+
+### 신규 함정 5건 (이번 세션)
+1. **젠지 `~/.bashrc` ROS_STATIC_PEERS 잔재** — `export ROS_STATIC_PEERS=192.168.10.70` → cross-host 토픽 불안정. `sed -i '/ROS_STATIC_PEERS/d' ~/.bashrc`로 제거.
+2. **`/dev/tb3_arduino` symlink stale** — Arduino realloc `/dev/ttyACM0` → old `/dev/ttyACM1` 여전히. `ln -sf /dev/ttyACM0 /dev/tb3_arduino` 재링크.
+3. **RealSense compressed는 lazy republish** — 구독자 없으면 발행 안 함. ros_tcp_endpoint 먼저, Unity 구독, realsense 재시작 순서 필요.
+4. **직결(en5) + 무선(en0) 같은 대역 충돌** — asymmetric routing 재발. `ifconfig en5 down` (직결 제거) → 무선 단일화.
+5. **Unity 에디터 background throttle** — `unityctl play` 후 포커스 떨어짐 → 로그 정지. "Run In Background" 켜기 또는 Editor 항상 포그라운드 유지.
+
+### 미해결 / 다음 세션 높음 우선
+- **`codelab_robot_team_2_5G` 간헐 끊김 심각**: 10회 ping 중 2~3회 100% loss, 회복 1초 내, 빈번 반복 → **시연 신뢰성 낮음**. 임시 우회: 공유기를 로봇 근처로 옮겨 `codelab_5G` 사용 가능한지 확인, 또는 직결(Mac ↔ 젠지 eth0) 복귀 + mDNS 충돌 회피.
+- **세션 종료 상태**: 젠지 안전 종료(poweroff) 완료, ping 100% loss 확인. 티원은 망 끊김으로 ssh 셧다운 실패 → **물리 전원 OFF 필요**.
+- **다음 진입 5단계**: ① DHCP IP 재확인 ② `/dev/ttyACM*` 재확인 + symlink 갱신 ③ ROS_DOMAIN_ID=210 확인 ④ bringup 실행 ⑤ ros_tcp_endpoint + arduino_bridge.py + Unity 구독 시작.
+- **evidence**: `docs/evidence/2026-06-15-wireless-codelab-team-crosshost-camera-sensor.md`
+
+## 2026-06-15 — 무선 통일 + ROS_DOMAIN_ID 210 통일 + Unity 듀얼 로봇 전환 검증
+
+### 결정
+- **ROS_DOMAIN_ID 230 → 210 전면 통일.** 젠지(kim-desktop)는 팀원이 이미 210으로 변경한 상태였고, 티원(rb)도 `~/.bashrc` 230→210으로 맞춤. namespace 분리(`/tb3_1`=티원, `/tb3_2`=젠지)는 유지 → "도메인 통일 + namespace 분리"가 정본. SSOT 6개 문서 갱신 완료(ARCHITECTURE/CONTRACT/ROS2-ROBOT/VISION-CAMERA/PROJECT-PLAN + unity Ros/CLAUDE.md).
+- **개발 접속을 무선으로 통일** — 직결(Mac en5 ↔ 젠지 eth0)을 제거하고 팀 와이파이(`192.168.10.x`)로 양 로봇 접근.
+
+### 네트워크 (무선 통일 트러블슈팅)
+- 팀 와이파이는 **AP isolation 아님** (Mac↔티원 SSH 통과). 이전 세션의 격리망과 다른 망.
+- 젠지 무선이 안 닿던 원인 = **asymmetric routing**: 젠지가 eth0(직결)+wlan0 동시 보유 + default route가 eth0로 잡혀, wlan0(.87)로 온 요청의 응답을 직결로 내보냄 → Mac엔 안 옴. **직결 랜선 물리 제거**로 eth0 down → `default via 192.168.10.1 dev wlan0`로 정상화.
+- 현재: 젠지=`192.168.10.87`(wlan0), 티원=`192.168.10.250`(wlan0). 둘 다 무선 + 210. (IP는 DHCP drift — [[project_robot_ip_dynamic]])
+
+### 검증 (PASS)
+- **cross-discovery PASS**: 양 로봇이 같은 210 도메인에서 `/chatter` 상호 발견 확인 (티원 talker → 젠지·티원 양쪽 topic list에 `/chatter`).
+- **Unity 듀얼 로봇 전환 (코드+Scene)**: 카메라·배터리는 두 로봇 Subscriber 배치 + 탭(`tab-tb3_1`/`tab-tb3_2`)→`OnRobotChanged`→즉시 전환 완비(모델 B: 동시 구독 + robotId 필터). cross-host 가시성은 단일 ros_tcp_endpoint(티원)가 210에서 양 로봇 토픽 forward하는 구조에 의존 → 도메인 통일이 전제.
+
+### 역할 분담 (갭 아님 — 설계대로)
+- **티원(tb3_1) = RealSense 비전 전용**(role:vision), **젠지(tb3_2) = Pi Camera + 센서 전용**(role:sensor). 조도/PIR/가스는 젠지 단독이 **설계대로**이며 티원엔 물리 센서가 없다. Unity에서 티원 탭 선택 시 센서 카드 `--` 표시가 정상 동작. TopicRegistry `tb3_1` 센서 null도 정상. → "두 로봇 모두 카메라"는 둘 다 OK, "센서"는 젠지 탭에서만(정상).
+
+### 미해결 갭 (다음 작업)
+1. **런타임 토픽 0** — 두 로봇 bringup/카메라 노드 미실행. Unity 켜도 데이터 안 옴. 실제 화면 확인은 양 로봇 bringup + 카메라(젠지 Pi Camera / 티원 RealSense) 기동 필요.
+2. **ControlRoomApp IP 하드코딩** (`192.168.0.250` fallback + `t1@192.168.10.250`) — IP drift 위반, hostname/mDNS 전환 검토.
+3. **젠지 센서 토픽 `/sensors/*` namespace 미분리** — Phase 3에서 `/tb3_2/sensor/*`로 정합 예정.
+- evidence: `docs/evidence/2026-06-15-wireless-unify-domain210-unity-dualrobot-check.md`
+
+## 2026-06-10 — Mac MPS + T1 RealSense → YOLOv8n 라이브 PASS + 영상 끊김 정량 진단 + 자산 5종 영구화
+
+### 비전 트랙(Mac 절반) 검증 완료
+
+- **결정**: 박물관 시연 비전 트랙은 **라즈베리(T1)는 영상 publish만, Mac MPS가 YOLO 추론**의 분업 구조를 본선 후보로 채택. 라즈베리에서 YOLO 안 돌림(CPU 한계).
+- **결과**:
+  - Mac MPS + cv2 + YOLOv8n: **26.0 fps headless / 16~17 fps GUI imshow**
+  - 탐지: person 0.89 / keyboard 0.91 / cup 0.86 / tv 0.79 / laptop / mouse / cell phone 등 안정
+  - 결과 이미지: `test/realsense_yolo_result.jpg`
+- **데이터 경로**: T1 RealSense D435 → `realsense2_camera` (compressed 29Hz 2.17MB/s) → `web_video_server` (port 8080, MJPEG HTTP) → Mac `cv2.VideoCapture(http://...)` → YOLO(mps) → cv2.imshow
+- **병렬 다리 3개**: `web_video_server` (8080, cv2/브라우저) + `foxglove_bridge` (8765, Foxglove Studio) + `ros_tcp_endpoint` (10000, Unity). 모두 같은 T1 토픽 별도 TCP 구독.
+
+### 영상 끊김 정량 진단 (8지표) + compressed 전환
+
+- **원인 진단**: raw `/camera/.../image_raw` = 11.27 Hz × 14.24 MB/s = **114 Mbps** → Wi-Fi link rate 65 Mbps의 **1.75배 초과** → publish/transmit 둘 다 못 따라가 끊김 누적.
+- **해결**: Foxglove Image 패널 토픽을 `.../image_raw/compressed` (29.22 Hz × 2.17 MB/s = 17 Mbps)로 1줄 변경.
+- **효과**:
+  - 라즈베리 `realsense_node` CPU **87.5% → ~0%** (-87%p, raw subscribe 없어진 효과)
+  - 네트워크 외부 흐름 **14.24 → 2.17 MB/s** (-85%)
+  - 발행률 **11.27 → 29.22 Hz** (×2.6)
+  - Foxglove 클라이언트 drop/error 0건
+
+### 박제된 자산 (스킬 3종 + 메모리 1종 + 코드 1종 + evidence 1건)
+
+- 🆕 **`.claude/skills/robot-ip-detect-fallback/SKILL.md`** — mDNS 깨졌을 때 ARP 라즈베리 OUI(`d8:3a:dd`/`2c:cf:67`/`dc:a6:32`/`b8:27:eb`/`e4:5f:01`) + `known_hosts` ed25519 host key 매칭으로 신원 추적. 2026-06-10 사례: Wi-Fi 대역 `0.x`→`10.x` 점프, `rb.local` 실패했지만 ed25519 매칭으로 T1=`192.168.10.250` 확정.
+- 🆕 **`.claude/skills/robot-camera-stream-diag/SKILL.md`** — 카메라 영상 끊김 6대축 8지표 한 ssh 호출 동시 측정 + raw vs compressed 비교 + 해결 옵션 표. 박물관 시연 dry-run 매 회 첫 검증.
+- ✏️ **`.claude/skills/robot-camera-bringup/SKILL.md`** §C/§D/§E + 함정 #19 추가
+  - **§C** `ssh -fn` 표준 detach 패턴 (기존 `nohup ... & disown` heredoc 안에서 SSH session 종료 시 로그조차 안 생기는 케이스 회피)
+  - **§D** `foxglove_bridge` 통합 (port 8765, Foxglove Studio dmg 클라이언트)
+  - **§E** compressed 우선 정책 (Wi-Fi 65Mbps 환경 표준)
+  - **함정 #19** `nohup ... & disown` heredoc detach 실패 사례
+- ✏️ **메모리 `project_robot_ip_dynamic.md`** — "mDNS 자체가 깨졌을 때 fallback" 한 줄 추가 (다음 세션 자동 로드)
+- 🆕 **`test/detect_realsense.py`** — Mac MPS RealSense YOLO. env: `FRAMES` `HEADLESS` `SAVE_LAST` `T1_IP` `T1_PORT` `T1_TOPIC`
+- ✏️ **`test/CLAUDE.md`** — Y5 진입 한 줄 추가, Y0~Y4 PASS 마크
+- 🆕 **evidence**: `docs/evidence/2026-06-10-mac-yolo-realsense-live.md`
+
+### T1 시스템 변경 (apt install 3종)
+
+- `ros-jazzy-foxglove-bridge` 3.2.6
+- `ros-jazzy-realsense2-camera` 4.57.7 (+ msgs, description)
+- `ros-jazzy-web-video-server` 3.1.0
+
+### 맞춤 YOLO 캡처-라벨-학습-검수 루프 확정
+
+- **결정**: T1 RealSense 맞춤 물체 인식은 Roboflow 같은 외부 SaaS 없이, 로컬 브라우저 학습실 `scripts/yolo_training/custom_yolo_studio.py`를 우선 정본으로 사용한다. 주소는 `http://127.0.0.1:8766/`.
+- **저지연 영상 경로**: T1의 8090 preview 서버(`scripts/yolo_training/t1_compressed_mjpeg_server.py`)를 사용한다. 브라우저는 긴 MJPEG가 아니라 `/preview.jpg` polling으로 원본 실시간을 유지하고, SAM2/GrabCut segmentation은 overlay/검수용으로 분리한다.
+- **데이터셋 정본**: `datasets/custom_object/images/{train,val}` + `datasets/custom_object/labels/{train,val}`. 학습 산출물은 `runs/custom_object/<run>/weights/best.pt`.
+- **자동 라벨 결정**: ROI 박스를 그대로 저장하지 않고 `ROI crop -> SAM2/rembg/GrabCut mask -> bbox -> YOLO txt` 순서로 좁힌다. 자동연사 기본은 `매핑 성공한 사진만 저장`.
+- **검수 결정**: 촬영 목록의 `마스크`, `검수 시작`, `←/→`, `D 삭제`, `Delete/Backspace`, `Esc`를 통해 앱 안에서 빠르게 넘기며 삭제한다. 검수 이미지는 `datasets/custom_object/review_masks` 캐시를 우선 사용한다.
+- **오탐 정제 결정**: 배경을 물건으로 감지하는 현상은 `.pt`를 직접 수정하지 않고, `N 오탐 배경 저장`으로 `negative_*.jpg` + 빈 `.txt` hard-negative 샘플을 추가한 뒤 재학습한다.
+- **현재 데이터 품질 진단**: 최신 학습 전 데이터에서 반복 bbox가 많았다. 예: 학습 50장 중 35장, 검증 18장 중 13장이 같은 bbox 좌표. 이 경우 높은 mAP라도 실전 배경 오탐을 숨길 수 있으므로, background-only 검증이 필수다.
+- **최신 UI 확인**: `http://127.0.0.1:8766/?v=hard-negative-20260610-1806-clean`.
+- **근거**: `docs/evidence/2026-06-10-mac-yolo-realsense-live.md`의 `Custom labeling studio`, `Review visibility/cache fix`, `Hard-negative background capture` 섹션.
+
+### Robot safe shutdown 기준 문서화
+
+- **결정**: 실험 종료 시에는 메인 슬라이드 스위치를 먼저 끄지 않고, SSH가 살아 있으면 OS `poweroff`를 먼저 수행한다.
+- **표준 순서**:
+  1. `tb3-down` 또는 수동 `pkill`로 ROS/카메라/브릿지 프로세스 정리.
+  2. `ssh t1@192.168.10.250 'sudo poweroff'` 또는 Genji `ssh urhynix-robot 'sudo poweroff'`.
+  3. 10~30초 후 ping 100% loss 확인.
+  4. ping loss 확인 후 TurtleBot 메인 슬라이드 스위치 OFF.
+  5. LiPo 분리/충전 상태 기록.
+- **예외**: SSH frozen, 충돌 위험, 안전 문제는 물리 전원 OFF를 우선할 수 있다. 이 경우 emergency shutdown으로 기록한다.
+- **2026-06-10 문서화 시점 상태**: T1 `192.168.10.250`은 ping 2/2 응답 및 8090 status fresh였으므로, 실제 셧다운 완료로 표시하지 않는다. 셧다운 완료 조건은 ping 100% loss다.
+- **정본 절차**: `docs/ref/tech/ROS2-ROBOT.md` Safe Shutdown, `docs/status/HANDOFF.md` shutdown note.
+
+### 함정 발견 (이번 세션 4종)
+
+- **#19** `nohup ... & disown` heredoc에서 SSH session 종료 시 같이 죽음 → `ssh -fn` 패턴으로 교체
+- **Foxglove inactive-tab 20MB drop** → `defaults write dev.foxglove.studio NSAppSleepDisabled YES` + 재시작 / 또는 cv2 경로 우회
+- **mDNS `rb.local` resolve 실패** → ARP OUI + ed25519 매칭 fallback
+- **Wi-Fi 대역 점프** (`0.x`→`10.x`) → ssh host key 동일성으로 같은 머신 확인
+
+### 다음 트랙 후보 (이번 세션 종료 시점)
+
+1. 젠지(Pi Camera) 동시 추론 — 이중 카메라 YOLO
+2. depth 토픽 결합 — 박스 중심 픽셀 거리 표시
+3. Unity ControlRoom 통합 — Mac 추론 결과를 ROS2 `/yolo/detections` 토픽으로 publish
+4. realsense 15Hz + depth off 최적화 (박물관 시연 안정성)
+
+### 자세히
+
+`docs/evidence/2026-06-10-mac-yolo-realsense-live.md`
+
+---
+
+## 2026-06-09 — Phase 2.8 — 젠지 Arduino LDR/PIR Unity 결선 + 5종 자산 영구화
+
+### 조도(LDR) + PIR 인체감지 Unity UI 결선
+
+- **결정**: 조도 표시 = `63% · 밝음` (% + 5단계 상태 라벨), PIR = `감지!` / `감지 안 됨` 한글 토글
+- **코드 신규**:
+  - 🆕 `Assets/Scripts/Ros/LuxSubscriber.cs` (BatterySubscriber 패턴, Inspector `rawMin=30 / rawMax=300` 캘리브레이션 노출)
+  - 🆕 `Assets/Scripts/Ros/PirSubscriber.cs` (`std_msgs/Bool` 구독, lastState 추적 + 첫 메시지 로그)
+  - 🆕 `Assets/Scripts/App/SensorVerifyConsole.cs` — **영구 검증 자산**. Runtime static class. `Dump()`/`SwitchTo()`/`DumpRos()` 3개. SensorRegistry/Robots 동적 순회로 새 센서 추가 시 dict 1줄로 자동 포함.
+  - ✏️ `Assets/Scripts/Ros/TopicRegistry.cs` (GetLdrRaw/GetPirState lookup 추가, 토픽 `/sensors/ldr` `/sensors/pir`)
+  - ✏️ `Assets/Scripts/UI/SensorCardListView.cs` (PIR boolean 분기 + light 5단계 라벨 + **OnRobotChanged 캐시 redraw 패치** — 탭 전환 즉시 LastSensorValues에서 끌어와 표시, TelemetryPanelView 패턴과 동일)
+  - ✏️ `Assets/Scripts/Data/FakeSensorData.cs` (tb3_2 제외, tb3_1만 fake 유지)
+  - ✏️ `Assets/Scenes/ControlRoomMain.unity` 루트에 `LuxSubscriber_G` + `PirSubscriber_G` 2개 GameObject YAML 직접 박음 (Unity Editor 라이선스 핸드셰이크 실패 우회). fileID `7000000001~003` (Lux), `7000000011~013` (Pir).
+
+- **영구 자산화 (스킬 4건)**:
+  - 🆕 `.claude/skills/urhynix-sensor-bringup/SKILL.md` — Arduino 센서 결선 표준 (자매 스킬, urhynix-battery-bringup과 1:1 모델)
+  - 🆕 `.claude/skills/unity-scene-yaml-patch/SKILL.md` — Editor 라이선스 실패 시 .unity YAML 직접 patch 표준 (fileID 충돌 회피 + SceneRoots 갱신)
+  - 🆕 `.claude/skills/urhynix-sensor-verify-console/SKILL.md` — SensorVerifyConsole 호출/확장 패턴
+  - ✏️ `.claude/skills/urhynix-battery-bringup/SKILL.md` — 함정 표 #26/#27 추가
+    - **함정 #26**: USB `/dev/ttyACM*` 번호 재부팅/재꽂이마다 변동 → udev rule 영구 매핑 (Arduino UNO `2341:0043` → `tb3_arduino`, OpenCR `0483:5740` → `tb3_opencr`)
+    - **함정 #27**: `OPENCR_PORT` 환경변수가 `turtlebot3_bringup robot.launch.py`에서 무시됨 → launch argument `usb_port:=/dev/ttyACM1` 사용 (line 40 `LaunchConfiguration('usb_port', default='/dev/ttyACM0')`)
+
+- **검증 결과**:
+  - ✅ 조도 UI 표시 PASS (`17% · 매우 어두움` 등 캘리브레이션 후 자연 환산)
+  - ✅ PIR UI 표시 PASS (`감지 안 됨` 초기, `감지!` 토글 동작)
+  - ✅ LDR/PIR ROS publish PASS (`/sensors/ldr` Int32, `/sensors/pir` Bool)
+  - ✅ 젠지 배터리 UI `94.3 %` PASS (오전 작업)
+  - ⚠️ **세션 후반 막힘**: Wi-Fi 망 변경 + 도메인 충돌 + 팀원 카메라 작업 후 ROS-TCP-Endpoint가 일관되게 티원 트랙만 forward, 젠지 트랙(배터리/카메라/LDR/PIR) 모두 막힘
+    - 진단: 무선 망 multicast 차단으로 DDS multi-host discovery 실패 의심 (티원 ros2 cli도 `Unknown topic '/tb3_1/battery_state'`)
+    - 다음 세션 디버그 후보: CycloneDDS unicast peers / Wi-Fi 라우터 IGMP / 팀원 도메인 충돌 분리
+
+- **영향 받은 외부 환경 (참고)**:
+  - 양쪽 `.bashrc` ROS_DOMAIN_ID `230` → `210` (팀원과 공유 도메인). **다음 세션 진입 시 도메인 확인 필요**.
+  - 젠지 팀원 Pi Camera 작업 중 — 같은 도메인 210에 `/camera_container`, `/image_sub_node` 노드 보임. 우리 camera_node `Killed` (팀원 작업과 충돌 흔적).
+
+- **다음 세션 5분 진입 캡슐**:
+  1. 양 로봇 켜기 → `ros2 node list`로 팀원 노드 + 도메인 확인 (충돌 분리)
+  2. USB ttyACM 번호 재확인 (`udevadm info`로 Arduino/OpenCR 매핑) → `/dev/tb3_arduino` 심링크 갱신 (함정 #26)
+  3. 티원 본체 메인 전원 스위치 ON 확인 (함정 #20)
+  4. `turtlebot3_bringup robot.launch.py namespace:=tb3_* usb_port:=/dev/ttyACM<N>` (함정 #27)
+  5. `ros_tcp_endpoint` + `arduino_bridge.py` launch
+  6. Unity Play → `unityctl exec ... SensorVerifyConsole.Dump()`로 5트랙 종합 검증
+
+- **자세히**: `docs/evidence/2026-06-09-controlroom-sensor-lux-pir-link.md`
+
+## 2026-06-08
+
+### 듀얼 로봇 실 배터리 결선 PASS + 젠지 ROS 2 jazzy 원격 fresh install
+
+- **결과**: `/tb3_1/battery_state` (티원 12.59V→99.5%) + `/tb3_2/battery_state` (젠지 11.73V→59.0%) Unity UI 동시 라이브 표시. 우측 패널 배터리 % + bar 토글 시 즉시 갱신. 사용자 확인 "양쪽 다른 voltage 다른 % 표시 PASS".
+
+- **결정 4건**:
+  1. **B안 (실 ROS 배터리 결선) 채택** — 시뮬 FakeSensorData에서 실 `sensor_msgs/BatteryState`로 전환. TurtleBot3 OpenCR 펌웨어가 percentage 필드를 잘못 채움(예: 117%)이라 voltage 선형 변환 채택: LiPo 3S `pct = clamp((voltage-10.5)/2.1)*100`. 만충 12.6V=100%, cutoff 직전 10.5V=0%.
+  2. **단일 ros_tcp_endpoint 채택** — 티원에 endpoint 1대 띄우고 양 로봇 토픽 모두 forward. ROS_DOMAIN_ID=230 통일이라 가능. 젠지 endpoint는 미사용(자급 빌드는 함).
+  3. **SSOT IP fallback 패턴** — `ControlRoomApp.ConfigureRos`가 `default_robots.json[0].hostAddress`에서 `user@host` 분리 후 IP 사용. mDNS 미작동 시 IP 직결 안전망. SSOT 변경만으로 IP 제어 가능.
+  4. **3대 동시 launch 금지 원칙** — TurtleBot3 OpenCR `/dev/ttyACM0`는 1개만 잡음. 다중 launch는 무의미 + 펌웨어 stress. 1대만 launch + 나머지는 subscribe.
+
+- **산출물** (코드 5종):
+  - 🆕 `unity/ControlRoom/Assets/Scripts/Ros/TopicRegistry.cs` (`T1BatteryState`, `GenjiBatteryState` 상수 + `GetBatteryState(robotId)`)
+  - 🆕 `unity/ControlRoom/Assets/Scripts/Ros/BatterySubscriber.cs` (119줄, voltage 환산 + 끊김 감지 3중: timeout 5초/present=false/voltage<5V/회복 로그)
+  - ✏️ `unity/ControlRoom/Assets/Scripts/App/ControlRoomApp.cs` (`DefaultRosIp` 하드코딩 → `default_robots.json[0].hostAddress`에서 IP 추출 + `FallbackRosIp`)
+  - ✏️ `unity/ControlRoom/Assets/Scripts/UI/TelemetryPanelView.cs` (`OnRobotChanged` 구독 추가 + `Apply()/Reset()` 헬퍼 분리, 탭 전환 즉시 갱신)
+  - ✏️ `unity/ControlRoom/Assets/Resources/RobotConfig/default_robots.json` (tb3_1 hostAddress `t1@192.168.0.250` → `t1@192.168.10.250`, Wi-Fi 변경 반영)
+
+- **Scene (영구 박힘)**:
+  - `BatterySubscriber_T1` GameObject + `BatterySubscriber` 컴포넌트 (robotId=tb3_1, displayLabel=티원)
+  - `BatterySubscriber_G` GameObject + `BatterySubscriber` 컴포넌트 (robotId=tb3_2, displayLabel=젠지)
+  - `ROSConnection` GameObject + `m_RosIPAddress=192.168.10.250` `m_RosPort=10000`
+
+- **로봇 워크스페이스**:
+  - **티원** (rb / 192.168.10.250): `~/turtlebot3_ws/install/ros_tcp_endpoint` 자급 빌드 (Unity-Technologies/ROS-TCP-Endpoint, branch main-ros2)
+  - **젠지** (kim-desktop / 192.168.10.87): ROS 2 jazzy 원격 fresh install — ros-jazzy-desktop + ros-jazzy-turtlebot3 + ros-jazzy-turtlebot3-msgs + colcon + rosdep, `~/turtlebot3_ws` clone 3종(turtlebot3, ROS-TCP-Endpoint main-ros2, coin_d4_driver) + `colcon build` 10 packages (3분 57초), `.bashrc` env 박음(TURTLEBOT3_MODEL=burger, LDS_MODEL=LDS-03, OPENCR_PORT=/dev/ttyACM0, ROS_DOMAIN_ID=230)
+
+- **신규 함정 5건 (영구 자산화 #19~#23)**:
+  | 번호 | 함정 | 우회 |
+  |---|---|---|
+  | #19 | TurtleBot3 OpenCR pub `BatteryState.percentage` 필드 117% 같은 무효값 | voltage 선형 변환 사용 (`(v-10.5)/2.1*100`) |
+  | #20 | TB3 본체 메인 전원 스위치 OFF — OpenCR는 USB 5V로 살아있지만 Dynamixel 응답 0 → `[TxRxResult] There is no status packet` 후 `process has died, exit code -6` | 본체 메인 스위치 ON 확인 우선 |
+  | #21 | 새 OS 사용자 `dialout` 그룹 미가입 → `/dev/ttyACM0` `crw-rw----` 권한 부족 → `Failed to open port` | `sudo usermod -aG dialout <user>` 영구 + `sudo chmod 666 /dev/ttyACM0` 즉시 우회 |
+  | #22 | 3대 컴퓨터에서 동시 ssh launch → ttyACM0 선점 경쟁 + 펌웨어 baudrate handshake stress → publisher count 0 깜빡임 | 1대만 launch + 나머지는 subscribe-only |
+  | #23 | DHCP Wi-Fi 변경(`192.168.0.x` → `192.168.10.x`) 시 SSOT IP drift, mDNS 일시 캐시 깨짐 | `default_robots.json` IP 갱신 + `dscacheutil -flushcache` + arp sweep으로 MAC 매칭 추적 |
+
+- **다음 진입 후보**:
+  - (a) 센서 카드 확장 (`SensorCardListView`에 `OnRobotChanged` 구독 + `/scan` 같은 ROS 토픽 구독)
+  - (b) 카메라 namespace 정리 (현 젠지 `/camera/*` → SSOT 약속 `/tb3_2/camera/*`)
+  - (c) 끊김 감지 시연 (한쪽 본체 전원 OFF → 5초 후 `⚠️ 배터리 토픽 끊김` 로그 박힘 확인)
+  - (d) 가스/소음/조도 Arduino 센서 ROS 토픽화
+
+- **자세히**: `docs/evidence/2026-06-08-controlroom-battery-real-link.md`
+
 ## 2026-06-05
 
 ### Unity ControlRoom Phase 2.7-dual — 듀얼 카메라 분기 PASS (모델 B, 0ms 즉시 전환) + 함정 #17/#18 영구 자산화
@@ -847,3 +1139,111 @@
 - 효과: IP 바뀌어도 `ssh urhynix-robot` / `tb3-ip` / Unity 모두 자동 follow. `ip-drift-resync` 스킬은 호출 거의 불필요 (다른 망 가거나 mDNS 죽었을 때만 안전망으로 남음).
 - 검증: 랜선 분리 + 재기동 후 무선 단독 PASS (eth0 IP 비어있는 상태로 wlan0=192.168.0.82만으로 ssh + ros2 진입 OK).
 - 근거: `docs/evidence/2026-06-01-new-sd-128gb-ros2-jazzy-bootstrap.md` §"IP-drift zero-touch 화"
+
+### 티원 TurtleBot3 + RealSense D435 ArUco 마커 자동주차 노드 결선 PASS (2026-06-09)
+
+- 결정: 티원(`t1@192.168.0.250`)에서 RealSense D435 카메라로 ArUco 마커 ID 1번을 감지하고 자동 주차(자율 접근·정렬·停止)하는 ROS2 노드를 결선한다.
+- 표준 결정 5가지:
+  1. **cmd_vel = `geometry_msgs/TwistStamped`** (Twist 아님) — TurtleBot3 Jazzy 표준, `ros2 topic info /cmd_vel`로 확인.
+  2. **거리 측정 = RealSense `aligned_depth_to_color`** — 단안 픽셀 크기 추정보다 cm 단위 정확도 높음.
+  3. **dry_run 파라미터 추가** (기본 False) — 안전 검증 모드, cmd_vel을 0으로 강제해 모션 차단.
+  4. **OpenCV 4.6 호환 함수형 API** (`cv2.aruco.detectMarkers(...) + DetectorParameters_create()`) — ArucoDetector 클래스 미존재.
+  5. **sensorId=ID 1번 우선** — A4 가득 인쇄 마커, ~12cm 표준.
+- 발견·해결한 함정 8가지 (영구 자산화):
+  1. cmd_vel = TwistStamped (TB3 Jazzy)
+  2. declare_parameter 6번 호출 → context race → declare_parameters batch 사용
+  3. OpenCV 4.6에 ArucoDetector 클래스 없음 → 함수형 API 사용
+  4. LDS_MODEL 비인터랙티브 ssh에서 안 잡힘 → 명시적 export
+  5. rqt_image_view QoS RELIABLE vs RealSense BEST_EFFORT → rviz2 또는 옵션 조정
+  6. finally의 cmd_pub.publish race → rclpy.ok() 가드
+  7. turtlebot3_bringup 중복 launch → 노드 이름 충돌
+  8. message_filters slop=0.1 너무 작음 → 0.3~0.5 권장
+- 새 자산 4종:
+  - 스킬: `.claude/skills/urhynix-aruco-parking-bringup/SKILL.md` (NEW)
+  - 노드 SSOT: `scripts/aruco_parking/parking_node.py` (NEW, 맥 측 소스)
+  - t1 배포: `~/aruco_ws/src/aruco_parking/aruco_parking/parking_node.py` (scp 복제)
+  - 폴더 룰: `scripts/aruco_parking/CLAUDE.md` (NEW)
+  - evidence: `docs/evidence/2026-06-09-aruco-parking-bringup.md` (NEW)
+- 기술 스택:
+  - 카메라: RealSense D435 (Serial 254522075185, FW 5.17.0.10)
+  - 마커: ArUco DICT_4X4_50, ID 1번
+  - 목표 거리: 0.25m (마커까지 접근 후 停止)
+  - 상태머신: SEARCH (마커 찾기) → APPROACH (정면 접근) → ALIGN (정렬) → PARK_DONE (停止)
+  - 안전 한도: lin velocity 0.15 m/s, ang velocity 0.5 rad/s (np.clip 내부)
+- 검증:
+  - colcon build PASS (19.5s)
+  - 노드 실행: `ros2 run aruco_parking parking_node`
+  - `/cmd_vel` Publisher 1 (parking_node) + Subscription 1 (turtlebot3_node) — 연결 라인 확인
+  - `/cmd_vel_input` (subscribe) + `/cmd_vel_output` (publish) 토픽 라우팅 OK
+- 잠금: 다음 세션 첫 5분은 **5트라이얼 정밀도 평가** (안전 환경 확보 후). 평가 완료 시 시연 GO 조건 확정.
+- 근거: `docs/evidence/2026-06-09-aruco-parking-bringup.md`
+
+### 코드 구조 보강 + 2차 시도 하드웨어 문제 발견 — Dynamixel crash + callback stuck (2026-06-09 2차 시도)
+
+- 결정: parking_node.py를 MultiThreadedExecutor + ReentrantCallbackGroup + heartbeat timer(0.1초) + try/except callback wrapper + Depth latest-cache 패턴으로 강화하고, 발견된 함정 #9, #10을 영구 자산화한다.
+- 코드 구조 4가지 변경:
+  1. **MultiThreadedExecutor 채택** — SingleThreadedExecutor에서 image_callback 실행 중 다음 메시지 처리 지연 → 첫 callback 1회 호출 후 cmd_vel hz 0, debug_image hz 0 멈춤 현상 해결.
+  2. **ReentrantCallbackGroup** — callback 내부에서 publisher 호출 시 deadlock 방지.
+  3. **0.1초 heartbeat timer** — callback 멈춰도 cmd_vel 정지 신호(0, 0, 0) 발행 보장 → 로봇이 최대 0.1초 후 자동 정지.
+  4. **Depth latest-cache 패턴** — message_filters.ApproximateTimeSynchronizer의 slop 0.1/0.5 조정으로도 RealSense RGB/Depth 동기화 매칭 안정성 부족 → RGB 콜백 후 매 프레임마다 latest depth frame으로 거리 측정 (stamp 매칭 폐기).
+- 발견한 추가 함정 2가지 (총 8 → 10으로 확장):
+  - **함정 #9**: Dynamixel SDK 통신 실패 → turtlebot3_ros crash
+    - 증상: turtlebot3.log에 `[DynamixelSDKWrapper]: Failed to read[[TxRxResult] There is no status packet!]` 반복 후 `*** stack smashing detected ***: terminated` 발생, process exit code -6.
+    - 원인: LiPo 배터리 부족 / OpenCR↔Dynamixel 통신 끊김 / 케이블 불량. 소프트웨어 원인 아님 (parking_node와 무관).
+    - 우회: 배터리 충전, OpenCR 리셋 버튼, 휠 모터 케이블 재연결, 전원 OFF/ON.
+  - **함정 #10**: image_callback 단일 호출 후 멈춤 (SingleThreadedExecutor)
+    - 증상: 첫 callback 1회 호출 후 cmd_vel hz 0, debug_image hz 0.
+    - 원인: SingleThreadedExecutor + 무거운 callback (cv_bridge 변환)이 다음 메시지 처리 못 따라감.
+    - 우회: MultiThreadedExecutor + ReentrantCallbackGroup + 0.1s heartbeat + try/except로 callback 안전화.
+- 다음 세션 진입 조건 (시연 GO 해제):
+  1. LiPo 배터리 충전 완료 (>11.5V)
+  2. OpenCR 리셋 버튼 1회 누름
+  3. Dynamixel 휠 모터 케이블 재연결
+  4. t1 전원 OFF → ON
+  5. turtlebot3_bringup launch 후 `[DynamixelSDKWrapper] Failed to read` 에러 없는지 확인
+  6. parking_node 실행 → 5트라이얼 정밀도 평가
+- 영향:
+  - `scripts/aruco_parking/parking_node.py` = SSOT 자체 (MultiThreadedExecutor + 패턴 코드로 이미 갱신).
+  - `.claude/skills/urhynix-aruco-parking-bringup/SKILL.md` 함정 #9, #10 추가 (기존 함정 8→10으로 확장).
+  - `docs/evidence/2026-06-09-aruco-parking-bringup.md`에 오늘 2차 시도 결과 추가 (하드웨어 crash 진단 + 우회책 명기).
+  - PROJECT-STATUS.md 한 줄 상태: "Phase 2.9 시연 GO 보류 (하드웨어 점검 필요)".
+  - HANDOFF.md 다음 세션 진입: "①배터리 충전 확인 → ②OpenCR 리셋 → ③turtlebot3_bringup 검증 → ④parking_node 5트라이얼".
+- 잠금: 다음 세션 첫 5분은 하드웨어 점검(배터리·OpenCR·케이블) → 정상 부팅 검증 → 5트라이얼 정밀도. 시演 GO는 이 후.
+- 근거: `docs/evidence/2026-06-09-aruco-parking-bringup.md` (2차 시도 결과 섹션)
+
+### 3차 시도: 시연 PASS 확정 + 배터리 트렌드 측정 + 동료 인계 완료 (2026-06-09 오후)
+
+- 결정: 배터리 충전 후 parking_node를 재실행하고, 사용자가 직접 시연 중 자동주차 동작을 확인한다. 완료 후 우리 parking_node는 종료하고 turtlebot3_bringup + RealSense를 nohup으로 유지해 동료에게 인계한다.
+- 조건:
+  - 배터리 부팅 직후: 11.54V / 57.77% (멀티미터 측정)
+  - parking_node 실행: MultiThreadedExecutor + ReentrantCallbackGroup + 0.1s heartbeat + try/except + Depth latest-cache 패턴 적용 (2차 시도 코드 그대로)
+  - 사용자 시연: 자동주차 동작(마커 감지 → 접근 → 정렬 → 停止) **PASS 확인**
+  - 시연 후 배터리: 11.43V / 51.66% → 감소량 0.11V, 6.11% (약 1회 시연당 -6%)
+- 자산:
+  - 배터리 트렌드 표:
+    | 시점 | voltage | percentage |
+    |---|---|---|
+    | 부팅 직후 | 11.54 V | 57.77% |
+    | 시연 후 | 11.43 V | 51.66% |
+    | 감소 | -0.11 V | -6.11% |
+  - 추가 자산: XQuartz 설치 완료 (`brew install --cask xquartz` + SUDO_ASKPASS helper 우회 패턴)
+  - 경로: `/Applications/Utilities/XQuartz.app` + `/opt/X11/bin/Xquartz`
+  - **주의**: 로그아웃/재로그인 필요 → 다음 세션 진입 시 `ssh -Y t1@192.168.10.250 + ros2 run rqt_image_view rqt_image_view`로 맥에서 RealSense 영상 직접 확인 가능
+- 동료 인계:
+  - 우리 ssh 연결 자동 종료 (매 명령마다 새 세션)
+  - 동료가 본인 PC에서 `source /opt/ros/jazzy/setup.bash + export ROS_DOMAIN_ID=230 + python3 aruco_real_test1.py` 3줄로 진입 가능
+  - 우리 parking_node 종료 완료, turtlebot3_bringup + RealSense nohup으로 유지(동료 재사용)
+  - 동료 코드 권장 수정 2가지:
+    1. `cv2.namedWindow` 제거 (DISPLAY 환경 의존, SSH 환경에서 불필요)
+    2. `np.clip` 안전 클램프 추가 (velocity bounds 명시)
+- 다음 세션 진입 조건:
+  1. 배터리 풀충전 (>12.4V 권장)
+  2. t1 부팅 후 `/battery_state` voltage 확인
+  3. XQuartz 재로그인 후 `ssh -Y` 가능 (선택)
+  4. parking_node 실행 → 5트라이얼 정밀도 평가 (마커 정면 1m × ±30° 각도, 5회 중 3회 이상 0.25m 이내 停止 성공)
+  5. rosbag 4종 기록 (/cmd_vel, /odom, /aruco/debug_image, /aruco/state)
+- 영향:
+  - 시演 GO 조건 **확정** — Phase 2.9 완료
+  - 배터리 관리: 11.0V 도달 시 즉시 정지 + 충전 권장
+  - 다음 단계: 5트라이얼 정량 평가 → 다중 마커 통합 (티원 D435) → 박물관 시나리오 통합
+- 근거: `docs/evidence/2026-06-09-aruco-parking-bringup.md` (3차 시도 결과 섹션 추가)

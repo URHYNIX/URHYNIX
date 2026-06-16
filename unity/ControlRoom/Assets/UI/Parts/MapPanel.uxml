@@ -6,50 +6,17 @@
         <ui:VisualElement class="map-toolbar">
             <ui:Label text="맵 뷰" class="card-title" />
             <ui:VisualElement class="spacer" />
+            <ui:Button name="btn-map-rot-ccw" text="⟲" class="btn-map-mode" />
+            <ui:Label name="map-rot-angle" text="0°" class="map-rot-angle" />
+            <ui:Button name="btn-map-rot-cw" text="⟳" class="btn-map-mode" />
             <ui:Button name="btn-map-2d" text="2D" class="btn-map-mode active" />
             <ui:Button name="btn-map-3d" text="3D" class="btn-map-mode" />
         </ui:VisualElement>
-        <ui:VisualElement name="map-2d-container" class="map-placeholder map-2d">
-            <ui:VisualElement class="map-grid-v" style="left: 25%;" />
-            <ui:VisualElement class="map-grid-v" style="left: 50%;" />
-            <ui:VisualElement class="map-grid-v" style="left: 75%;" />
-            <ui:VisualElement class="map-grid-h" style="top: 25%;" />
-            <ui:VisualElement class="map-grid-h" style="top: 50%;" />
-            <ui:VisualElement class="map-grid-h" style="top: 75%;" />
-
-            <ui:VisualElement class="map-protected" style="left: 30%; top: 35%;">
-                <ui:VisualElement class="map-protected-icon" />
-                <ui:Label text="액자 A" class="map-protected-label" />
-            </ui:VisualElement>
-            <ui:VisualElement class="map-protected" style="left: 70%; top: 60%;">
-                <ui:VisualElement class="map-protected-icon" />
-                <ui:Label text="액자 B" class="map-protected-label" />
-            </ui:VisualElement>
-
-            <ui:VisualElement class="map-waypoint" style="left: 15%; top: 80%;">
-                <ui:Label text="1" class="map-waypoint-num" />
-            </ui:VisualElement>
-            <ui:VisualElement class="map-waypoint" style="left: 50%; top: 50%;">
-                <ui:Label text="2" class="map-waypoint-num" />
-            </ui:VisualElement>
-            <ui:VisualElement class="map-waypoint" style="left: 40%; top: 25%;">
-                <ui:Label text="3" class="map-waypoint-num" />
-            </ui:VisualElement>
-            <ui:VisualElement class="map-waypoint" style="left: 78%; top: 30%;">
-                <ui:Label text="4" class="map-waypoint-num" />
-            </ui:VisualElement>
-            <ui:VisualElement class="map-waypoint" style="left: 12%; top: 18%;">
-                <ui:Label text="5" class="map-waypoint-num" />
-            </ui:VisualElement>
-
-            <ui:VisualElement name="map-robot-tb3_1" class="map-robot-dot robot-t1" style="left: 22%; top: 72%;">
-                <ui:Label text="티원" class="map-robot-label" />
-            </ui:VisualElement>
-            <ui:VisualElement name="map-robot-tb3_2" class="map-robot-dot robot-genji" style="left: 60%; top: 42%;">
-                <ui:Label text="젠지" class="map-robot-label" />
-            </ui:VisualElement>
-
-            <ui:Label text="박물관 1층" class="map-area-label" />
+        <!-- 2026-06-16: 목업(격자·보호대상·웨이포인트·로봇점·구역라벨) 제거. 라이브 SLAM 맵만 표시.
+             라이브 맵 레이어(name=map-live-layer)는 MapPanelView가 런타임에 Insert(0)으로 채움.
+             실제 웨이포인트/로봇 마커는 Phase 4/5에서 pose 기반 오버레이로 재도입. -->
+        <ui:VisualElement name="map-2d-container" class="map-2d">
+            <ui:Label name="map-empty-hint" text="SLAM 맵 수신 대기…" class="map-area-label" />
         </ui:VisualElement>
         <ui:VisualElement name="map-3d-container" class="map-placeholder map-3d hidden">
             <ui:Label name="map-3d-overlay" text="3D 맵 — Phase 6 예정 (URDF Importer)" class="map-3d-label" />

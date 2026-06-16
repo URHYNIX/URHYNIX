@@ -2,6 +2,8 @@
 
 Arduino Uno R3, PIR/LDR/sound/flame sensors, serial bridge 작업의 빠른 진입점이다.
 
+⚠️ **정본 v18(2026-06-16)에서 LDR·불꽃 → 온도·레이저·워터펌프로 변경 결정됨. 아래는 구 LDR 기준 as-built이며 하드웨어 물리 교체 후 갱신 예정. 출처: DECISION-LOG 2026-06-16.**
+
 ## Read First
 
 1. `docs/ref/TECH-INDEX.md`

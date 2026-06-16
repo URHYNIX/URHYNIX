@@ -12,7 +12,9 @@ namespace URHYNIX.ControlRoom.Simulation
         public float tickHz = 1.5f;
 
         [Header("Robot IDs to fake")]
-        public string[] robotIds = { "tb3_1", "tb3_2" };
+        // Phase 2.8: tb3_2(젠지)는 실 ROS(arduino_bridge → LDR/PIR + battery_state) 결선됨 → fake 제외.
+        // tb3_1(티원)은 아직 센서 미준비 → fake 유지.
+        public string[] robotIds = { "tb3_1" };
 
         float nextTick;
         float startTime;

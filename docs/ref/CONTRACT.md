@@ -23,7 +23,7 @@
 | `/tb3_1/odom` | `nav_msgs/Odometry` | `urhynix_bringup_1` (turtlebot3_node) | cartographer, nav2, unity_bridge | 30 | OpenCR 휠 엔코더 기반. |
 | `/tb3_1/battery_state` | `sensor_msgs/BatteryState` | `urhynix_bringup_1` | unity_bridge | 1 | LiPo 전압 모니터링. |
 
-> **ROS2 환경변수 모드 통일 (필수)**: 모든 노드는 같은 도메인(`ROS_DOMAIN_ID=230`) + 같은 RMW(`rmw_fastrtps_cpp`) + 같은 발견 모드를 사용해야 통신 가능. 본 프로젝트 기본은 **multicast (`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`)** 단일 모드. Discovery Server(`ROS_DISCOVERY_SERVER`) 혼용 금지 — 한쪽이라도 다르면 같은 도메인이라도 발견 실패. **2026-06-02 정정**: 티원이 230으로 작동 중이라 젠지도 230으로 통일(이전 56/30 표기는 16GB SD 시점/신규 SD 초기값 — DECISION-LOG 2026-06-02 참조). 검증: `cat /proc/$(pgrep -f turtlebot3_node)/environ \| tr '\0' '\n' \| grep ROS_`.
+> **ROS2 환경변수 모드 통일 (필수)**: 모든 노드는 같은 도메인(`ROS_DOMAIN_ID=210`) + 같은 RMW(`rmw_fastrtps_cpp`) + 같은 발견 모드를 사용해야 통신 가능. 본 프로젝트 기본은 **multicast (`ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET`)** 단일 모드. Discovery Server(`ROS_DISCOVERY_SERVER`) 혼용 금지 — 한쪽이라도 다르면 같은 도메인이라도 발견 실패. **2026-06-02 정정**: 티원이 230으로 작동 중이라 젠지도 230으로 통일(이전 56/30 표기는 16GB SD 시점/신규 SD 초기값 — DECISION-LOG 2026-06-02 참조). **2026-06-15 정정**: 210으로 통일(팀 공유 도메인), cross-discovery 검증 PASS. 검증: `cat /proc/$(pgrep -f turtlebot3_node)/environ \| tr '\0' '\n' \| grep ROS_`.
 
 ### 1.2 보안 이벤트 토픽 (공통 네임스페이스, robot_id 포함)
 
@@ -168,12 +168,15 @@ string session_id
 **데이터 경로**: `센서 4종 → 미니 브레드보드 → Arduino Uno → USB Type-B → Raspberry Pi → urhynix_sensor_bridge (pyserial) → /security/event`
 **전원 경로**: `OpenCR 5V 핀 → 점퍼 2줄 (5V + GND) → Arduino 5V 핀` (Vin 아님). AA 배터리 등 별도 전원 추가하지 않음.
 
+> ⚠️ **정본 v18 (2026-06-16) 변경 — Gen.G(tb3_2) 센서 스택**: LDR(조도)·불꽃(Flame) 제거 → **온도 센서 · 레이저 송신 모듈 · 워터 펌프(릴레이+Adafruit 3V)** 추가. 아래 4.1~4.3은 **구 LDR 기준 as-built**(실측·검증 완료)이며, 하드웨어 물리 교체 후 핀·시리얼 타입·임계값을 갱신한다. 출처: DECISION-LOG 2026-06-16.
+
 ### 4.1 핀 / 회로
 
 | 센서 | Arduino 핀 | 회로 |
 |---|---|---|
 | PIR (HC-SR501) | D2 (디지털) | 5V/GND + 모듈 OUT → D2 |
-| 조도 (LDR) | A0 (아날로그) | `5V─[LDR]─A0─[10kΩ]─GND` 분압 |
+| ~~조도 (LDR)~~ | ~~A0 (아날로그)~~ | 제거됨 (정본 v18, 2026-06-16) |
+| 레이저 송신 모듈 | D8 (디지털) | 5V(레일)/GND + DATA→D8, PIR 감지 시 LED와 동시 점등 [as-built 2026-06-16] |
 | 소리 (KY-038) | D3 | 5V/GND + D-out → D3 |
 | 불꽃 (Flame) | D4 | 5V/GND + D-out → D4 |
 | 모의 입력 버튼 (화재) | D5 | `INPUT_PULLUP`, GND로 풀다운 |

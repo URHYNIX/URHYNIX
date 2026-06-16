@@ -14,11 +14,12 @@
 
 | Work type | Fast ref | Typical skills |
 |---|---|---|
-| Unity ControlRoom / UI / ROS-TCP panel | `docs/ref/tech/UNITY.md` | `unity-camera-panel`, `doc-sync`, `evidence-review` |
-| ROS2 / TurtleBot / SLAM / Nav2 | `docs/ref/tech/ROS2-ROBOT.md` | `slam-nav2-arena-survey`, `map-quality-eval`, `ip-drift-resync` |
+| Unity ControlRoom / UI / ROS-TCP panel | `docs/ref/tech/UNITY.md` | `unity-camera-panel`, `unity-live-map-twin`, `unity-unityctl-ops`, `doc-sync`, `evidence-review` |
+| ROS2 / TurtleBot / SLAM / Nav2 | `docs/ref/tech/ROS2-ROBOT.md` | `slam-nav2-arena-survey`, `map-quality-eval`, `ip-drift-resync`, `urhynix-fullstack-bringup` |
 | Arduino / PIR / LDR / sensor serial | `docs/ref/tech/ARDUINO-SENSORS.md` | `arduino-flash`, `api-contract-guard`, `doc-sync` |
 | Supabase / schema / DB writer | `docs/ref/tech/DATABASE-SUPABASE.md` | `api-contract-guard`, `doc-sync`, `evidence-review` |
 | Pi Camera / RealSense / compressed image / YOLO | `docs/ref/tech/VISION-CAMERA.md` | `robot-camera-bringup`, `unity-camera-panel` |
+| T1 RealSense 맞춤 YOLO 캡처/라벨/학습 | `docs/evidence/2026-06-10-mac-yolo-realsense-live.md` | `urhynix-yolo-capture-train`, `robot-camera-stream-diag` |
 | Claude/Codex skill harness / intake / evidence | `docs/ref/tech/OPS-HARNESS.md` | `task-intake-router`, `doc-sync`, `evidence-review` |
 
 ## Core Skills
@@ -27,6 +28,7 @@
 |---|---|---|
 | `doc-framework` | 프로젝트에 문서 체계를 심거나 정리할 때 | SSOT 구조, 문서 계층, change class 규칙 |
 | `doc-sync` | 코드 변경 후 어떤 문서를 같이 고쳐야 할지 헷갈릴 때 | 문서 누락 판정, companion check |
+| `doc-health-audit` | "문서 건강성 체크" — 진입 문서 인덱싱성/토큰부담/폴더 정리 상태를 진단하고 선택적 편집까지 닫을 때 | 3기준 등급표 + 🔴🟡🟢 + 소넷 편집(HANDOFF 캡슐화·DECISION 분리·archive) + 검증 |
 | `project-bootstrap` | 새 프로젝트 시작 시 | 최소 골격, 초기 문서, 첫 검증 |
 | `session-retro` | 세션 종료 시 | 성공/실패 패턴 기록, 승격 후보 |
 | `big-task` | 작업 규모가 크고 단계를 쪼개야 할 때 | 단계 계획, 검증 루프, 문서 동기화 |
@@ -74,10 +76,15 @@
 | `robot-camera-bringup` | 매 세션 첫 5분 — 두 로봇 카메라 트랙(camera_ros Pi Camera + realsense2_camera D435 + ros_tcp_endpoint)을 한 번에 살릴 때 | LD_LIBRARY_PATH 우회 + ssh ControlMaster=no + nohup/disown + 토픽 hz 30Hz 검증 한 줄. 함정 8건 매트릭스 (ABI 충돌/sudo stdin/연결 끊김/launch 파일 이름 등). 2026-06-02 젠지 30.095Hz 검증 통과 |
 | `unity-camera-panel` | Unity 관제 UI에 ROS2 카메라 라이브 RGB 패널을 코드 손 안 대고 추가할 때. 새 카메라 추가 시 AddCameraPanel 한 줄로 확장 | `CameraStreamPanel.cs` 컴포넌트(topic Inspector 입력) + `CameraPanelSetup.cs` Editor script(batch mode) + Unity batch CLI 한 줄. 함정 7건 매트릭스. 2026-06-02 GenjiCameraPanel + T1CameraPanel 자동 추가 통과 |
 | `unity-ui-interaction-audit` | UI Toolkit View 레이어 완료 후 UI Contract Lock 잠그기 전 모든 버튼/토글의 핸들러+이벤트+구독자+시각 피드백 정합성 검증 | Phase A Opus 정적 매트릭스 (25개 요소, 결함 6분류) + Phase B unityctl 동적 한계 5종 우회 표. 함정 7건 (script validate 가짜 PASS / exec 사용자 어셈블리 unreachable / Button.clicked event invoke 불가 등). 2026-06-04 URHYNIX Phase 2.5 검증 통과 |
+| `unity-live-map-twin` | ControlRoom 맵뷰에 라이브 SLAM `/map`을 카메라 없이 그리거나, /tf 로봇 마커·우클릭 SSOT 출동·맵 회전 보정을 추가할 때 | map-frame 비율맞춤(여백 제거) + 좌표 SSOT(`MapCoordinateSystem`) + /tf 합성 마커 + 우클릭 컨텍스트 메뉴(`IMapAction`+SSOT) + `/goal_pose` 발행 + 회전 영속(PlayerPrefs+json). 컴포넌트화 Map/ 레이어. 2026-06-16 젠지 검증(회전 85° CW) |
+| `unity-unityctl-ops` | unityctl로 코드 수정 검증/Play 할 때, check가 stale하거나 IPC "not ready"/스크린샷 검정/에디터 교착일 때 | 안전 절차(play stop→refresh→isCompiling 폴링→check) + 함정표(Play 중 재컴파일 차단, --json 우회, UI Toolkit 스크린샷 검정, 로봇-오프 ROS 스팸 교착). 2026-06-16 반복 학습 |
+| `urhynix-fullstack-bringup` | 디지털트윈 dry-run — 배터리·카메라·맵·LDR·PIR 5트랙을 한 로봇에 동시에 띄워 Unity에 다 표시할 때, 또는 "개별은 되는데 다 같이" 안 될 때 | SLAM 공존 위한 non-namespaced bringup + 배터리 relay 결정, USB 2개(Arduino 2341/OpenCR 0483) usb_port·심링크, 기동 5단계, SensorVerifyConsole 검증, 함정표(usb스왑·edge-trigger·libcamera LD·ros_tcp크래시·wifi churn). 2026-06-16 젠지 5트랙 PASS |
+| `urhynix-yolo-capture-train` | T1 RealSense 브라우저 UI로 맞춤 물체를 Space 촬영, ROI 연사, 마스크 bbox 보정, YOLO 학습, best.pt 탐지 검증, hard-negative 오탐 배경 정제까지 이어갈 때 | 8090 preview polling, datasets/runs 위치, ROI crop→mask→bbox→YOLO txt, rembg/SAM/GrabCut/fallback 규칙, 검수 삭제, `N 오탐 배경 저장`, 학습 후 live detect 검증 |
 
 ## Selection Rule Of Thumb
 
 - "무슨 문서를 고쳐야 하지?" -> `doc-sync`
+- "문서 건강성 체크해줘 / 진입 문서 너무 큰 것 같다 / docs 정리됐나?" -> `doc-health-audit`
 - "새 프로젝트 골격부터" -> `project-bootstrap`
 - "프로젝트 계획부터 촘촘히" -> `project-planning`
 - "이 요청부터 먼저 분류해야 한다" -> `task-intake-router`
@@ -97,6 +104,9 @@
 - "작업 끝났으니 SSOT 3종에 박고 마무리" -> `ssot-trio-update`
 - "Unity 작업에 필요한 ref만 빨리 보고 싶다" -> `docs/ref/tech/UNITY.md`
 - "UI 버튼/토글 다 잘 위치하고 클릭에 반응하나 검증" -> `unity-ui-interaction-audit`
+- "라이브 SLAM 맵을 Unity 맵뷰에 띄우고 로봇 마커/우클릭 출동/회전 보정" -> `unity-live-map-twin`
+- "배터리·카메라·맵·센서 5트랙을 한 로봇에 동시에 띄워 Unity에 다 표시" -> `urhynix-fullstack-bringup`
+- "unityctl로 코드 검증하는데 컴파일이 stale/스크린샷 검정/에디터 묶임" -> `unity-unityctl-ops`
 
 ## Writing Rules
 

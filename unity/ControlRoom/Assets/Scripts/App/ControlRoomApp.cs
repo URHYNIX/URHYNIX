@@ -5,29 +5,64 @@ using System;
 using UnityEngine;
 using Unity.Robotics.ROSTCPConnector;
 using URHYNIX.ControlRoom.Data;
+using URHYNIX.ControlRoom.Ros;
 
 namespace URHYNIX.ControlRoom.App
 {
     public class ControlRoomApp : MonoBehaviour
     {
         const string RobotsJsonResourcePath = "RobotConfig/default_robots";
-        const string DefaultRosIp = "urhynix-robot.local";   // 젠지. TODO Phase 5: RobotInfo JSON에서 읽기.
+        const string FallbackRosIp = "192.168.0.250";   // mDNS 미작동 시 fallback. SSOT는 default_robots.json[0].hostAddress.
         const int DefaultRosPort = 10000;
 
         void Awake()
         {
             LoadRobots();
             ConfigureRos();
+            CreateRosSubscribers();
             ControlRoomEvents.RaiseLogAdded("system", "INFO", "ControlRoom 부팅 완료.");
             ControlRoomEvents.RaiseLogAdded("gemma", "INFO", "⚪ Gemma 4 12B 대기 중");
         }
 
         void ConfigureRos()
         {
+            string ip = FallbackRosIp;
+            var robots = ControlRoomState.Instance.Robots;
+            if (robots != null && robots.Count > 0)
+            {
+                var addr = robots[0].hostAddress ?? "";
+                int at = addr.IndexOf('@');
+                var host = at >= 0 ? addr.Substring(at + 1) : addr;
+                if (!string.IsNullOrEmpty(host)) ip = host;
+            }
             var ros = ROSConnection.GetOrCreateInstance();
-            ros.RosIPAddress = DefaultRosIp;
+            ros.RosIPAddress = ip;
             ros.RosPort = DefaultRosPort;
-            Debug.Log($"[ControlRoomApp] ROS IP set: {DefaultRosIp}:{DefaultRosPort}");
+            Debug.Log($"[ControlRoomApp] ROS IP set: {ip}:{DefaultRosPort}");
+        }
+
+        // 코드로 부착하는 글로벌 구독자(씬 YAML 비의존). 현재: SLAM /map 라이브 맵뷰(경로 B).
+        // 카메라/배터리/센서는 씬 GameObject MonoBehaviour로 결선되어 있어 여기서 다루지 않음.
+        void CreateRosSubscribers()
+        {
+            if (FindObjectOfType<MapSubscriber>() == null)
+            {
+                var go = new GameObject("MapSubscriber");
+                go.transform.SetParent(transform, false);
+                go.AddComponent<MapSubscriber>();
+            }
+            if (FindObjectOfType<RobotPoseSubscriber>() == null)
+            {
+                var go = new GameObject("RobotPoseSubscriber");
+                go.transform.SetParent(transform, false);
+                go.AddComponent<RobotPoseSubscriber>();
+            }
+            if (FindObjectOfType<DispatchPublisher>() == null)
+            {
+                var go = new GameObject("DispatchPublisher");
+                go.transform.SetParent(transform, false);
+                go.AddComponent<DispatchPublisher>();
+            }
         }
 
         void LoadRobots()

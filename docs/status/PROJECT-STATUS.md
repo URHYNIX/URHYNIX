@@ -1,6 +1,6 @@
 # Project Status
 
-Last updated: 2026-06-05 — **Unity ControlRoom Phase 2.7-dual — 듀얼 카메라 분기 PASS (모델 B, 0ms 즉시 전환) + 함정 #17/#18 영구 자산화**: 상단 탭(티원/젠지) 클릭 시 카메라 패널이 지연 0ms로 즉시 전환. 사용자 직접 확인 "딜레이없이 전환잘됨 실시간표시됨". 모델 B(동시 구독 + display 토글, 스피너 불필요) 채택, A(토글 구독 80~500ms + 스피너)는 폐기. 산출물: `TopicRegistry.cs`(신규 토픽 SSOT) + `CameraStreamSubscriber.cs` 인스턴스 식별자(`robotId, tex, hz`) + `CameraPanelView.cs` activeRobotId 필터링 + `CameraStreamSetup.cs` SubSpec[] 두 Subscriber idempotent. cross-host visibility 검증 — 젠지 endpoint 1개로 양쪽 토픽 forward (티원 endpoint 불필요, `ROS_DOMAIN_ID=230` 통일). **신규 함정 2종**: ① **#17** Write로 만든 `.cs`는 `.meta` 미생성 → 어셈블리 누락 → `unityctl asset import --path` 우회 ② **#18** Play 중 도메인 리로드 차단 → `play stop → RequestScriptCompilation → exec → play start` 5단계. UI Contract Lock 침해 0줄. 자세히: `docs/evidence/2026-06-05-controlroom-dual-camera-toggle.md` + 스킬 보강 `unity-camera-panel`(듀얼 패턴 + unityctl 5단계 + #17/#18) + `robot-camera-bringup`(#17/#18). **이전**: Phase 2.7 젠지 Pi Camera 라이브 결선 PASS + 함정 4종 (#13 linger / #14 server.py `[:-1]` / #15 macOS open -a / #16 ★ ROS2 define). 이전: Phase 2.5 진짜 완료 — EventSystem InputModule + unity-ui-interaction-audit 스킬화. 이전: Phase 2.5 단계 1~4 + 16 View 100% 활성.
+Last updated: 2026-06-10 — **Mac MPS + T1 RealSense → YOLOv8n 라이브 PASS + 영상 끊김 정량 진단 + 자산 5종 영구화**: 박물관 시연 비전 트랙의 Mac 절반 검증 종결. T1(`192.168.10.250`) RealSense D435 → `web_video_server` (port 8080 MJPEG HTTP) → Mac `cv2.VideoCapture` → YOLO(mps) 경로로 **26.0 fps headless / 16~17 fps GUI** 추론. 탐지 안정(person 0.89 / keyboard 0.91 / cup 0.86 / tv 0.79 / mouse / laptop / cell phone). **분업 구조 채택**: 라즈베리는 영상 publish만(11Hz raw로 못 따라감), Mac MPS가 추론. **영상 끊김 정량 진단** — raw `image_raw` 11.27Hz × 14.24 MB/s = 114 Mbps → Wi-Fi 65 Mbps의 1.75배 초과 원인. compressed 토픽 전환으로 라즈베리 CPU 87.5%→0% + 네트워크 -85% + 발행률 ×2.6 해소. **병렬 다리 3개 운용**: `web_video_server` 8080 (cv2/브라우저) + `foxglove_bridge` 8765 (Foxglove Studio) + `ros_tcp_endpoint` 10000 (Unity). **박제 자산 5종**: 🆕 스킬 `robot-ip-detect-fallback` (mDNS 깨졌을 때 ARP OUI + ed25519 host key 매칭) + 🆕 스킬 `robot-camera-stream-diag` (6대축 8지표 정량 진단) + ✏️ 스킬 `robot-camera-bringup` §C/§D/§E + 함정 #19 (ssh -fn detach + foxglove 통합 + compressed 정책) + ✏️ 메모리 `project_robot_ip_dynamic.md` fallback 추가 + 🆕 `test/detect_realsense.py` (env: FRAMES/HEADLESS/SAVE_LAST/T1_IP/T1_PORT/T1_TOPIC). **T1 apt install**: foxglove_bridge 3.2.6 + realsense2_camera 4.57.7 + web_video_server 3.1.0. 자세히: `docs/evidence/2026-06-10-mac-yolo-realsense-live.md`. **이전(2026-06-05)**: Unity ControlRoom Phase 2.7-dual 듀얼 카메라 분기 PASS (모델 B, 0ms 즉시 전환) + 함정 #17/#18 영구 자산화. 이전: Phase 2.7 젠지 Pi Camera 라이브 결선 PASS + 함정 4종. 이전: Phase 2.5 진짜 완료 — EventSystem InputModule + unity-ui-interaction-audit 스킬화. 이전: Phase 2.5 단계 1~4 + 16 View 100% 활성.
 
 ## 2026-06-02 Addendum
 
@@ -34,15 +34,15 @@ Last updated: 2026-06-05 — **Unity ControlRoom Phase 2.7-dual — 듀얼 카�
 
 ## 한 줄 상태
 
-방향은 **박물관/미술관 액자 보호형 디지털트윈경비로봇 (tb3_1=티원 순찰/감지/비전 + tb3_2=젠지 출동/확인/센서)** 그대로. **로봇 작명 + 호스트 매핑 확정 (2026-06-02)**: tb3_1=**티원**(비전, RealSense D435, 호스트 `t1@192.168.0.250` hostname `rb`) / tb3_2=**젠지**(센서, Arduino 4종+Pi Camera IMX219, 호스트 `urhynix-robot` kim@192.168.0.82). **2026-06-01 저녁: tb3_1(티원)에서 RealSense D435 ROS2 smoke PASS** — color/depth/aligned depth 토픽이 약 30Hz로 정상 발행됨. 카메라는 **D435 확정 (D435i 아님, IMU 없음, Serial `254522075185`, FW `5.17.0.10`)**. Mac에서 `sudo rs-enumerate-devices` PASS지만 `rs-hello-realsense` streaming은 macOS Tahoe(26) + brew 빌드 옵션 누락으로 차단되며, Windows bench와 티원 ROS2 경로는 정상. 박물관 매핑 계획 95% 유지 (VIO만 폐기, RGB-D SLAM + LDS-03 + wheel odom). evidence: `docs/evidence/2026-06-01-robot2-realsense-d435-ros2-smoke.md` + `docs/evidence/2026-06-01-realsense-d435-windows-pyrealsense2-smoke.md` + `docs/evidence/2026-06-01-realsense-d435-mac-sdk-smoke.md`. **2026-06-01 점심**: 신규 128GB SD + Ubuntu 24.04.4 + ROS2 Jazzy 풀 스택 한 세션 완전 부트스트랩 PASS (젠지 호스트). `ssh urhynix-robot` 한 줄 진입.
+**Phase 2.9 시연 PASS 확정 — 5트라이얼 정량 평가 다음 세션**: 배터리 11.54V(57.77%)로 부팅 후 parking_node(MultiThreadedExecutor+heartbeat+depth-cache) 가동. 사용자 시연 → 자동주차 동작 PASS 확인. 배터리 감소 -6% (1회 시연당). 동료에게 t1 인계 완료. **다음: 배터리 풀충전(>12.4V) + t1 부팅 검증 + 5트라이얼 정밀도 평가(마커 정면 1m, ±30° 각도, 3회 이상 停止 성공) + rosbag 4종 기록.**
 
 ## 현재 방향
 
 - 팀명: UR HYNIX
 - 프로젝트 제목: 디지털트윈경비로봇
 - 핵심 목표: tb3_1이 박물관/미술관 전시 구역을 순찰하며 액자형 사진 타깃과 센서 이벤트를 감지하면 Unity 관제 화면에 표시되고, tb3_2가 출동해 카메라로 확인하며, 이동 좌표·사진·영상·사운드와 모든 결과가 DB에 기록된다.
-- 시나리오 4종: 야간 모드(조도→LiDAR 강화), 침입/외부자 감지(PIR+LiDAR), 이상 소음(소리), 화재 의심(불꽃·모의+액자 주변 카메라 확인)
-- 포함 범위: SLAM/Nav2, 다중 로봇 이벤트 응답, 아두이노 센서 4종, Pi Camera, Unity 관제 UI, ROS-TCP, 영상 라이브 스트리밍, DB 기록, 이동 좌표 로그, 미디어 메타데이터 저장, AI 보조 분류, 액자형 중요물품 인식
+- 시나리오 5종: ①폐관 침입자(PIR+LiDAR) ②중요전시품 분실·이동(YOLO) ③화재 의심(온도·레이저 재확인→EVACUATE 워터펌프 분사) ④개장 중 접촉(YOLO 손) ⑤배터리 부족·임무 인계(ArUco 정밀주차→수동 충전 요청). 위험등급 SAFE/WATCH/CHECK/DANGER/EVACUATE. [정본 v18 2026-06-16 — HW/코드 미반영]
+- 포함 범위: SLAM/Nav2, 다중 로봇 이벤트 응답, 아두이노 센서 4종(PIR·온도·소리·레이저+워터펌프), Pi Camera, Unity 관제 UI, ROS-TCP, 영상 라이브 스트리밍, DB 기록, 이동 좌표 로그, 미디어 메타데이터 저장, AI 보조 분류, 액자형 중요물품 인식. [정본 v18: LDR·불꽃→온도·레이저·워터펌프]
 - 제외 범위: FR5 로봇팔, 실시간 사람 추적, 실제 화재 테스트, 완전 자동 보안 시스템
 - **하드웨어 확정**: 별도 Arduino Uno R3 + 미니 브레드보드 → Raspberry Pi USB serial. **별도 층 추가 없음** — Burger 상판 빈 공간(라즈베리파이 반대편)에 양면테이프로 부착. 전원은 OpenCR 5V 핀 → Arduino 5V 핀 점퍼 2줄.
 - **병렬 작업 매트릭스**: `docs/ref/PROJECT-PLAN.md` 앞부분에 주차×모듈 표와 S1 1주차 4팀 동시 시작 가이드 추가됨.
@@ -103,7 +103,7 @@ Last updated: 2026-06-05 — **Unity ControlRoom Phase 2.7-dual — 듀얼 카�
 - **M3 (Sprint 3 종료)**: tb3_2 출동 시뮬 + 카메라 확인 + DB 저장 전체 흐름 + 좌표/미디어/보호 대상 저장 확장
 - **M4 (Sprint 4 종료, 발표)**: 박물관/미술관 액자 보호 컨셉으로 시나리오 4종 시연 + 발표 지표 표
 
-## Day-1 작업 (2026-05-27 즉시 시작 · 확정)
+## Day-1 작업 (2026-05-27 즉시 시작 · 확정) — 2026-06-09 Phase 2.9 진행 중
 
 | 팀 | 인원 | 작업 | 관련 SCRUM | 오늘 산출물 |
 |---|---|---|---|---|
@@ -113,13 +113,13 @@ Last updated: 2026-06-05 — **Unity ControlRoom Phase 2.7-dual — 듀얼 카�
 
 → Day-1 끝에 PIR → 시리얼 → DB가 한 줄로 통하면 S1 끝까지 자신감 확보.
 
-## 다음 액션 (Day-1 이후)
+## 다음 액션 (Phase 2.9 GO 조건 해제까지)
 
-1. Day-1 결과 합의: PIR→DB 통하면 SCRUM-13/14 부분 완료 마킹
-2. Sprint 1 W2 진입: SCRUM-10 tb3_1 SLAM + SCRUM-16 실내 트랙
-3. 부족 센서(소리/불꽃) 발주
-4. OpenCR 5V 패드 위치 실측 + 점퍼 배선 도면 작성 (M2/M4)
-5. Unity 기능 문서 → SCRUM-11/22 작업으로 분해
+1. **①배터리 충전 (>11.5V)** + **②OpenCR 리셋** + **③케이블 재연결** + **④t1 부팅 검증** (turtlebot3_bringup Dynamixel crash 없는지 확인)
+2. **⑤parking_node 5트라이얼 정밀도 평가** (안전 환경에서 0.25m 목표 거리까지 진입 성공률 3회 이상/5회)
+3. 시연 GO 조건 해제 후 — 티원 + 젠지 듀얼 ArUco 마커 감지 통합
+4. 박물관 시나리오 통합 시연 (액자 타깃 + ArUco 마커 주차 + 이벤트 연쇄)
+5. 그 외 잔여 센서(소리/불꽃) + 분류 모델 통합
 
 ## Handoff Capsule
 
@@ -217,6 +217,12 @@ grep -rn '/turtlebot/\|LiDAR only vs\|expansion plate\|Arduino 층은 LiDAR' doc
 | Pi Camera user-space 도구 (rpicam-apps/libcamera Pi fork) | ✅ | 2026-06-01 16:36 빌드 PASS. libcamera Pi fork `v0.7.1+rpt20260429` + rpicam-apps `v1.12.0` 6분만에 빌드 (capabilities: egl:1 qt:1 drm:1 libav:0). 함정 3건 잡음: ① Ubuntu 24.04 ports repo 미제공(소스 빌드) ② libepoxy-dev 누락(추가) ③ libav API mismatch(`-Denable_libav=disabled`). evidence: `docs/evidence/2026-06-01-rpi-camera-imx219-source-build.md`. 재사용 스크립트: `scripts/build-picamera.sh`. |
 | Pi Camera 캡처 검증 (rpicam-still + rpicam-vid) | ✅ | 2026-06-01 16:38 `rpicam-still -n -t 2000 --width 1920 --height 1080` 1920×1080 JPG 283KB 캡처 + `rpicam-vid --framerate 30 -t 5000` 1280×720@30Hz × 5초 H.264 2.9MB 캡처 PASS. Mac 미리보기에서 시각 검증. 산출물: `docs/evidence/pi_cam_test_2026-06-01.{jpg,h264}`. **모드 노출**: 3280×2464@21fps, 1920×1080@47fps, 1280×720@30~60fps, 640×480@103fps. |
 | 박물관 시연 듀얼 카메라 Unity 라이브 (젠지 + 티원) | ✅ | 2026-06-02 오후 사용자 확인 "둘다 잘나옴". 젠지 `/tb3_2/camera/image_raw/compressed` 30Hz @ 640×480 (지연 1~2초 → 실시간) + 티원 `/tb3_1/camera/color/image_raw/compressed` 32.985Hz @ 640×480. 잡은 함정 4건: ssh-copy-id 1회 자동화, `compressed_image_transport` 별도 설치, `camera_namespace:=tb3_1` 토픽 구조, robot reboot 시 IP변경 → mDNS 자동 follow. evidence: `docs/evidence/2026-06-02-camera-ros2-topic-unity-batch-setup.md` Phase 8. |
+| Custom YOLO 라벨링/검수/오탐 정제 UI | ✅ | 2026-06-10 `scripts/yolo_training/custom_yolo_studio.py` + T1 `t1_compressed_mjpeg_server.py`로 브라우저 학습실 PASS. 주소 `http://127.0.0.1:8766/`, low-latency preview `http://192.168.10.250:8090/preview.jpg`. Space 촬영, ROI 자동연사, SAM2/rembg/GrabCut bbox 보정, `best.pt` 최신 자동 로드, 앱 안 검수(`검수 시작`, `←/→`, `D 삭제`, `Delete/Backspace`, `Esc`), `review_masks` cache 검수 이미지, `N 오탐 배경 저장` hard-negative 빈 라벨 샘플까지 구현. 배경 오탐은 `.pt` 직접 수정이 아니라 `negative_*.jpg` + 빈 `.txt`를 모아 재학습하는 루프로 결정. 최신 확인 URL `http://127.0.0.1:8766/?v=hard-negative-20260610-1806-clean`. evidence: `docs/evidence/2026-06-10-mac-yolo-realsense-live.md`. |
+| Robot safe shutdown 문서화 | 🟡 | 2026-06-10 안전 셧다운 절차를 `docs/ref/tech/ROS2-ROBOT.md`와 `docs/status/HANDOFF.md`에 반영. 표준 순서: ROS/카메라/브릿지 프로세스 정리 → `ssh t1@192.168.10.250 'sudo poweroff'` → ping 100% loss 확인 → 메인 슬라이드 스위치 OFF → LiPo 분리/충전 상태 기록. 문서 업데이트 시점 점검에서는 T1 ping 2/2 응답 + 8090 status fresh라 실제 셧다운 완료는 미확인. |
+| Custom YOLO ROI mask bbox 자동 라벨 보정 | ✅ | 2026-06-10 `ROI crop -> mask -> bbox -> YOLO txt` 경로 추가. `/api/auto_label_roi`는 rembg 설치 시 rembg mask, 현재 기본 환경은 OpenCV GrabCut, 실패 시 ROI fallback. UI에 `ROI 안 물체 bbox 자동 보정` 체크박스와 `bbox 보정/fallback` 카운터 표시. 검증: py_compile PASS, T1 8090 fresh, local API status PASS, 테스트 캡처 1장 `engine=grabcut fallback=false` 후 jpg/txt 즉시 삭제. 스킬화: `.claude/skills/urhynix-yolo-capture-train` + 공용 하네스 반영. |
+| Custom YOLO 실시간 세그 preview | ✅ | 2026-06-10 ROI 안에서 물체를 움직이며 mask/bbox를 화면으로 볼 수 있는 `실시간 세그 보기` 추가. `/api/segment_frame.jpg`는 T1 8090 preview frame을 사용해 저장 없이 반투명 mask + bbox JPEG를 반환. preview 전용 GrabCut은 최대 220px/2 iterations로 경량화. 검증: HTTP 200 JPEG 5회 `0.399~0.867s`(1회 제외 없이 안정), Browser snapshot에서 체크박스 표시 확인. |
+| Custom YOLO 데이터셋 다중 삭제 UI | ✅ | 2026-06-10 촬영 목록에 체크박스 + `전체 선택` + `라벨 없음 선택` + `선택 삭제` 추가. `/api/delete_items`는 선택 항목의 jpg/txt를 같이 삭제하고 삭제 전 confirm을 띄움. 검증: py_compile PASS, 빈 payload 삭제 smoke `deleted_files=0`, Browser snapshot에서 버튼/선택 카운터 표시 확인. 이후 기존 잘못된 데이터셋 삭제 완료 상태: train/val 이미지·라벨 0장, 기존 `.pt` run은 보존. |
+| Custom YOLO 탐지 보기 저지연화 | ✅ | 2026-06-10 최신 run `학습대상_20260610_153621/weights/best.pt` 로드 후 탐지 보기 끊김 개선. `/api/detect_frame.jpg`를 full snapshot 대신 T1 8090 preview frame 기반으로 바꾸고 브라우저 detect polling delay를 900ms→80ms로 단축. 검증: detect API 5회 `0.287~0.695s`(기존 단일 호출 `2.196s`), HUD `fast best.pt` 표시 확인. SAM은 탐지 표시 속도 문제가 아니라 라벨 품질 개선용으로 유지. |
 | Teachable Machine / Keras 객체 분류 스파이크 기준 | 🟡 | 2026-06-02 14:30 회의 기준. 학습 도구 Google Teachable Machine, 모델 형식 TensorFlow/Keras, 클래스 `빈공간`·`박스`·`마우스(검정/흰색)`·`손`. 목적은 로봇 카메라 영상 객체 분류 테스트. Jira `SCRUM-44/61` 반영 완료, 실제 모델 파일/추론 로그 검증은 다음 단계. |
 | 2026-06-02 Jira 최신 업데이트 | ✅ | `SCRUM-44`, `SCRUM-51`, `SCRUM-54`, `SCRUM-56`, `SCRUM-61`, `SCRUM-62`, `SCRUM-64` 설명에 14:30 회의 내용 반영 완료. 검증: Atlassian `_editjiraissue` 응답으로 각 issue description 갱신 확인. |
 | 2026-06-01 회의록(로봇 역할 분리 + UI 요구사항) SSOT 반영 | ✅ | Confluence page `5111810`의 “tb3_1=비전(D435) / tb3_2=센서+Arduino+PiCam(IMX219)” 및 UI 버튼/상호작용 정의를 **문서로만** 반영. 구현/장착/토픽 검증은 별도 evidence 필요. 반영 위치: `docs/status/DECISION-LOG.md`, `docs/ref/PROJECT-PLAN.md`. |

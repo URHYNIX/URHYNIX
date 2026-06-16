@@ -69,6 +69,11 @@ ros-ws/build/
 ros-ws/install/
 ros-ws/log/
 
+# Local YOLO datasets / training artifacts
+datasets/
+runs/
+*.pt
+
 # Secrets / Env
 .env
 .env.local

@@ -1,6 +1,7 @@
 // TopicRegistry.cs — ROS2 토픽 이름 SSOT. 토픽 하드코딩 금지(Ros/CLAUDE.md 규칙).
 // 카메라 토픽 정본: 젠지 /tb3_2/camera/image_raw/compressed (Pi Camera v2 IMX219, 30Hz)
 //                  티원 /tb3_1/camera/color/image_raw/compressed (RealSense D435, 30Hz)
+// 배터리 토픽 정본: turtlebot3_bringup robot.launch.py namespace:=tb3_* → /tb3_*/battery_state
 // robotId 컨벤션: "tb3_1" 티원 / "tb3_2" 젠지 (default_robots.json과 1:1).
 namespace URHYNIX.ControlRoom.Ros
 {
@@ -9,12 +10,59 @@ namespace URHYNIX.ControlRoom.Ros
         public const string GenjiCameraCompressed = "/tb3_2/camera/image_raw/compressed";
         public const string T1CameraCompressed    = "/tb3_1/camera/color/image_raw/compressed";
 
+        public const string T1BatteryState    = "/tb3_1/battery_state";
+        public const string GenjiBatteryState = "/tb3_2/battery_state";
+
+        // Phase 2: arduino_bridge.py가 root namespace `/sensors/*`로 발행 중.
+        // SSOT default_sensors.json은 `/tb3_2/sensor/*` 약속 — Phase 3에서 정합.
+        // 현재는 tb3_2(젠지)만 LDR/PIR 결선. tb3_1은 미준비.
+        public const string GenjiLdrRaw   = "/sensors/ldr";
+        public const string GenjiPirState = "/sensors/pir";
+
+        // SLAM 점유격자맵. cartographer가 글로벌 단일 /map으로 발행(네임스페이스 없음).
+        // 2026-06-16 라이브 맵뷰(경로 B): OccupancyGrid → MapSubscriber → MapPanel Texture2D.
+        public const string Map = "/map";
+
+        // tf 트리. map→odom(cartographer) + odom→base_footprint(로봇). RobotPoseSubscriber가 합성.
+        public const string Tf = "/tf";
+
+        // Nav2 단일 목표 좌표. 맵 우클릭 출동 → DispatchPublisher가 PoseStamped 발행.
+        public const string GoalPose = "/goal_pose";
+
         public static string GetCameraCompressed(string robotId)
         {
             switch (robotId)
             {
                 case "tb3_1": return T1CameraCompressed;
                 case "tb3_2": return GenjiCameraCompressed;
+                default:      return null;
+            }
+        }
+
+        public static string GetBatteryState(string robotId)
+        {
+            switch (robotId)
+            {
+                case "tb3_1": return T1BatteryState;
+                case "tb3_2": return GenjiBatteryState;
+                default:      return null;
+            }
+        }
+
+        public static string GetLdrRaw(string robotId)
+        {
+            switch (robotId)
+            {
+                case "tb3_2": return GenjiLdrRaw;
+                default:      return null;
+            }
+        }
+
+        public static string GetPirState(string robotId)
+        {
+            switch (robotId)
+            {
+                case "tb3_2": return GenjiPirState;
                 default:      return null;
             }
         }

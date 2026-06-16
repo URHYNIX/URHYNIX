@@ -22,6 +22,7 @@ namespace URHYNIX.ControlRoom.Data
         public float resolution;      // m/pixel (Nav2 호환)
         public int widthPx;
         public int heightPx;
+        public float displayRotationDeg; // 라이브 맵 표시 보정각(시계+). SLAM 원점↔실제 경기장 정렬.
     }
 
     [Serializable]

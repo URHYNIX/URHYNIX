@@ -1,39 +1,52 @@
 # Camera Integration Checklist
 
-## Hardware
+**Use Case**: 카메라(RealSense D435 + Pi Camera v2) 스트림 결선 및 ROS2 토픽 검증  
+**Owner**: 임현찬(RealSense), 김주영(Pi Camera)
 
-- [ ] 카메라가 TurtleBot3에 단단히 고정되어 있다.
-- [ ] 주행 중 케이블이 바퀴나 센서에 걸리지 않는다.
-- [ ] 카메라 시야에 트랙과 장애물이 들어온다.
-- [ ] 조명 변화가 너무 심하지 않다.
+---
 
-## ROS / Data
+## Tier 1: 하드웨어 점검
 
-- [ ] 카메라 이미지 topic이 확인된다.
-- [ ] 이미지 timestamp가 확인된다.
-- [ ] 로봇 pose timestamp가 확인된다.
-- [ ] image_id와 robot_pose를 연결할 수 있다.
-- [ ] 샘플 이미지와 pose manifest를 저장할 수 있다.
+- [ ] RealSense D435 USB 연결 확인 (T1 라즈베리파이 USB 포트)
+- [ ] Pi Camera v2 리본 케이블 연결 (젠지 라즈베리파이 Camera CSI 포트)
+- [ ] 두 카메라 LED 불이 켜있는가?
 
-## Vision
+## Tier 2: 드라이버 및 라이브러리
 
-- [ ] 장애물 class 목록이 정해져 있다.
-- [ ] 각 class별 대표 이미지가 있다.
-- [ ] 실시간 또는 준실시간 인식 결과가 나온다.
-- [ ] confidence가 낮을 때의 표시 기준이 있다.
+- [ ] T1: `ros-jazzy-realsense2-camera` 설치 확인 (`dpkg -l | grep realsense`)
+- [ ] 젠지: `libcamera-dev` + `rpicam-apps` 설치 확인
+- [ ] T1: RealSense firmware 버전 확인 (`rs-enumerate-devices`)
+- [ ] 젠지: Pi Camera 권한 설정 (`usermod -aG video pi`)
 
-## Unity
+## Tier 3: ROS2 노드 런칭
 
-- [ ] 카메라 이미지 또는 캡처가 표시된다.
-- [ ] class/confidence가 표시된다.
-- [ ] 로봇 위치와 인식 결과가 같은 화면에서 이해된다.
-- [ ] 인식 실패 상태가 구분된다.
+- [ ] T1: `ros2 launch realsense2_camera rs_launch.py` 실행
+- [ ] 젠지: `ros2 launch camera_ros camera.launch.py` (또는 `rpicam` 스크립트)
+- [ ] 두 노드 모두 no error 확인 (`tail -f /var/log/... | grep ERROR` 0건)
 
-## DB
+## Tier 4: 토픽 발행 확인
 
-- [ ] image_id가 저장된다.
-- [ ] image_path가 저장된다.
-- [ ] robot_pose가 저장된다.
-- [ ] vision_class와 confidence가 저장된다.
-- [ ] run_id로 주행 1회를 묶을 수 있다.
+- [ ] T1: `/tb3_1/camera/color/image_raw/compressed` 토픽 발행 (30Hz 이상)
+- [ ] 젠지: `/tb3_2/camera/image_raw/compressed` 토픽 발행 (30Hz 이상)
+- [ ] Cross-host multicast 수신 (ROS_DOMAIN_ID=210 확인)
+  ```bash
+  ros2 topic list | grep camera
+  ros2 topic hz /tb3_1/camera/color/image_raw/compressed  # 30Hz 이상?
+  ```
 
+## Tier 5: Unity 통합
+
+- [ ] TopicRegistry에 두 카메라 토픽 등록
+- [ ] CameraSubscriber 스크립트 활성화
+- [ ] Unity ControlRoom 에디터에서 카메라 패널 표시 (tb3_1 탭, tb3_2 탭 전환 가능)
+- [ ] 라이브 영상 렌더링 확인 (5fps 이상)
+
+## Tier 6: 네트워크 안정성
+
+- [ ] Foxglove 클라이언트 drop/error 0건 (log tail)
+- [ ] Wi-Fi 신호 강도 확인 (RSSI > -70 dBm)
+- [ ] 간헐 끊김 시 compressed 포맷 재확인 (`image_raw` vs `.../compressed`)
+
+---
+
+**Last updated**: 2026-06-17

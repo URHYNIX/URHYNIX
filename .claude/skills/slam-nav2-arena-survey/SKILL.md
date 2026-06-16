@@ -6,7 +6,7 @@ when_to_use:
   - SLAM 품질(드리프트·루프클로저·해상도)을 정량 평가할 때
   - 산출된 맵을 Unity Plane 텍스처 + 좌표축 변환까지 옮길 때
 inputs:
-  - 로봇 부팅 + Wi-Fi 동일 LAN (192.168.0.0/24)
+  - 로봇 부팅 + Wi-Fi 동일 LAN (192.168.10.0/24)
   - macOS/Ubuntu 호스트 + tb3.sh source 완료 + tb3-key-setup 1회 완료
 outputs:
   - docs/evidence/maps/<map_name>/{*.pgm, *.yaml, *.png, eval.md}
@@ -27,6 +27,9 @@ exit_criteria:
 ## 무엇
 
 TurtleBot3 Burger + LDS-03 LiDAR로 경기장을 SLAM(cartographer) 매핑하고 Nav2 1-waypoint를 통해 베이스라인을 검증한 뒤, 산출 맵을 Unity 디지털 트윈 씬에 임포트한다.
+
+> **2026-06-16 환경 갱신**: 본 스킬의 명령은 `ROS_DOMAIN_ID=210` + `192.168.10.x` 망 기준으로 업데이트됨(이전 56 / 192.168.0.x). 대상 기체 = 젠지(`kim@192.168.10.87`, LDS-03). 헬퍼 `scripts/tb3.sh`도 동일 갱신.
+> **신규 목표(검증 중)**: Unity 임포트를 기존 정적 PNG 텍스처(경로 A) 대신 **`/map` OccupancyGrid 라이브 구독 → ControlRoom MapPanel Texture2D 렌더(경로 B)**로 확장. 근거·플랜: `docs/evidence/2026-06-16-unity-live-occupancygrid-slam-research.md`.
 
 ## 결정 트리 — Robot 직접 vs Mac 외부 (2026-05-29 검증)
 
@@ -94,7 +97,7 @@ tb3-unity             # Unity Editor 자동 Play → 5채널 LIVE 확인 (선택
 ```
 
 검증:
-- `tb3-myip` 결과가 `192.168.0.x` ✅
+- `tb3-myip` 결과가 `192.168.10.x` ✅
 - `tb3-ip` 결과가 로봇 IP 1개 반환 ✅
 - `tb3-port` 결과: `Connection succeeded`
 
@@ -107,7 +110,7 @@ tb3-unity             # Unity Editor 자동 Play → 5채널 LIVE 확인 (선택
 ```bash
 tb3-slam              # cartographer tmux 세션 시작 (multicast 모드)
 sleep 8
-ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 daemon stop >/dev/null; ros2 daemon start; sleep 3; timeout 8 ros2 topic hz /map"'
+ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 daemon stop >/dev/null; ros2 daemon start; sleep 3; timeout 8 ros2 topic hz /map"'
 ```
 
 검증:
@@ -355,6 +358,29 @@ tb3-down              # bringup·ros_tcp·arduino_bridge·slam·rviz·nav2 모�
 | robot SSH는 살았는데 daemon이 stale 환경으로 떠있음 | bringup launch 후 ros2 daemon이 이전 env 캐시 | 콘솔에서 `ros2 daemon stop && ros2 daemon start` 후 topic list. |
 | Mac 컨테이너에서 robot topic 미발견 | macOS Docker host networking은 outbound NAT만 (inbound UDP 미라우팅) | A) robot 직접 cartographer 권장. B) 동료 Ubuntu native. C) OrbStack. 자세한 진단 `MAC-DOCKER-ROS2-PLAYBOOK.md §6.5`. |
 | `scp host:dir/{a,b}` 분리 안 됨 | macOS scp client가 brace expansion 미지원 | `.pgm`과 `.yaml` 분리 scp. tb3-fetch-map은 이미 분리 패턴. |
+| `tb3-up`이 `tmux: command not found` | 로봇에 tmux 미설치 (기체마다 다름. 젠지 2026-06-16) | `ssh kim@<ip> "echo <pw> \| sudo -S apt-get install -y tmux"` |
+| `cartographer.launch.py` FileNotFoundError (ws install 경로) | `~/turtlebot3_ws` symlink-install인데 `src/turtlebot3_cartographer` 삭제됨 → install의 launch가 **깨진 심볼릭 링크** | ws 오버레이 source 없이 `/opt/ros/jazzy`만 source해 **apt판** 실행. (`readlink`로 깨진 링크 확인) |
+| Unity가 /map 등록은 됐는데 데이터 안 옴 + 곧 끊김 | codelab WiFi `Broken pipe`(핑 75~136ms 변동) | ROS-TCP 자동 재연결로 링크 안정 시 수신됨. 안정 시연은 codelab_5G 근접 배치. [[urhynix-wifi-codelab-status]] |
+| Unity 첫 맵 수신 로그가 Editor.log에 안 보임 | `ControlRoomEvents.RaiseLogAdded`는 인앱 로그 패널 전용(Editor.log 미기록) | 검증 시 `Debug.Log` 별도 추가해 Editor.log로 확인 |
+| `unityctl screenshot` Game View 검정 | Unity 백그라운드 시 Game View 렌더 정지 | 기능 무관. Unity 창 포그라운드에서 직접 확인 |
+
+---
+
+## 라이브 맵뷰 (경로 B) — Unity ControlRoom 1:1 (2026-06-16 검증)
+
+기존 Phase 5(정적 PNG 텍스처, 경로 A) 대안. **SLAM 도는 동안 `/map`을 Unity가 실시간 구독**해 MapPanel에 렌더. 2026-06-16 젠지로 PASS.
+
+구현(ControlRoom):
+- `Ros/TopicRegistry.cs`: `Map = "/map"`
+- `Ros/MapSubscriber.cs`: `OccupancyGridMsg` 구독 → `Texture2D`(RGBA32, Point) 변환. 셀 -1 unknown/0 free/≥65 occupied. 크기 변하면 텍스처 재생성. static `OnMapUpdated` + `LatestMap`. (카메라 구독과 동일 패턴)
+- `UI/MapPanelView.cs`: `OnMapUpdated` 구독 → `Image`(ScaleToFit, 절대배치 fill)에 렌더, 힌트 숨김
+- `App/ControlRoomApp.cs`: `MapSubscriber` GameObject 코드 부착(씬 YAML 비편집)
+- `default_robots.json`: 사용할 로봇을 `robots[0]`으로(=`ConfigureRos`가 endpoint IP 지정)
+- `UI/Parts/MapPanel.uxml`: 목업(격자/웨이포인트/로봇점) 제거, 라이브 맵만
+
+검증 체인: 컴파일 OK → `RegisterSubscriber(/map, nav_msgs/OccupancyGrid) OK`(endpoint) → `🟢 first /map frame WxH @res`(Unity). 근거: `docs/evidence/2026-06-16-genji-live-slam-unity-map.md`.
+
+⚠️ 전제: 로봇에 `ros_tcp_endpoint`가 떠 있어야(=`tb3-up`이 bringup+ros_tcp 동시 기동) Unity가 /map을 받음. cartographer /map은 RELIABLE+TRANSIENT_LOCAL, endpoint 구독은 VOLATILE이라 호환(새 메시지 수신 OK).
 
 ---
 
@@ -364,7 +390,7 @@ ROS2 발견 모드는 **bringup·cartographer·ros2 cli·rviz 모두 동일 모�
 
 | 모드 | 환경 변수 패턴 | 사용 시점 |
 |---|---|---|
-| **multicast (SUBNET)** ✅ 권장 | `ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET` | 같은 LAN의 native Linux. **본 프로젝트 기본**. |
+| **multicast (SUBNET)** ✅ 권장 | `ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET` | 같은 LAN의 native Linux. **본 프로젝트 기본**. |
 | Discovery Server | 위 + `ROS_DISCOVERY_SERVER=<ip>:11811 ROS_SUPER_CLIENT=true` | Discovery 서버 머신이 있고 multicast 안 되는 환경 (Docker, 다른 서브넷 등) |
 
 **검증**: `cat /proc/$(pgrep -f turtlebot3_node)/environ | tr '\0' '\n' | grep -E 'ROS_|RMW_'` — 모든 노드의 env가 같은 모드인지.
@@ -385,13 +411,13 @@ tb3-up
 tb3-slam
 
 # 3. /map 검증
-ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 daemon stop >/dev/null; ros2 daemon start; sleep 3; timeout 8 ros2 topic hz /map"'
+ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && ros2 daemon stop >/dev/null; ros2 daemon start; sleep 3; timeout 8 ros2 topic hz /map"'
 
 # 4. 매핑 주행 (정적이면 30s 대기, 경기장이면 tb3-teleop 25분)
 sleep 30   # or: tb3-teleop
 
 # 5. 맵 저장 (robot 측 ~/maps/)
-ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=56 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && mkdir -p ~/maps && cd ~/maps && ros2 run nav2_map_server map_saver_cli -f arena_v1 --ros-args -p save_map_timeout:=20.0"'
+ssh kim@$(tb3-ip) 'bash -c "source /opt/ros/jazzy/setup.bash && source ~/turtlebot3_ws/install/setup.bash && export ROS_DOMAIN_ID=210 RMW_IMPLEMENTATION=rmw_fastrtps_cpp && mkdir -p ~/maps && cd ~/maps && ros2 run nav2_map_server map_saver_cli -f arena_v1 --ros-args -p save_map_timeout:=20.0"'
 
 # 6. 호스트로 fetch + PNG + Unity scale
 tb3-fetch-map arena_v1
